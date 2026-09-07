@@ -41,7 +41,10 @@ const ProductCard = ({ product }) => {
       {/* Content */}
       <div className="p-4">
         <h3 className="font-medium text-gray-800">{product.name}</h3>
-        <p className="text-sm text-gray-500">{product.category}</p>
+        {/* The API embeds category as an object ({id, slug, name}), not a string — see
+            docs/API.md. Rendering the object itself throws React error #31 and takes the
+            whole page down, which is exactly what happened. */}
+        <p className="text-sm text-gray-500">{product.category?.name}</p>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="font-semibold text-gray-900">

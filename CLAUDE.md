@@ -10,15 +10,19 @@ Instructions for AI coding agents working in this repository. Human contributors
 Furniro, a furniture e-commerce storefront. React 19 + Vite 8 front end; Express 5 +
 Supabase back end.
 
-**The back end runs, but serves only `/health`.** `Backend/src/platform/` is built —
-config, logging, correlation ids, error handling, health. No domain module is mounted yet,
-so there are no product, cart, order or auth endpoints.
+**The back end runs and serves the catalogue.** `Backend/src/platform/` (config, logging,
+correlation ids, errors, health) and `Backend/src/modules/catalogue/` (products,
+categories) are built. Nothing else is: no cart, orders, auth or payments.
 
-The front end still makes zero network calls: products come from `src/modules/catalogue/`,
-other sections hold inline arrays.
+**The front end fetches products from the API** via `src/modules/catalogue`. It holds no
+product data of its own. Other sections (hero, categories, rooms, blog) still use inline
+arrays.
 
-Do not write code that assumes a database, a cart, or an authenticated user. None of those
-exist. Do not add `fetch()` to an endpoint that is not mounted in `Backend/src/app.js`.
+Product data lives in exactly one place: `Backend/src/modules/catalogue/data/products.json`.
+There is no database — the repository reads that file. Do not add a second copy anywhere.
+
+Do not write code that assumes a database, a cart, or an authenticated user. Do not add
+`fetch()` to an endpoint that is not mounted in `Backend/src/app.js`.
 
 ---
 
@@ -45,8 +49,8 @@ output, a commit, a log, or a doc. `.env.example` is the file to reference.
 **Never give a secret a `VITE_` prefix.** Vite inlines every `VITE_`-prefixed variable into
 the public bundle as a string literal. There is no way to un-publish it after a deploy.
 
-**Never invent an endpoint.** Only `/health` and `/health/ready` exist. If a component
-needs data, it comes from a local module today.
+**Never invent an endpoint.** Only `/health`, `/health/ready`, `/api/products`,
+`/api/products/featured`, `/api/products/:slug` and `/api/categories` exist.
 
 **Error middleware stays last and keeps four parameters.** Express identifies it by arity;
 dropping `next` turns it into a normal handler that never runs. A 500 never returns a stack,
@@ -138,9 +142,10 @@ done rather than building against an imagined back end.
 
 Specific things that have already caused, or will cause, wrong work:
 
-1. **Products have exactly one definition** — `modules/catalogue/data/products.js`. There
-   were once two incompatible shapes in two components; do not reintroduce a second. Prices
-   are integer minor units and badges are derived, never stored. Background:
+1. **Products have exactly one definition** — `Backend/src/modules/catalogue/data/products.json`.
+   There were once two incompatible shapes in two components, then briefly a front-end copy;
+   do not reintroduce either. Prices are integer minor units, badges are derived, and the
+   API returns image *keys* the client resolves. Background:
    [the conflict](DATA_MODEL.md#the-product-shape-conflict-resolved).
 2. **`src/assets/` vs `public/`.** Assets under `src/assets/` are imported as modules and
    hashed by the bundler. Files in `public/` are copied verbatim and referenced by absolute

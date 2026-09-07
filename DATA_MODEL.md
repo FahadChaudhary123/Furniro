@@ -3,10 +3,12 @@
 The app has no database. Entities are JavaScript array literals. This document records
 those shapes, the conflicts between them, and the Postgres schema they imply.
 
-> **Products are now resolved.** The catalogue was extracted to
-> `Frontend/src/modules/catalogue/` on 2026-09-07 — 40 products, one canonical shape,
-> numeric prices, derived badges. The conflict analysis below is kept as the record of why
-> the shape is what it is. Everything else on this page still describes the current state.
+> **Products are now resolved and served over HTTP.** The catalogue lives in
+> `Backend/src/modules/catalogue/data/products.json` — 40 products, one canonical shape,
+> integer minor units, derived badges — and the front end fetches it from
+> `GET /api/products`. There is no second copy anywhere. The conflict analysis below is kept
+> as the record of why the shape is what it is; everything else on this page still describes
+> the current state.
 
 ---
 
@@ -14,8 +16,8 @@ those shapes, the conflicts between them, and the Postgres schema they imply.
 
 | Entity | Defined in | Rows | Scope |
 |---|---|---|---|
-| ~~Shop products~~ | **Now** `modules/catalogue/data/products.js` | 40 | Module, one source |
-| ~~Featured products~~ | **Now** `FEATURED_SLUGS` in the same file | 8 | Curated slug list |
+| ~~Shop products~~ | **Now** `Backend/…/catalogue/data/products.json`, over the API | 40 | One source |
+| ~~Featured products~~ | **Now** `featured` in the same file | 8 | Curated slug list |
 | Range categories | [BrowseRange.jsx](Frontend/src/sections/BrowseRange.jsx) | 3 | Module-level `const` |
 | Room inspiration | [RoomsInspiration.jsx](Frontend/src/sections/RoomsInspiration.jsx) | 3 | Module-level `const` |
 | Blog posts | [BlogSection.jsx](Frontend/src/sections/BlogSection.jsx) | 3 | Inside the component body |
@@ -292,18 +294,18 @@ but two constraints are worth fixing now because they are expensive to retrofit:
 
 The sequence that avoids doing the work twice:
 
-1. ~~**Reconcile the product shape.**~~ **Done.** The canonical array lives at
-   `Frontend/src/modules/catalogue/data/products.js` — 40 products, one shape, imported by
-   both `ProductGrid` and `ProductsSection` through `modules/catalogue/index.js`. Image
-   paths fixed in the same change; all 404s gone.
+1. ~~**Reconcile the product shape.**~~ **Done.** One canonical set of 40 products, now in
+   `Backend/src/modules/catalogue/data/products.json`. Image paths fixed; all 404s gone.
 2. ~~**Introduce the formatter.**~~ **Done.** `Frontend/src/shared/lib/money.js`. Every
    inline `toLocaleString()` and the `Rs` typo are gone.
 3. ~~**Derive badges**~~ **Done.** `modules/catalogue/lib/badge.js`. Two stored badges were
    already wrong when replaced — see [Currency inconsistency](#currency-inconsistency-fixed).
-4. **Create the tables and seed them** from that single array — it is already the right
-   shape, so the seed is a script, not a rewrite.
-5. **Implement the read endpoints** in [API.md](API.md).
-6. **Swap the import for a `useProducts()` hook.** Because steps 1–3 froze the shape, this
-   touches the fetch boundary and nothing else.
+4. **Create the tables and seed them** from `products.json` — it is already the right shape,
+   so the seed is a script, not a rewrite. **Still outstanding: there is no database.**
+5. ~~**Implement the read endpoints**~~ **Done** — see [API.md](API.md). The repository is
+   the only file that would change when the tables exist.
+6. ~~**Swap the import for a `useProducts()` hook.**~~ **Done.** Because steps 1–3 froze the
+   shape, this touched the fetch boundary and nothing else — no component changed its
+   understanding of a product.
 
 Steps 1–3 are worth doing even if the back end is never built.

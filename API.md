@@ -2,8 +2,8 @@
 
 **Status: the catalogue endpoints are live; nothing else is.** `GET /api/products`,
 `/api/products/featured`, `/api/products/:slug` and `/api/categories` are implemented and
-covered by 29 smoke checks. Everything else below is still the contract to build against.
-The front end does not consume any of it yet — it still renders from local data.
+covered by 29 smoke checks, and **the front end consumes them**. Everything else below is
+still the contract to build against.
 
 Conventions and error shapes here are binding once implementation starts — agreeing them
 before the first route is written is the point of the document.

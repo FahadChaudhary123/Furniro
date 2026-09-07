@@ -22,12 +22,12 @@ npm install
 npm run dev
 ```
 
-**Verify:** the terminal prints a `Local: http://localhost:5173/` line, and the page loads
-with the navbar, hero and product sections. Navigate to `/shop`, `/about` and `/contact` —
-all four routes should render.
+**Verify:** the terminal prints a `Local: http://localhost:5173/` line, and the page loads.
+Navigate to `/shop`, `/about` and `/contact` — all four routes should render.
 
-Product images should all load. If any 404, something has diverged from
-`src/modules/catalogue/` — that is the single source of product data.
+**Start the API too.** The shop grid and the home-page product strip fetch from it. Without
+it you get an error panel with a retry, not products — which is correct behaviour, not a
+setup failure. Everything else on the page renders standalone.
 
 ### Back end
 
@@ -127,6 +127,20 @@ On Windows, killing the `npm` wrapper process does **not** kill the `vite` child
    rm -rf node_modules/.vite
    npm run dev
    ```
+
+### Products show "Products could not be loaded"
+
+The front end could not reach the API. In order:
+
+1. Is the API running? `cd Backend && npm run dev`.
+2. Is it on the port the front end expects? Default `http://localhost:3000/api`; override
+   with `VITE_API_URL` in `Frontend/.env.local`. **Restart Vite after changing it** — env
+   values are inlined at startup, not read per request.
+3. Is the front end's origin in `ALLOWED_ORIGINS`? A CORS rejection looks identical to an
+   outage from the browser's side. The API logs `CORS origin rejected` with the origin it
+   saw — check the API's output.
+4. Quote the reference id shown under the error. It is the correlation id, and it appears
+   on the matching server log line.
 
 ### `Supabase is not configured`
 

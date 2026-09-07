@@ -30,3 +30,9 @@ Thumbs.db
 
 # Image optimisation backups (originals, restorable) — scripts/optimise-images.mjs
 .image-originals/
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+.playwright/

@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "budgets": "node scripts/check-budgets.mjs",
     "optimise:images": "node scripts/optimise-images.mjs",
-    "verify": "npm run lint && npm run build && npm run budgets"
+    "verify": "npm run lint && npm run build && npm run budgets",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:report": "playwright show-report"
   },
   "dependencies": {
     "framer-motion": "^12.34.0",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@playwright/test": "^1.63.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",

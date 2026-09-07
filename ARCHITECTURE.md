@@ -16,7 +16,7 @@ Browser
   ▼
 Frontend/  ── React 19 SPA, built by Vite 8, served as static files
   │
-  │  HTTPS/JSON   ← does not exist yet
+  │  HTTPS/JSON   ← catalogue only; cart, orders, auth still to come
   ▼
 Backend/   ── Express 5 API
   │
@@ -25,8 +25,9 @@ Backend/   ── Express 5 API
 Supabase   ── managed Postgres + Auth + Storage
 ```
 
-That third hop is the whole of the unfinished work. The front end currently terminates at
-itself: it imports arrays from its own source files and renders them.
+That hop now carries the catalogue: the shop grid and the home-page strip fetch from
+`GET /api/products`. Everything else on the page — hero, range categories, rooms, blog —
+still renders from arrays inside its own component.
 
 ### Why a separate back end at all
 
@@ -78,7 +79,12 @@ local to one component, and there are exactly two pieces of it:
 | `isOpen` | [Navbar.jsx](Frontend/src/components/Navbar.jsx) | Mobile drawer open/closed |
 | `currentPage` | [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx) | Shop pagination |
 
-This is correct for a catalogue that never changes. **It stops being correct at the cart** —
+Server data now arrives through `useProducts()` / `useFeaturedProducts()` in
+`modules/catalogue`, each owning its own loading and error state. That is deliberate: a
+server-state library earns its place once there is caching, revalidation and mutation to
+coordinate, and there is none of that yet.
+
+**Local state stops being sufficient at the cart** —
 a cart is read by the navbar badge and written by every product card, which are cousins in
 the tree with no common owner but the root. That is the trigger to introduce shared state,
 and the recommendation is a `CartContext` at the `App.jsx` level plus a `useCart()` hook,

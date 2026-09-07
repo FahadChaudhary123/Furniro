@@ -160,6 +160,11 @@ tracing across 20 modules is far more expensive than starting with it.
 | `inventory` | ATP, reservations, movement ledger, buffers, SKU freeze | `INV-01`–`06` (6) | L | Engineering lead | R8 |
 | `pricing` | Price resolution, promotions, discounts, coupons, tax class, display rules | `PROMO-01`–`05` (5) | L | Merchandising | — |
 
+**`catalogue` is built across both tiers** — `Backend/src/modules/catalogue/` serves it,
+`Frontend/src/modules/catalogue/` fetches it, and product data exists in exactly one file.
+The remaining `CAT-*` work is variants, the publish gate and the ERP/PIM feed. The other
+three modules in this layer are unstarted.
+
 **`inventory` is separated from `catalogue` deliberately.** They look like one thing and are
 not: catalogue data is read-heavy, cacheable and edited by humans; stock is write-heavy,
 transactional, and `INV-02` requires every write to pass through the reservation path. Doc B

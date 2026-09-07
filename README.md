@@ -47,6 +47,11 @@ npm run dev
 
 Vite serves on <http://localhost:5173>, or the next free port if 5173 is taken.
 
+**The API must be running too.** The shop and home-page product grids fetch from it; without
+it they show an error with a retry rather than products. Start it in a second shell — see
+[Running the back end](#running-the-back-end). Everything else (hero, categories, blog,
+contact) renders standalone.
+
 | Script | Does |
 |---|---|
 | `npm run dev` | Dev server with hot module replacement |
@@ -56,8 +61,11 @@ Vite serves on <http://localhost:5173>, or the next free port if 5173 is taken.
 | `npm run budgets` | Enforce performance budgets against `dist/` (Doc B §12) |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm run verify` | lint + build + budgets — run this before opening a PR |
+| `npm run e2e` | Playwright end-to-end suite (123 checks; starts both servers) |
 
-The front end makes no network calls, so it runs fully standalone.
+Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
+`http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined
+into the bundle as a string literal. Never put a secret behind that prefix.
 
 ## Running the back end
 
@@ -77,7 +85,6 @@ rather than at boot.
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon reload |
 | `npm run smoke` | Smoke-test a running server (46 checks) |
-| `npm run check:catalogue` | Guard the front-end catalogue copy against the back end's |
 
 | Endpoint | Purpose |
 |---|---|
@@ -124,7 +131,7 @@ under *Unreleased*.
 | Contact form has no `onSubmit` — submitting reloads the page and discards input | [contact.jsx](Frontend/src/pages/contact.jsx) |
 | Navbar user / search / wishlist / cart icons are not interactive | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
 | `AnimationDemo.jsx` is the only `gsap` consumer and is never imported | [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx) |
-| No tests, and no deployment configuration | repo-wide |
+| No unit tests (end-to-end coverage exists), and no deployment configuration | repo-wide |
 | Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |
 | Not a git repository yet — CI exists but cannot run until it is | repo root |
 
@@ -157,10 +164,8 @@ Backend/
 touches a data store**, and today that store is a JSON file — there is no database schema
 yet. Swapping that one file for Supabase is the entire migration.
 
-The catalogue JSON is generated from the front end's module (`npm run catalogue:generate`)
-because the two are separate npm roots and cannot share a file. That duplication is
-temporary — it ends when the front end fetches — and `npm run check:catalogue` guards it in
-CI meanwhile.
+Product data lives in `src/modules/catalogue/data/products.json` and is the single source
+for the whole system. The front end fetches it; it holds no catalogue of its own.
 
 Further modules mount into `src/app.js` as they are built. The layout, boundary rules and
 build order are in [docs/MODULES.md](docs/MODULES.md).
@@ -191,9 +196,9 @@ every later module sees a populated `process.env`. Two further variables are sup
 `ALLOWED_ORIGINS` (comma-separated CORS allowlist, defaulting to `http://localhost:5173`)
 and `LOG_LEVEL`.
 
-The front end reads no environment variables. When it needs an API base URL, it must be
-named `VITE_API_URL` — Vite only exposes variables prefixed `VITE_`, and **everything so
-exposed is embedded in the public bundle.** Never put a secret behind a `VITE_` prefix.
+The front end reads one variable, `VITE_API_URL` (see `Frontend/.env.example`). Vite only
+exposes variables prefixed `VITE_`, and **everything so exposed is embedded in the public
+bundle.** Never put a secret behind a `VITE_` prefix.
 
 ---
 

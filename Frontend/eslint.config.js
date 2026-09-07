@@ -32,4 +32,10 @@ export default defineConfig([
       'react/jsx-uses-vars': 'error',
     },
   },
+  {
+    // Test and tooling files run in Node, not the browser: they use `process`, and the
+    // Playwright specs bring their own `test`/`expect` via imports.
+    files: ['playwright.config.js', 'e2e/**/*.js', 'scripts/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node } },
+  },
 ])

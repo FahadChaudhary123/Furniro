@@ -16,6 +16,21 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **End-to-end test suite** (`npm run e2e`) — Playwright, 123 checks across desktop and a
+  Pixel 5 viewport, running against the production build with both servers started by the
+  config. Covers the catalogue contract, image decoding, derived badges, sorting,
+  pagination, routing, the SPA rewrite, mobile drawer, console errors, failed requests, alt
+  text, third-party scripts, and API-failure handling. Now a CI gate.
+- **The front end now fetches products from the API.** `useProducts()` and
+  `useFeaturedProducts()` in `Frontend/src/modules/catalogue` replace the local data
+  import, with abortable requests, loading skeletons, and an error state carrying a retry
+  and the server correlation id. Paging, sorting and page size are now server-side
+  parameters rather than client-side array operations.
+- `Frontend/src/modules/catalogue/images.js` — resolves the image *keys* the API returns
+  (`products/product1.jpg`) into hashed bundled assets via `import.meta.glob`, so the API
+  stays storage-agnostic and no path is baked into the data.
+- `Frontend/.env.example` documenting `VITE_API_URL` and the rule that every `VITE_`
+  variable is public.
 - **The catalogue API is live** — the first domain module.
   `GET /api/products` (pagination, category filter, text search, price range, whitelisted
   sort), `/api/products/featured`, `/api/products/:slug`, `/api/categories` with
@@ -26,10 +41,6 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   envelope, integer prices, embedded category objects, absence of a stored badge field,
   pagination boundaries, sort ordering, filters, and five validation rejections including
   an injection-shaped `sort`.
-- `npm run check:catalogue` — guards the front end's catalogue copy against the back end's,
-  and now runs in CI. Verified to exit 1 on a real change and name the drifted field.
-- `npm run catalogue:generate` — derives the back-end catalogue from the front-end module
-  rather than retyping 40 products.
 - **The back end runs.** `Backend/src/platform/` implements the Layer 0 platform module
   from docs/MODULES.md — `PLAT-01` health endpoint (build SHA, config version, feature
   flags, uptime, plus a separate readiness probe), `PLAT-02` correlation ids via
@@ -116,6 +127,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **`/shop` rendered a completely blank page.** The API embeds `category` as an object
+  (`{id, slug, name}`) per docs/API.md, but `ProductCard` still rendered it as a string.
+  React threw error #31 ("Objects are not valid as a React child"), which unmounted the
+  entire tree — no navbar, no footer, nothing. Lint, build, performance budgets and all 46
+  API smoke checks were green throughout; only a real browser caught it.
 - **The three blockers preventing the back end from starting.** `"type": "module"` added
   (`config/supabase.js` used ESM syntax in a package Node parsed as CommonJS); `start` and
   `dev` scripts added (there were none); `mongoose` removed — a MongoDB driver in a

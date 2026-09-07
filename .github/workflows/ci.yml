@@ -57,6 +57,23 @@ jobs:
       - name: Enforce performance budgets
         run: node scripts/check-budgets.mjs
 
+      # Real browser, real bundle, both servers. Catches what a build cannot: this suite
+      # found a React error #31 crash that blanked /shop while lint, build, budgets and the
+      # API smoke tests were all green.
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: Frontend/playwright-report
+          retention-days: 7
+
       - name: Upload build output
         if: always()
         uses: actions/upload-artifact@v4
@@ -66,7 +83,7 @@ jobs:
           retention-days: 7
 
   backend:
-    name: Back end — boot, smoke, catalogue drift
+    name: Back end — boot and smoke
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -83,11 +100,6 @@ jobs:
 
       - name: Install
         run: npm ci
-
-      # The front end and back end each hold a copy of the catalogue until the front end
-      # fetches. Two copies of product data is how the original shape conflict happened.
-      - name: Catalogue drift
-        run: npm run check:catalogue
 
       # Boots the server and exercises the real HTTP surface: health, correlation, error
       # shape, CORS, and the whole catalogue API contract.

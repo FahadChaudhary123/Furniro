@@ -13,8 +13,11 @@ New here? [README.md](README.md) has setup and current status;
 **Node `^20.19.0` or `>=22.12.0`** — Vite 8 refuses to start below that. Verified on Node
 22.18.0 with npm 11.10.0.
 
+Two shells — the front end fetches products from the API:
+
 ```bash
-cd Frontend && npm install && npm run dev
+cd Backend  && npm install && npm run dev    # API on :3000
+cd Frontend && npm install && npm run dev    # storefront on :5173
 ```
 
 The two npm roots are independent — there is no workspace tool, so `Frontend/` and
@@ -243,15 +246,31 @@ will keep printing the warning.
 
 ## Testing
 
-There are no tests. That is a gap, not a policy — see
-[ARCHITECTURE.md](ARCHITECTURE.md#known-architectural-debt).
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — 123 checks across a desktop
+and a Pixel 5 viewport, run against the production build. The config starts both servers
+itself, so it is the whole command.
 
-Until a runner is set up, verify manually: every route, mobile and desktop widths, and a
-production `npm run build` rather than just the dev server.
+```bash
+cd Frontend
+npm run e2e          # headless
+npm run e2e:ui       # interactive, for writing tests
+npm run e2e:report   # last HTML report
+```
 
-When adding a runner, Vitest is the natural fit — it shares Vite's config and transform
-pipeline. Highest-value first targets: `ProductGrid` pagination boundaries, `badgeFor()`
-once it exists, and price formatting.
+Add a case whenever you fix a user-visible defect. Every assertion in `e2e/` exists because
+something was actually broken or a claim was made about a fix — that is what keeps the
+suite from becoming decoration.
+
+The suite earned its place immediately: it found a React error #31 that blanked `/shop`
+entirely, while lint, build, performance budgets and all 46 API smoke checks were green.
+**A build that succeeds is not a page that renders.**
+
+Known gaps are recorded as `test.fail()` cases, so the suite documents them and tells you
+when one closes rather than sitting quietly red.
+
+**There are still no unit tests.** Vitest remains the natural fit — it shares Vite's
+config and transform pipeline. Highest-value targets: `badgeFor()` boundaries, price
+formatting, and the catalogue service's pagination arithmetic.
 
 ---
 

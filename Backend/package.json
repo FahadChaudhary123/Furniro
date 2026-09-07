@@ -7,9 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "smoke": "node scripts/smoke.mjs",
-    "test": "echo \"No tests yet \u2014 see docs/OPS_CONFORMANCE.md\" && exit 0",
-    "catalogue:generate": "node scripts/generate-catalogue.mjs",
-    "check:catalogue": "node scripts/check-catalogue-drift.mjs"
+    "test": "echo \"No tests yet \u2014 see docs/OPS_CONFORMANCE.md\" && exit 0"
   },
   "keywords": [],
   "author": "",

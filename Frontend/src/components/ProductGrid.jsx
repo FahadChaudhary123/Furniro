@@ -1,71 +1,69 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import ProductCard from './ProductCard';
-import { getAllProducts, sortProducts, SORT_OPTIONS } from '../modules/catalogue';
+import { ProductGridSkeleton, CatalogueError, CatalogueEmpty } from './CatalogueState';
+import { useProducts, SORT_OPTIONS, DEFAULT_SORT } from '../modules/catalogue';
 
 const PAGE_SIZE_OPTIONS = [16, 32, 48];
 
 const ProductGrid = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortKey, setSortKey] = useState('default');
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
+  const [page, setPage] = useState(1);
+  const [sort, setSort] = useState(DEFAULT_SORT);
+  const [limit, setLimit] = useState(PAGE_SIZE_OPTIONS[0]);
 
-  const allProducts = getAllProducts();
-
-  // Sorting returns a new array; `products` is module state and must not be sorted in place.
-  const sorted = useMemo(() => sortProducts(allProducts, sortKey), [allProducts, sortKey]);
-
-  const totalProducts = sorted.length;
-  const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
-
-  // Changing sort or page size can leave you past the last page.
-  const page = Math.min(currentPage, totalPages);
-  const startIndex = (page - 1) * pageSize;
-  const visibleProducts = sorted.slice(startIndex, startIndex + pageSize);
-
-  // Reset to page 1 in the handlers rather than in an effect: the reset is a consequence of
-  // the interaction, not of the render. `page` above is clamped, so this is belt-and-braces.
-  const changeSort = (key) => {
-    setSortKey(key);
-    setCurrentPage(1);
-  };
-  const changePageSize = (size) => {
-    setPageSize(size);
-    setCurrentPage(1);
-  };
+  // Paging, sorting and filtering happen server-side. Fetching everything and sorting in
+  // the browser stops working the moment the catalogue outgrows a single page.
+  const { products, meta, loading, error, retry } = useProducts({ page, limit, sort });
 
   // Scroll to top on page change (UX polish)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [page]);
 
+  // Reset paging in the handlers, not an effect: it is a consequence of the interaction.
+  const changeSort = (value) => {
+    setSort(value);
+    setPage(1);
+  };
+  const changePageSize = (value) => {
+    setLimit(value);
+    setPage(1);
+  };
+
+  const total = meta?.total ?? 0;
+  const totalPages = meta?.total_pages ?? 1;
+  const start = (page - 1) * limit;
+
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
         <p className="text-sm text-gray-500">
-          Showing {totalProducts === 0 ? 0 : startIndex + 1}–
-          {Math.min(startIndex + pageSize, totalProducts)} of {totalProducts} results
+          {loading && !meta
+            ? 'Loading products…'
+            : `Showing ${total === 0 ? 0 : start + 1}–${Math.min(start + limit, total)} of ${total} results`}
         </p>
 
         <div className="flex gap-3">
           <label className="sr-only" htmlFor="sort">Sort products</label>
           <select
             id="sort"
-            value={sortKey}
+            value={sort}
             onChange={(e) => changeSort(e.target.value)}
-            className="border px-3 py-2 text-sm rounded"
+            disabled={Boolean(error)}
+            className="border px-3 py-2 text-sm rounded disabled:opacity-50"
           >
-            {Object.entries(SORT_OPTIONS).map(([key, { label }]) => (
-              <option key={key} value={key}>{label}</option>
+            {Object.entries(SORT_OPTIONS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
             ))}
           </select>
 
           <label className="sr-only" htmlFor="page-size">Products per page</label>
           <select
             id="page-size"
-            value={pageSize}
+            value={limit}
             onChange={(e) => changePageSize(Number(e.target.value))}
-            className="border px-3 py-2 text-sm rounded"
+            disabled={Boolean(error)}
+            className="border px-3 py-2 text-sm rounded disabled:opacity-50"
           >
             {PAGE_SIZE_OPTIONS.map((n) => (
               <option key={n} value={n}>Show {n}</option>
@@ -74,22 +72,33 @@ const ProductGrid = () => {
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {visibleProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {error ? (
+        <CatalogueError error={error} onRetry={retry} />
+      ) : loading && products.length === 0 ? (
+        <ProductGridSkeleton count={limit > 16 ? 16 : limit} />
+      ) : products.length === 0 ? (
+        <CatalogueEmpty />
+      ) : (
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 transition-opacity ${
+            loading ? 'opacity-60' : ''
+          }`}
+        >
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+      {!error && totalPages > 1 && (
         <div className="flex justify-center mt-12 gap-2">
           {Array.from({ length: totalPages }).map((_, i) => {
             const n = i + 1;
             return (
               <button
                 key={n}
-                onClick={() => setCurrentPage(n)}
+                onClick={() => setPage(n)}
                 aria-current={page === n ? 'page' : undefined}
                 className={`px-4 py-2 rounded transition
                   ${page === n ? 'bg-amber-600 text-white' : 'border hover:bg-gray-100'}`}
@@ -100,7 +109,7 @@ const ProductGrid = () => {
           })}
 
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
             disabled={page === totalPages}
             className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
           >

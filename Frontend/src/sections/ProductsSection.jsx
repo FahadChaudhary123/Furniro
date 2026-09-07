@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
 import { FaHeart, FaShareAlt, FaBalanceScale } from "react-icons/fa";
-import { getFeaturedProducts, badgeFor } from "../modules/catalogue";
+import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
 import { formatPrice } from "../shared/lib/money";
+import { ProductGridSkeleton, CatalogueError } from "../components/CatalogueState";
 
 const ProductsSection = () => {
-  const products = getFeaturedProducts();
+  const { products, loading, error, retry } = useFeaturedProducts();
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
@@ -12,6 +13,11 @@ const ProductsSection = () => {
         Our Products
       </h2>
 
+      {error ? (
+        <CatalogueError error={error} onRetry={retry} />
+      ) : loading ? (
+        <ProductGridSkeleton count={8} />
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((item) => {
           const badge = badgeFor(item);
@@ -76,6 +82,7 @@ const ProductsSection = () => {
           );
         })}
       </div>
+      )}
 
       {/* Show More */}
       <div className="text-center mt-12">
