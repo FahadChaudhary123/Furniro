@@ -158,6 +158,12 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **CI's front-end job failed at the end-to-end step** with
+  `ERR_MODULE_NOT_FOUND: express`. The Playwright config starts the API itself, but the job
+  installed only the front end's dependencies, so the API could not boot. It now runs
+  `npm ci` in `Backend/` too, caches both lockfiles, and the job is renamed to say it runs
+  end-to-end tests. Reproduced locally by moving `Backend/node_modules` aside — same error,
+  same stack.
 - **A mobile user could not remove an item from their cart.** At a 393px viewport the cart
   table's columns crushed together until the quantity input overlapped the remove button and
   swallowed its clicks. The table now reflows into stacked rows below `md`. Found by the

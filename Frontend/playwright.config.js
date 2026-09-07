@@ -18,6 +18,11 @@ export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
+  /**
+   * One retry in CI. A test that passes on retry is reported as "flaky" rather than
+   * "passed" — that visibility is the point. A flake is a real defect in the test or the
+   * code under it; retries stop it blocking a merge, they do not excuse leaving it.
+   */
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
 

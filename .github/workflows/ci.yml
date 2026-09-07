@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend — lint, build, budgets
+    name: Frontend — lint, build, budgets, end-to-end
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,7 +40,9 @@ jobs:
           # Must satisfy Vite 8's engines: ^20.19.0 || >=22.12.0
           node-version: '22'
           cache: npm
-          cache-dependency-path: Frontend/package-lock.json
+          cache-dependency-path: |
+            Frontend/package-lock.json
+            Backend/package-lock.json
 
       # ci, not install — respects the lockfile exactly and fails if it is out of sync.
       - name: Install
@@ -62,6 +64,13 @@ jobs:
       # API smoke tests were all green.
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      # The e2e config starts the API itself (playwright.config.js webServer), so this job
+      # needs the API's dependencies as well as the front end's. Without them the run fails
+      # with ERR_MODULE_NOT_FOUND: express.
+      - name: Install API dependencies (the e2e run starts the API)
+        working-directory: Backend
+        run: npm ci
 
       - name: End-to-end tests
         run: npm run e2e

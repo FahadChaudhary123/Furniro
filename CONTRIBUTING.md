@@ -257,6 +257,14 @@ npm run e2e:ui       # interactive, for writing tests
 npm run e2e:report   # last HTML report
 ```
 
+The suite starts both servers itself, so **CI jobs that run it need both packages
+installed** — `Frontend/` and `Backend/`. That is not obvious from the job name and has
+already broken CI once.
+
+CI retries a failed test once. A test that passes on retry is reported as **flaky**, not
+passed: that is a defect in the test or the code beneath it, and the retry exists to stop it
+blocking a merge, not to excuse leaving it.
+
 Add a case whenever you fix a user-visible defect. Every assertion in `e2e/` exists because
 something was actually broken or a claim was made about a fix — that is what keeps the
 suite from becoming decoration.
