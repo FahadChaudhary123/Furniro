@@ -20,8 +20,14 @@ cd Frontend && npm install && npm run dev
 The two npm roots are independent — there is no workspace tool, so `Frontend/` and
 `Backend/` each need their own `npm install`.
 
-The back end does not start yet; see
-[Wiring up the back end](README.md#wiring-up-the-back-end).
+The back end runs:
+
+```bash
+cd Backend && npm install && npm run dev
+```
+
+Verify it with `npm run smoke` in another shell — 17 checks against the running server.
+Structure and boundary rules: [docs/MODULES.md](docs/MODULES.md).
 
 ### Before your first commit
 

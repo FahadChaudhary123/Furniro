@@ -65,6 +65,44 @@ jobs:
           path: Frontend/dist
           retention-days: 7
 
+  backend:
+    name: Back end — boot, smoke, catalogue drift
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Backend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # The front end and back end each hold a copy of the catalogue until the front end
+      # fetches. Two copies of product data is how the original shape conflict happened.
+      - name: Catalogue drift
+        run: npm run check:catalogue
+
+      # Boots the server and exercises the real HTTP surface: health, correlation, error
+      # shape, CORS, and the whole catalogue API contract.
+      - name: Smoke test
+        run: |
+          npm start &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/health > /dev/null && break
+            sleep 1
+          done
+          npm run smoke
+        env:
+          PORT: 3000
+          NODE_ENV: test
+
   audit:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest

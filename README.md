@@ -61,8 +61,41 @@ The front end makes no network calls, so it runs fully standalone.
 
 ## Running the back end
 
-**Not yet runnable.** `Backend/index.js` is an empty file and `package.json` defines no
-`start` or `dev` script. See [Wiring up the back end](#wiring-up-the-back-end).
+```bash
+cd Backend
+cp .env.example .env      # fill in values; see Environment variables below
+npm install
+npm run dev               # or: npm start
+```
+
+Serves on `http://localhost:3000` unless `PORT` says otherwise. It starts without Supabase
+credentials — `/health` works regardless, and database access fails at the point of use
+rather than at boot.
+
+| Script | Does |
+|---|---|
+| `npm start` | Run the server |
+| `npm run dev` | Run with nodemon reload |
+| `npm run smoke` | Smoke-test a running server (46 checks) |
+| `npm run check:catalogue` | Guard the front-end catalogue copy against the back end's |
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | Liveness — build SHA, config version, feature flags, uptime |
+| `GET /health/ready` | Readiness — dependency checks; 503 when not ready |
+| `GET /api/products` | Catalogue: `page`, `limit`, `category`, `sort`, `q`, `min_price`, `max_price` |
+| `GET /api/products/featured` | The eight curated home-page products |
+| `GET /api/products/:slug` | One product; 404 if absent |
+| `GET /api/categories` | The seven categories, with `product_count` |
+
+Full contract in [API.md](API.md). Data comes from a JSON file, not a database — see
+[Back-end structure](#back-end-structure).
+
+Verify with the server running in another shell:
+
+```bash
+npm run smoke
+```
 
 ---
 
@@ -87,47 +120,55 @@ under *Unreleased*.
 
 | Gap | Where |
 |---|---|
-| Back end has no code — empty `index.js`; `controllers/`, `models/`, `routes/`, `middlewares/`, `utils/` are all empty directories | [Backend/](Backend/) |
-| Shop product images 404 — rows reference `/images/productN.png` but `Frontend/public/` contains only `vite.svg` | [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx) |
-| Sort and "show N" dropdowns are decorative — no `onChange`, no effect on the grid | [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx) |
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
 | Contact form has no `onSubmit` — submitting reloads the page and discards input | [contact.jsx](Frontend/src/pages/contact.jsx) |
 | Navbar user / search / wishlist / cart icons are not interactive | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
-| Prices render as `Rp` for current and `Rs` for old price on the same card | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
-| Product data exists in two incompatible shapes across two files | See [DATA_MODEL.md](DATA_MODEL.md) |
 | `AnimationDemo.jsx` is the only `gsap` consumer and is never imported | [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx) |
 | No tests, and no deployment configuration | repo-wide |
+| Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |
 | Not a git repository yet — CI exists but cannot run until it is | repo root |
 
 ---
 
-## Wiring up the back end
+## Back-end structure
 
-Three blockers to clear before `Backend/` will start, in order:
+The three blockers that used to prevent the server starting are cleared: `"type": "module"`
+is set, `start`/`dev` scripts exist, and `mongoose` — a MongoDB driver in a Postgres
+project — is removed.
 
-1. **Set `"type": "module"` in [Backend/package.json](Backend/package.json).**
-   [config/supabase.js](Backend/config/supabase.js) uses `import`/`export` syntax, which
-   Node parses as CommonJS without this field and rejects with `SyntaxError: Cannot use
-   import statement outside a module`.
+```
+Backend/
+├── index.js              Entry point: validate config, listen, shut down gracefully
+├── src/
+│   ├── app.js            Composition root — middleware order is load-bearing
+│   └── platform/         Layer 0. Everything depends on this; it depends on nothing
+│       ├── config.js       env loading (dotenv first), validation, warnings
+│       ├── logger.js       structured logs, redaction, correlation id on every line
+│       ├── correlation.js  one id per request, via AsyncLocalStorage
+│       ├── errors.js       AppError + the error middleware (registered last)
+│       ├── health.js       /health and /health/ready
+│       ├── supabase.js     the shared client, constructed lazily
+│       └── index.js        public interface — import only from here
+└── scripts/smoke.mjs     end-to-end checks against a running server
+```
 
-2. **Add start scripts.** There are none:
+`src/modules/catalogue/` is the first domain module, layered
+`routes -> controller -> service -> repository`. **The repository is the only file that
+touches a data store**, and today that store is a JSON file — there is no database schema
+yet. Swapping that one file for Supabase is the entire migration.
 
-   ```json
-   "scripts": {
-     "start": "node index.js",
-     "dev": "nodemon index.js"
-   }
-   ```
+The catalogue JSON is generated from the front end's module (`npm run catalogue:generate`)
+because the two are separate npm roots and cannot share a file. That duplication is
+temporary — it ends when the front end fetches — and `npm run check:catalogue` guards it in
+CI meanwhile.
 
-3. **Pick one data layer.** `@supabase/supabase-js`, `mongoose` and `pg` are all installed.
-   `mongoose` is a MongoDB driver and cannot talk to Supabase; `pg` and `supabase-js` are
-   two different routes to the same Postgres instance. [ARCHITECTURE.md](ARCHITECTURE.md)
-   recommends keeping `supabase-js` and dropping the other two.
+Further modules mount into `src/app.js` as they are built. The layout, boundary rules and
+build order are in [docs/MODULES.md](docs/MODULES.md).
 
-Then implement the endpoints in [API.md](API.md) against the schema in
-[DATA_MODEL.md](DATA_MODEL.md).
-
----
+**One data-layer decision remains.** `@supabase/supabase-js` and `pg` are both installed.
+They are two routes to the same Postgres; `pg` is kept for now pending the question of
+whether raw SQL is needed — see
+[ARCHITECTURE.md](ARCHITECTURE.md#three-data-layers-pick-one).
 
 ## Environment variables
 
@@ -145,10 +186,10 @@ cp .env.example .env
 | `SUPABASE_ANON_KEY` | Supabase anonymous (public) key |
 | `DATABASE_URL` | Postgres connection string, for direct `pg` access |
 
-`Backend/config/supabase.js` reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` from
-`process.env` but nothing calls `dotenv.config()` yet — whichever module becomes the entry
-point must load `dotenv` **before** importing the Supabase client, or both values will be
-`undefined`.
+`src/platform/config.js` loads dotenv at its own module top level and is imported first, so
+every later module sees a populated `process.env`. Two further variables are supported:
+`ALLOWED_ORIGINS` (comma-separated CORS allowlist, defaulting to `http://localhost:5173`)
+and `LOG_LEVEL`.
 
 The front end reads no environment variables. When it needs an API base URL, it must be
 named `VITE_API_URL` — Vite only exposes variables prefixed `VITE_`, and **everything so
@@ -180,5 +221,6 @@ Furniro/
 ## License
 
 Proprietary. All rights reserved — see [LICENSE](LICENSE).
-#   F u r n i r o  
+#   F u r n i r o 
+ 
  

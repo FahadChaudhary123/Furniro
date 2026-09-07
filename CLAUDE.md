@@ -10,13 +10,15 @@ Instructions for AI coding agents working in this repository. Human contributors
 Furniro, a furniture e-commerce storefront. React 19 + Vite 8 front end; Express 5 +
 Supabase back end.
 
-**The most important thing to know: the back end does not exist.** `Backend/index.js` is an
-empty file, and `controllers/`, `models/`, `routes/`, `middlewares/` and `utils/` are empty
-directories. The front end makes zero network calls — every page renders from hard-coded
-arrays in the component files.
+**The back end runs, but serves only `/health`.** `Backend/src/platform/` is built —
+config, logging, correlation ids, error handling, health. No domain module is mounted yet,
+so there are no product, cart, order or auth endpoints.
 
-Do not write code that assumes an API, a database, a cart, or an authenticated user. None
-of those exist.
+The front end still makes zero network calls: products come from `src/modules/catalogue/`,
+other sections hold inline arrays.
+
+Do not write code that assumes a database, a cart, or an authenticated user. None of those
+exist. Do not add `fetch()` to an endpoint that is not mounted in `Backend/src/app.js`.
 
 ---
 
@@ -25,7 +27,9 @@ of those exist.
 | Task | Read first |
 |---|---|
 | Anything at all | [README.md](README.md#current-state) — what works, what does not |
-| Touching product/blog/category data | [DATA_MODEL.md](DATA_MODEL.md) — **there is a shape conflict** |
+| Touching product data | Import from `src/modules/catalogue` — never redefine products |
+| Touching blog/category/room data | [DATA_MODEL.md](DATA_MODEL.md) — still inline arrays |
+| Adding a module | [docs/MODULES.md](docs/MODULES.md) — boundaries and dependency direction |
 | Adding an endpoint | [API.md](API.md) — conventions are binding |
 | Structural change | [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Anything touching secrets or user input | [SECURITY.md](SECURITY.md) |
@@ -41,8 +45,12 @@ output, a commit, a log, or a doc. `.env.example` is the file to reference.
 **Never give a secret a `VITE_` prefix.** Vite inlines every `VITE_`-prefixed variable into
 the public bundle as a string literal. There is no way to un-publish it after a deploy.
 
-**Never invent an endpoint.** If a component needs data, it comes from a local array today.
-Do not add `fetch()` calls to routes that do not exist.
+**Never invent an endpoint.** Only `/health` and `/health/ready` exist. If a component
+needs data, it comes from a local module today.
+
+**Error middleware stays last and keeps four parameters.** Express identifies it by arity;
+dropping `next` turns it into a normal handler that never runs. A 500 never returns a stack,
+a SQL fragment or a driver message — log those with the correlation id.
 
 **Never store a formatted price string or use a float for money.** Integers in minor units,
 formatted at the render boundary. [Why.](DATA_MODEL.md#money)
@@ -64,12 +72,16 @@ committing them. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-fi
 ### Structure
 
 ```
-components/   Reused across pages
-sections/     One full-width band of a page
-pages/        One per route; composes sections, no logic
+modules/<name>/   Domain modules. Import ONLY via modules/<name>/index.js
+shared/lib/       Cross-cutting helpers (money formatting)
+components/       Reused presentation across pages
+sections/         One full-width band of a page
+pages/            One per route; composes sections, no logic
 ```
 
-Dependencies flow `pages` → `sections` → `components`, never upward.
+Dependencies flow `pages` → `sections` → `components` → `modules`, never upward.
+**Never deep-import past a module's `index.js`** — that is the boundary breaking. See
+[docs/MODULES.md](docs/MODULES.md#boundary-rules).
 
 ### Code
 
@@ -80,7 +92,8 @@ Dependencies flow `pages` → `sections` → `components`, never upward.
   the component body; do not replicate that.
 - Stable `key` on every mapped element, never the array index.
 - Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind cannot express.
-- Brand gold is `#B88E2F`.
+- Brand gold is `#B88E2F`. (`#B88A2B` appears twice in `Hero.jsx` — that is a bug, not a second brand colour.)
+- The brand is spelled **Furniro**. `Funiro` in the footer and hashtag is a leftover to fix.
 - Relative imports — no path alias is configured.
 - Mobile-first: unprefixed utilities are small-screen, `sm:`/`md:`/`lg:` layer on top.
 
@@ -88,11 +101,10 @@ Dependencies flow `pages` → `sections` → `components`, never upward.
 
 ```bash
 cd Frontend
-npm run lint
-npm run build
+npm run verify     # lint + build + performance budgets
 ```
 
-Both must pass. There are no tests, so a change that "should work" has not been checked —
+All three must pass. There are no tests, so a change that "should work" has not been checked —
 run the dev server and load the routes you touched.
 
 ---
@@ -126,16 +138,17 @@ done rather than building against an imagined back end.
 
 Specific things that have already caused, or will cause, wrong work:
 
-1. **Two incompatible product shapes.** `ProductGrid.jsx` uses `title` and numeric prices;
-   `ProductsSection.jsx` uses `name` and formatted strings. `ProductCard` is only safe with
-   the first. Read [the conflict](DATA_MODEL.md#-the-product-shape-conflict) before
-   touching either.
+1. **Products have exactly one definition** — `modules/catalogue/data/products.js`. There
+   were once two incompatible shapes in two components; do not reintroduce a second. Prices
+   are integer minor units and badges are derived, never stored. Background:
+   [the conflict](DATA_MODEL.md#the-product-shape-conflict-resolved).
 2. **`src/assets/` vs `public/`.** Assets under `src/assets/` are imported as modules and
    hashed by the bundler. Files in `public/` are copied verbatim and referenced by absolute
    path. Confusing the two is what broke every shop image.
-3. **`config/supabase.js` cannot load** — ESM syntax, and `package.json` lacks
-   `"type": "module"`. Also, nothing calls `dotenv.config()`, so both env values would be
-   `undefined`.
+3. **Import platform config before anything reads `process.env`.** `src/platform/config.js`
+   loads dotenv at its own top level, and ES imports are hoisted — a `dotenv.config()`
+   written below an `import` runs too late and the imported module sees `undefined`. That
+   was the bug in the old `config/supabase.js`.
 4. **Express 5, not 4.** Async handler rejections forward to error middleware
    automatically; the `try/catch`-and-`next(err)` wrapper is obsolete.
 5. **`cors()` with no arguments reflects any origin.** Always pass an explicit allowlist.

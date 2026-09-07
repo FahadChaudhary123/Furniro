@@ -26,21 +26,26 @@ npm run dev
 with the navbar, hero and product sections. Navigate to `/shop`, `/about` and `/contact` —
 all four routes should render.
 
-Known and expected: **every product image on `/shop` is broken.** That is
-[a real defect](../../CHANGELOG.md#known-issues), not a setup problem.
+Product images should all load. If any 404, something has diverged from
+`src/modules/catalogue/` — that is the single source of product data.
 
 ### Back end
-
-**Does not start.** `index.js` is empty and there are no `start` or `dev` scripts. See
-[README.md](../../README.md#wiring-up-the-back-end) for the three blockers.
-
-If you are the one wiring it up:
 
 ```bash
 cd Backend
 cp .env.example .env      # then fill in real values
 npm install
+npm run dev
 ```
+
+**Verify:** the log prints `server listening`. Then, in another shell:
+
+```bash
+npm run smoke             # 17 checks; all should pass
+```
+
+It starts without Supabase credentials — you get a warning, `/health` still works, and
+database access fails at the point of use rather than at boot.
 
 Never commit `.env`. Confirm the ignore rule is working before you stage anything:
 
@@ -58,8 +63,14 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run build` | `Frontend/` | Production build to `dist/` |
 | `npm run preview` | `Frontend/` | Serve the built `dist/` |
 | `npm run lint` | `Frontend/` | ESLint over `**/*.{js,jsx}` |
+| `npm run budgets` | `Frontend/` | Performance budgets against `dist/` |
+| `npm run verify` | `Frontend/` | lint + build + budgets |
+| `npm start` | `Backend/` | Run the API |
+| `npm run dev` | `Backend/` | Run the API with nodemon reload |
+| `npm run smoke` | `Backend/` | 17 checks against a running API |
 
-Run `lint` and `build` before opening a PR. There are no tests.
+Run `npm run verify` (front end) and `npm run smoke` (back end) before opening a PR. There
+is no unit test suite yet.
 
 ---
 
@@ -117,16 +128,19 @@ On Windows, killing the `npm` wrapper process does **not** kill the `vite` child
    npm run dev
    ```
 
-### `SyntaxError: Cannot use import statement outside a module`
+### `Supabase is not configured`
 
-From `Backend/`. `config/supabase.js` uses ESM syntax while `package.json` has no
-`"type": "module"`. Add it. This is a known blocker, not a new breakage.
+`SUPABASE_URL` or `SUPABASE_ANON_KEY` is missing from `Backend/.env`. The server starts
+anyway and warns at boot; the error is thrown by the first code that needs the database.
+Copy `.env.example` and fill it in.
 
-### Supabase client has `undefined` credentials
+If the values *are* set and you still see this, check that nothing reads `process.env`
+before `src/platform/config.js` is imported — ES imports are hoisted, so ordering matters.
 
-Nothing calls `dotenv.config()`. Whichever module is the entry point must load dotenv
-**before** importing the Supabase client — module imports are hoisted and evaluated first,
-so a `dotenv.config()` written below an `import` line runs too late.
+### `EADDRINUSE`
+
+Another process holds the port. The server logs this and exits rather than hanging. Set
+`PORT` in `Backend/.env`, or find the holder as described above for 5173.
 
 ### A clean reinstall
 

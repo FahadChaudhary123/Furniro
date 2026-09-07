@@ -311,7 +311,7 @@ structure and should survive inside `shared/ui` and `modules/*/components`. The 
 that `ProductGrid.jsx` — currently 324 lines because a 32-item catalogue is inlined above
 the component — becomes `modules/catalogue/` with the data behind an `api` boundary. That
 single move also resolves the two-incompatible-product-shapes problem in
-[DATA_MODEL.md](../DATA_MODEL.md#-the-product-shape-conflict).
+[DATA_MODEL.md](../DATA_MODEL.md#the-product-shape-conflict-resolved).
 
 Back office is a **separate application**, not a route inside the storefront. It has a
 different auth model (`ADM-02`: RBAC + MFA), a different audience, and no reason to share a

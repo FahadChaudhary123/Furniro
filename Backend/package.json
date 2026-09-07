@@ -1,23 +1,32 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Furniro API \u2014 Express 5 + Supabase. See ../docs/MODULES.md",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "smoke": "node scripts/smoke.mjs",
+    "test": "echo \"No tests yet \u2014 see docs/OPS_CONFORMANCE.md\" && exit 0",
+    "catalogue:generate": "node scripts/generate-catalogue.mjs",
+    "check:catalogue": "node scripts/check-catalogue-drift.mjs"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "@supabase/supabase-js": "^2.96.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
-    "mongoose": "^9.2.1",
     "pg": "^8.18.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
+  },
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
   }
 }

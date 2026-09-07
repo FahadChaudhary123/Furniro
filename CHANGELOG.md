@@ -16,6 +16,29 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **The catalogue API is live** — the first domain module.
+  `GET /api/products` (pagination, category filter, text search, price range, whitelisted
+  sort), `/api/products/featured`, `/api/products/:slug`, `/api/categories` with
+  `product_count`. Layered `routes -> controller -> service -> repository` per
+  docs/MODULES.md, with the repository as the only data-touching file — swapping it for
+  Supabase is the whole migration.
+- **Smoke suite grew to 46 checks**, 29 of them covering the catalogue contract: response
+  envelope, integer prices, embedded category objects, absence of a stored badge field,
+  pagination boundaries, sort ordering, filters, and five validation rejections including
+  an injection-shaped `sort`.
+- `npm run check:catalogue` — guards the front end's catalogue copy against the back end's,
+  and now runs in CI. Verified to exit 1 on a real change and name the drifted field.
+- `npm run catalogue:generate` — derives the back-end catalogue from the front-end module
+  rather than retyping 40 products.
+- **The back end runs.** `Backend/src/platform/` implements the Layer 0 platform module
+  from docs/MODULES.md — `PLAT-01` health endpoint (build SHA, config version, feature
+  flags, uptime, plus a separate readiness probe), `PLAT-02` correlation ids via
+  `AsyncLocalStorage`, `PLAT-03` structured logging with key redaction, `PLAT-04` error
+  handling using the docs/API.md error shape. Plus a CORS allowlist read from
+  `ALLOWED_ORIGINS`, a 100 kB body limit, and graceful shutdown on SIGTERM/SIGINT.
+- `Backend/scripts/smoke.mjs` (`npm run smoke`) — 17 end-to-end checks against a running
+  server: health, correlation echo and rejection, error shape, credential leakage, CORS
+  allow and deny, framework fingerprinting. All 17 pass.
 - **CI pipeline** (`.github/workflows/ci.yml`) — Document B §3 gates, reduced to those
   enforceable today: lint, build, performance budgets, `npm audit` (blocking on high and
   critical, across both packages), and a `gitleaks` secret scan plus an explicit check that
@@ -41,7 +64,7 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   functional requirements were derived from the operations it prescribes. 134 requirements
   across 18 domains, each cited to the Doc B section implying it, with stable IDs so Doc B
   §16 and §17 cross-references resolve. Includes a traceability matrix covering all twelve
-  runbooks R1-R12. **4 of 134 are currently met.** Marked Rev 0.1 draft — a straw man to
+  runbooks R1-R12. **7 of 134 are currently met** (4 at the time of writing; the platform module added 3). Marked Rev 0.1 draft — a straw man to
   correct, not agreed scope.
 - `docs/MODULES.md` — the 134 requirements divided into **20 modules** across six layers,
   with boundary rules, a dependency graph, per-module ownership and runbooks, repository
@@ -67,6 +90,18 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Changed
 
+- **Catalogue reconciled into one module.** `Frontend/src/modules/catalogue/` is now the
+  single source of product data: 40 products in one canonical shape, consumed by both the
+  shop grid and the home-page strip. Replaces two incompatible inline arrays (`title` vs
+  `name`, numeric vs formatted prices, disjoint product sets). Exposed through
+  `modules/catalogue/index.js` only, per docs/MODULES.md#boundary-rules.
+- **Prices are integer minor units**, formatted at the render boundary by
+  `Frontend/src/shared/lib/money.js`. No formatted price strings remain in data.
+- **Badges are derived, not stored** (`modules/catalogue/lib/badge.js`).
+- Shop sort and page-size controls are now functional. They could not have worked before:
+  prices were formatted strings, which cannot be sorted.
+- Home-page "Show More" is now a link to `/shop`; it was an inert `<button>`.
+- Product images carry `loading="lazy"`.
 - **Images optimised: 24.0 MB -> 2.51 MB of shipped assets (90% smaller).** Source images
   were camera-resolution originals (one 6000x6000, one 5616x3744) served verbatim. Resized
   to a 1600px max edge and re-encoded via `Frontend/scripts/optimise-images.mjs`. Originals
@@ -81,6 +116,21 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **The three blockers preventing the back end from starting.** `"type": "module"` added
+  (`config/supabase.js` used ESM syntax in a package Node parsed as CommonJS); `start` and
+  `dev` scripts added (there were none); `mongoose` removed — a MongoDB driver in a
+  Postgres project, which could never have connected.
+- **The Supabase client constructed itself at import time from unloaded env vars**, so both
+  values would have been `undefined`. It is now constructed lazily and throws a directed
+  error at the point of use.
+- **All 32 shop product images 404'd; now every image resolves.** Rows referenced
+  `/images/productN.png` against a `public/` directory holding only `vite.svg`. They now
+  reference the real bundled assets. Verified by fetching all 8 from a production build.
+- **Two currencies on one card.** Current price rendered `Rp`, struck-through old price
+  rendered `Rs`. Both now go through one formatter.
+- **Two discount badges were wrong**, which is what derived badges prevent: Syltherine was
+  labelled `-30%` on a 2.5M/3.5M pair that is `-29%`, and the fabric recliner was labelled
+  `-10%` on a genuine `-13%`.
 - **`npm run lint` now passes; it was failing before this change.** Two `no-unused-vars`
   errors on `motion` in `HomePage.jsx` and `AnimationDemo.jsx` were false positives: the
   binding is used only as `<motion.section>`, and the flat config had no
@@ -99,35 +149,28 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
 
 ### Front end
 
-- **All shop product images 404.** Rows reference `/images/productN.png`, resolved against
-  `Frontend/public/`, which contains only `vite.svg`. The real assets are at
-  `src/assets/Products/*.jpg`. — [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx)
-- **Two currencies on one card.** Current price renders `Rp`, old price renders `Rs`. —
-  [ProductCard.jsx](Frontend/src/components/ProductCard.jsx)
-- **Sort and "show N" dropdowns do nothing** — no `onChange`, and prices are formatted
-  strings that cannot be sorted anyway.
 - **No cart.** "Add to cart", Share, Compare and Like have no handlers and there is no cart
   state anywhere in the app.
 - **Contact form discards input** — no `onSubmit`, so the page reloads and the message is
   lost. — [contact.jsx](Frontend/src/pages/contact.jsx)
 - **Navbar user, search, wishlist and cart icons are not interactive.**
 - **No 404 route.** An unknown path renders the navbar and blank space.
-- **Product data exists in two incompatible shapes** across `ProductGrid.jsx` and
-  `ProductsSection.jsx`. — [DATA_MODEL.md](DATA_MODEL.md#-the-product-shape-conflict)
 - **`Footer` duplicated** across all four pages instead of sitting in `App.jsx`.
 - **Page title is still `frontend`** in `index.html`.
+- **The brand name is spelled two ways.** `Furniro` in the navbar and repo; `Funiro` in the
+  footer heading, the copyright line and the `#FuniroFurniture` hashtag.
+- **Two brand golds in use** — `#B88E2F` (18 occurrences) and `#B88A2B` (2, in the Hero).
 
 ### Back end
 
-- **No code.** `index.js` is empty; `controllers/`, `models/`, `routes/`, `middlewares/`
-  and `utils/` are empty directories.
-- **`config/supabase.js` cannot load** — it uses ESM syntax while `package.json` omits
-  `"type": "module"`.
-- **No `dotenv.config()` call**, so `SUPABASE_URL` and `SUPABASE_ANON_KEY` would both be
-  `undefined` at client construction.
-- **No start scripts** — neither `start` nor `dev` is defined.
-- **Three overlapping data layers installed** — `@supabase/supabase-js`, `pg` and
-  `mongoose`. `mongoose` is a MongoDB driver and cannot reach Postgres at all.
+- **No domain endpoints yet.** Only `/health` and `/health/ready`. Products, cart, orders
+  and auth are unbuilt — see [docs/MODULES.md](docs/MODULES.md#build-order).
+- **Two overlapping data layers still installed** — `@supabase/supabase-js` and `pg`. Both
+  reach the same Postgres; the choice is pending.
+- **Graceful shutdown is unverified on Windows.** The SIGTERM/SIGINT handlers are written,
+  but `Stop-Process` is a hard terminate, so the path has only been exercised by
+  inspection. It matters in a Linux container, not locally.
+- **No error-tracking or uptime monitoring integration** — `PLAT-04` is the middleware only.
 
 ### Repository
 

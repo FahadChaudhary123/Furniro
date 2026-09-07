@@ -62,12 +62,12 @@ passing it.
 | | Section | Status | Notes |
 |---|---|---|---|
 | §1 | Purpose and ownership | ◐ | Ten accountable roles collapse to one person. The register is still worth writing — Doc B's own rule is that "the team" is not an owner |
-| §2 | Environments and configuration | ⏳ | Only `local` exists. The secrets rules apply **now** and are already breached — see §10 |
+| §2 | Environments and configuration | ◐ | Config is env-driven and validated; the health endpoint reports build SHA, config version and flag state as §2 requires. Only `local` exists as an environment |
 | §3 | Release management | ◐ | CI gates now defined in `.github/workflows/ci.yml`; they activate on `git init` + push. The migration discipline (expand → backfill → switch → drop) is already recorded in [rollback.md](runbooks/rollback.md#when-a-migration-is-involved) |
 | §4 | Maintenance calendar | ◐ | 5 of 26 items are meaningful today; the rest reference orders, payments, carriers, stock or search |
-| §5 | Monitoring, SLOs, alerting | ⏳ | Every SLO is defined over checkout, orders or traffic. None measurable |
+| §5 | Monitoring, SLOs, alerting | ⏳ | Structured logs and correlation ids now exist to build on, but every SLO is defined over checkout, orders or traffic. None measurable |
 | §6 | Incident management | ◐ | Severity model and post-incident review are adoptable now. Now aligned in [incident-response.md](runbooks/incident-response.md) |
-| §7 | Runbooks R1–R12 | ⏳ | 2 of 12 map to anything Furniro could have: R4 (site-wide 5xx) and R12 (data breach). The other ten need payments, stock, queues, search, carriers or email |
+| §7 | Runbooks R1–R12 | ⏳ | R4's correlation-id diagnosis is now possible. Still 2 of 12 applicable: R4 and R12. The other ten need payments, stock, queues, search, carriers or email |
 | §8 | Backup and disaster recovery | ⏳ | No data to back up. Supabase supplies snapshots and PITR once there is a schema |
 | §9 | Database and storage upkeep | ⏳ | No database |
 | §10 | Security maintenance | ✅ | **The most applicable section, and the one with an open breach.** See below |
@@ -194,6 +194,8 @@ Everything here is doable this week and none of it is thrown away later.
 - [x] Third-party register started (§16)
 - [ ] Ownership register, honest about being one person (§1)
 - [x] Dependency vulnerabilities triaged to zero in both packages (§10)
+- [x] Platform module built — health endpoint, correlation ids, structured logging, error
+      handling, CORS allowlist (`PLAT-01`–`04`, part of §2 and §5)
 - [ ] Execute `local-development.md` as written and correct what is wrong (§18)
 
 ### Stage 1 — back end and database exist

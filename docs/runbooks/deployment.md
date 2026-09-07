@@ -82,21 +82,29 @@ this is worth checking before the first deploy rather than after.
 
 ## Back end
 
-🔴 There is no back end to deploy. Before there can be, three things must be true — see
-[README.md](../../README.md#wiring-up-the-back-end):
+The back end now runs and can be deployed, though it serves only `/health` and
+`/health/ready` — no domain endpoints are mounted yet. Deploying it early is still worth it:
+it proves the pipeline, the environment configuration and the health probe before anything
+depends on them.
 
-1. `"type": "module"` set in `Backend/package.json`
-2. `start` and `dev` scripts defined
-3. One data layer chosen; `mongoose` removed
+Build and run: `npm ci && npm start` in `Backend/`. Node `^20.19.0 || >=22.12.0`.
 
-Then, at deploy time:
+At deploy time:
 
 - Set `PORT`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL` and `ALLOWED_ORIGINS` in
   the host's environment configuration. Never in the repository.
 - `ALLOWED_ORIGINS` must list the production front-end origin. **`cors()` with no arguments
   reflects any origin** and must never reach production.
 - Serve over HTTPS only.
-- Health check endpoint (`GET /health`) for the platform to probe.
+- Point the platform's **liveness** probe at `GET /health` and its **readiness** probe at
+  `GET /health/ready`. Do not point liveness at readiness: a liveness probe that checks the
+  database will restart a healthy server during a database blip, turning a degradation into
+  an outage.
+- Inject `GIT_SHA` and `APP_VERSION` at build time. `/health` reports them, which is how
+  Doc B §2 keeps "what is actually running" from being guesswork — and how a rollback is
+  confirmed to have taken effect.
+- Verify after deploy with `npm run smoke` against the deployed URL:
+  `BASE_URL=https://api.example npm run smoke`.
 
 ---
 

@@ -167,9 +167,12 @@ The rule that makes the layering worth having: **a controller never imports the 
 client directly.** It goes through `models/`. That is what keeps the data layer swappable
 and the controllers testable.
 
-Only `config/supabase.js` exists so far, and it has two problems documented in
-[README.md](README.md#wiring-up-the-back-end): ESM syntax in a package not declared as ESM,
-and no `dotenv.config()` call before the client is constructed.
+**Built.** `Backend/src/platform/` implements the Layer 0 module — config, logging,
+correlation ids, error handling, health — and `src/app.js` is the composition root domain
+modules mount into. The old `config/supabase.js` is gone; its two defects (ESM syntax in a
+package not declared as ESM, and a client constructed before dotenv had run) are fixed by
+construction. See [README.md](README.md#back-end-structure) and
+[docs/MODULES.md](docs/MODULES.md).
 
 ### Three data layers, pick one
 

@@ -116,7 +116,7 @@ has one person, which is a staffing question, not a requirements one.
 | `CAT-03` | A publish gate blocks incomplete products — "checked by the publish gate, not by eye" | §15 | 2 | ⭕ |
 | `CAT-04` | Completeness report of products failing rules, resolved within 14 days | §15 data-quality sweep | 2 | ⭕ |
 | `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ◐ |
-| `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ◐ |
+| `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ✅ |
 | `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ⭕ |
 | `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ⭕ |
 | `CAT-09` | Price and stock ingested from ERP/PIM; storefront reconciles daily within tolerance | §15 | 4 | ⭕ |
@@ -320,10 +320,10 @@ someone might skip.
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
-| `PLAT-01` | Health endpoint exposing build SHA, config version and feature-flag state | §2 | 1 | ⭕ |
-| `PLAT-02` | Correlation IDs propagated through traces and logs, queryable per session | §7 R2 | 1 | ⭕ |
-| `PLAT-03` | Structured application logs, 30 days hot / 12 months cold | §11 | 1 | ⭕ |
-| `PLAT-04` | Error tracking and alerting | §5 | 1 | ⭕ |
+| `PLAT-01` | Health endpoint exposing build SHA, config version and feature-flag state | §2 | 1 | ✅ |
+| `PLAT-02` | Correlation IDs propagated through traces and logs, queryable per session | §7 R2 | 1 | ✅ |
+| `PLAT-03` | Structured application logs, 30 days hot / 12 months cold | §11 | 1 | ✅ |
+| `PLAT-04` | Error tracking and alerting | §5 | 1 | ◐ |
 | `PLAT-05` | Background job framework with retries and a dead-letter queue | §4, §7 R6 | 3 | ⭕ |
 | `PLAT-06` | Queues prioritised: order-release and notification above analytics | §7 R6 | 3 | ⭕ |
 | `PLAT-07` | Long-running backfills run as jobs with progress and a kill switch, never inside a deploy | §3 | 3 | ⭕ |
@@ -337,8 +337,8 @@ someone might skip.
 | `SEC-05` | Dependency vulnerability scanning every build plus weekly sweep | §10 | 0 | ✅ |
 | `SEC-06` | Secret scanning in CI | §2, §3 | 0 | ✅ |
 
-`SEC-05` and `SEC-06` are the only requirements in this section already met — both landed in
-the Stage 0 pass. `SEC-01` is actively breached: credentials sit in a plaintext `.env` with
+`PLAT-01`–`03` landed with the platform module; `PLAT-04` is partial — the error middleware
+exists, an error-tracking service does not. `SEC-05` and `SEC-06` landed in the Stage 0 pass. `SEC-01` is actively breached: credentials sit in a plaintext `.env` with
 rotation outstanding.
 
 ## 19. Non-functional — `NFR`
@@ -441,16 +441,17 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 1 | 5 | 15 |
+| Catalogue, search, content | 21 | 2 | 5 | 14 |
 | Cart, checkout, payments | 27 | 0 | 0 | 27 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
 | Back office, support, privacy | 17 | 0 | 1 | 16 |
-| Platform, security, non-functional | 28 | 3 | 1 | 24 |
-| **Total** | **134** | **4** | **7** | **123** |
+| Platform, security, non-functional | 28 | 6 | 1 | 21 |
+| **Total** | **134** | **8** | **7** | **119** |
 
-**4 of 134 requirements are met** — `CAT-02` (alt text), `SEC-05` and `SEC-06` (the CI
-gates), `NFR-06` (budgets). Three of those four landed in the last session.
+**8 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
+`SEC-05`/`SEC-06` (CI gates), `NFR-06` (budgets), and `PLAT-01`–`03` (health, correlation
+ids, structured logging). A further 7 are partial.
 
 This is not a criticism of the codebase; it is the honest distance between a static
 storefront and the trading operation Document B is written to run.

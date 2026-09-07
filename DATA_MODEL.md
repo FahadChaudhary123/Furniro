@@ -1,11 +1,12 @@
 # Data model
 
-The app has no database. Every entity below is a JavaScript array literal living inside the
-component that renders it. This document records those shapes, the conflicts between them,
-and the Postgres schema they imply.
+The app has no database. Entities are JavaScript array literals. This document records
+those shapes, the conflicts between them, and the Postgres schema they imply.
 
-Read this before writing any API or database code — there is a shape conflict to resolve
-first, and resolving it later means doing the integration twice.
+> **Products are now resolved.** The catalogue was extracted to
+> `Frontend/src/modules/catalogue/` on 2026-09-07 — 40 products, one canonical shape,
+> numeric prices, derived badges. The conflict analysis below is kept as the record of why
+> the shape is what it is. Everything else on this page still describes the current state.
 
 ---
 
@@ -13,8 +14,8 @@ first, and resolving it later means doing the integration twice.
 
 | Entity | Defined in | Rows | Scope |
 |---|---|---|---|
-| Shop products | [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx) | 32 | Module-level `const` |
-| Featured products | [ProductsSection.jsx](Frontend/src/sections/ProductsSection.jsx) | 8 | Module-level `const` |
+| ~~Shop products~~ | **Now** `modules/catalogue/data/products.js` | 40 | Module, one source |
+| ~~Featured products~~ | **Now** `FEATURED_SLUGS` in the same file | 8 | Curated slug list |
 | Range categories | [BrowseRange.jsx](Frontend/src/sections/BrowseRange.jsx) | 3 | Module-level `const` |
 | Room inspiration | [RoomsInspiration.jsx](Frontend/src/sections/RoomsInspiration.jsx) | 3 | Module-level `const` |
 | Blog posts | [BlogSection.jsx](Frontend/src/sections/BlogSection.jsx) | 3 | Inside the component body |
@@ -26,9 +27,12 @@ memoised child — hoist it to module scope like the others.
 
 ---
 
-## ⚠ The product shape conflict
+## The product shape conflict (resolved)
 
-**Two files describe products. They disagree on nearly every field.** Neither can consume
+> **Fixed 2026-09-07.** Both consumers now import from `modules/catalogue`. Retained
+> because the reasoning still governs the schema and the API response shape.
+
+**Two files described products. They disagree on nearly every field.** Neither can consume
 the other's data. They do not collide today only because `ProductsSection` renders its own
 inline card markup instead of reusing
 [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) — which is itself duplication,
@@ -131,12 +135,24 @@ const IDR = new Intl.NumberFormat("id-ID", {
 export const formatPrice = (minorUnits) => IDR.format(minorUnits / 100);
 ```
 
-### Currency inconsistency to fix
+### Currency inconsistency (fixed)
 
-[ProductCard.jsx](Frontend/src/components/ProductCard.jsx) renders the current price with
-`Rp` and the struck-through old price with **`Rs`** — two currencies on one card, two lines
-apart. `Rp` (rupiah) is correct given the rest of the copy; `Rs` (rupee) is a typo. A
-central formatter makes this class of bug impossible.
+`ProductCard` rendered the current price with `Rp` and the struck-through old price with
+**`Rs`** — two currencies on one card, two lines apart. Both now go through
+`shared/lib/money.js`, which makes the class of bug impossible rather than fixing one
+instance of it.
+
+### Stored badges were already wrong (fixed)
+
+Replacing stored badges with `badgeFor()` surfaced two that had drifted from the prices they
+described, exactly as predicted above:
+
+| Product | Was labelled | Actually |
+|---|---|---|
+| Syltherine (2.5M / 3.5M) | `-30%` | **`-29%`** |
+| Fabric Recliner (5.4M / 6.2M) | `-10%` | **`-13%`** |
+
+Both were visible to customers. Neither would have been found by reading the code.
 
 ---
 
@@ -276,12 +292,14 @@ but two constraints are worth fixing now because they are expensive to retrofit:
 
 The sequence that avoids doing the work twice:
 
-1. **Reconcile the product shape.** Move the canonical array to
-   `Frontend/src/data/products.js`; have both `ProductGrid` and `ProductsSection` import
-   it. Fix the image paths in the same change. No network code yet — this alone kills the
-   404s and the double maintenance.
-2. **Introduce the formatter.** Delete every inline `toLocaleString()` and the `Rs` typo.
-3. **Derive badges** with `badgeFor()` rather than reading a stored field.
+1. ~~**Reconcile the product shape.**~~ **Done.** The canonical array lives at
+   `Frontend/src/modules/catalogue/data/products.js` — 40 products, one shape, imported by
+   both `ProductGrid` and `ProductsSection` through `modules/catalogue/index.js`. Image
+   paths fixed in the same change; all 404s gone.
+2. ~~**Introduce the formatter.**~~ **Done.** `Frontend/src/shared/lib/money.js`. Every
+   inline `toLocaleString()` and the `Rs` typo are gone.
+3. ~~**Derive badges**~~ **Done.** `modules/catalogue/lib/badge.js`. Two stored badges were
+   already wrong when replaced — see [Currency inconsistency](#currency-inconsistency-fixed).
 4. **Create the tables and seed them** from that single array — it is already the right
    shape, so the seed is a script, not a rewrite.
 5. **Implement the read endpoints** in [API.md](API.md).

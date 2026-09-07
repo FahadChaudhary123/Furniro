@@ -1,8 +1,9 @@
 # API
 
-**Status: none of this is implemented.** The front end makes zero network calls, and
-`Backend/index.js` is an empty file. This document is the contract to build against, not a
-description of running software. Every endpoint below is marked with its state.
+**Status: the catalogue endpoints are live; nothing else is.** `GET /api/products`,
+`/api/products/featured`, `/api/products/:slug` and `/api/categories` are implemented and
+covered by 29 smoke checks. Everything else below is still the contract to build against.
+The front end does not consume any of it yet — it still renders from local data.
 
 Conventions and error shapes here are binding once implementation starts — agreeing them
 before the first route is written is the point of the document.
@@ -61,7 +62,7 @@ Every non-2xx response, without exception:
 {
   "error": {
     "code": "VALIDATION_FAILED",
-    "message": "Request body failed validation.",
+    "message": "Request failed validation.",
     "details": [
       { "field": "email", "issue": "must be a valid email address" }
     ]
@@ -103,7 +104,7 @@ change.
 
 ### `GET /api/products`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/catalogue/`
 
 Paginated catalogue. Backs the shop grid.
 
@@ -153,7 +154,7 @@ that always renders the category label.
 
 ### `GET /api/products/featured`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/catalogue/`
 
 The eight home-page products. A curated list, not a filter — `?limit=8` would return an
 arbitrary eight and quietly change the home page whenever the catalogue changes. Same item
@@ -161,7 +162,7 @@ shape as above.
 
 ### `GET /api/products/:slug`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/catalogue/`
 
 One product by slug. `404` if absent. Slug, not id, so URLs are readable and stable across
 a reseed.
@@ -183,7 +184,7 @@ endpoint is a defacement waiting to happen.
 
 ### `GET /api/categories`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/catalogue/`
 
 Flat list, unpaginated — there are seven.
 
@@ -315,12 +316,13 @@ app.use(cors({
 
 Order matters — items 1–3 are the ones that are painful to add afterwards.
 
-- [ ] `"type": "module"` in `Backend/package.json`, `start`/`dev` scripts, `dotenv.config()` first
-- [ ] Error middleware last, four-arg signature, correlation ids, no internals in `500`s
-- [ ] CORS allowlist from environment; rate limiting on every public write
-- [ ] Validation at the edge — a schema library, one place, before any controller logic
-- [ ] `GET /api/products` with pagination, filter, whitelisted sort
-- [ ] `GET /api/categories`, `GET /api/products/featured`, `GET /api/products/:slug`
+- [x] `"type": "module"` in `Backend/package.json`, `start`/`dev` scripts, `dotenv.config()` first
+- [x] Error middleware last, four-arg signature, correlation ids, no internals in `500`s
+- [x] CORS allowlist from environment — rate limiting still outstanding (no public write yet)
+- [~] Validation at the edge — hand-rolled in the catalogue controller. A schema library is
+      still the right answer once a second module needs it
+- [x] `GET /api/products` with pagination, filter, whitelisted sort
+- [x] `GET /api/categories`, `GET /api/products/featured`, `GET /api/products/:slug`
 - [ ] `POST /api/contact` with rate limit and bot check
 - [ ] `GET /api/posts`, `GET /api/posts/:slug`
 - [ ] Authentication, then admin writes

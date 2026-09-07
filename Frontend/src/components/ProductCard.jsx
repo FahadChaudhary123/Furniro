@@ -1,13 +1,18 @@
+import { badgeFor } from '../modules/catalogue';
+import { formatPrice } from '../shared/lib/money';
+
 const ProductCard = ({ product }) => {
+  const badge = badgeFor(product);
+
   return (
     <div className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-      {/* Badge */}
-      {product.badge && (
+      {/* Badge — derived from price and age, never stored. See modules/catalogue/lib/badge.js */}
+      {badge && (
         <span
           className={`absolute top-3 left-3 z-10 text-xs px-2 py-1 rounded-full text-white
-          ${product.badge === "New" ? "bg-emerald-500" : "bg-red-500"}`}
+          ${badge.kind === 'new' ? 'bg-emerald-500' : 'bg-red-500'}`}
         >
-          {product.badge}
+          {badge.label}
         </span>
       )}
 
@@ -15,8 +20,9 @@ const ProductCard = ({ product }) => {
       <div className="relative h-64 bg-gray-100 flex items-center justify-center">
         <img
           src={product.image}
-          alt={product.title}
-          className="h-full object-cover"
+          alt={product.name}
+          loading="lazy"
+          className="h-full w-full object-cover"
         />
 
         {/* Hover actions */}
@@ -34,16 +40,16 @@ const ProductCard = ({ product }) => {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-medium text-gray-800">{product.title}</h3>
+        <h3 className="font-medium text-gray-800">{product.name}</h3>
         <p className="text-sm text-gray-500">{product.category}</p>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="font-semibold text-gray-900">
-            Rp {product.price.toLocaleString()}
+            {formatPrice(product.price)}
           </span>
-          {product.oldPrice && (
+          {product.old_price && (
             <span className="text-sm text-gray-400 line-through">
-              Rs {product.oldPrice.toLocaleString()}
+              {formatPrice(product.old_price)}
             </span>
           )}
         </div>
