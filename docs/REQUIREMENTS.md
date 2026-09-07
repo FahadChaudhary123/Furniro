@@ -117,7 +117,7 @@ has one person, which is a staffing question, not a requirements one.
 | `CAT-04` | Completeness report of products failing rules, resolved within 14 days | §15 data-quality sweep | 2 | ⭕ |
 | `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ◐ |
 | `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ✅ |
-| `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ⭕ |
+| `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ✅ |
 | `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ⭕ |
 | `CAT-09` | Price and stock ingested from ERP/PIM; storefront reconciles daily within tolerance | §15 | 4 | ⭕ |
 | `CAT-10`ⁱ | Product variants (size, finish, fabric) — implied by "SKU" being distinct from product throughout §7 R8 | — | 2 | ⭕ |
@@ -145,7 +145,7 @@ that are decorative — no `onChange`, and prices are formatted strings that can
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
-| `CART-01`ⁱ | Add, update quantity, remove line items | — | 2 | ⭕ |
+| `CART-01`ⁱ | Add, update quantity, remove line items | — | 2 | ✅ |
 | `CART-02` | Cart survives a failed payment attempt intact, so the customer can retry | §7 R3 | 3 | ⭕ |
 | `CART-03` | Stock reservation held against cart contents | §7 R3 "cart and reservation intact" | 3 | ⭕ |
 | `CART-04` | Abandoned carts retained 90 days then deleted, by a monitored job | §9, §11 | 3 | ⭕ |
@@ -261,10 +261,10 @@ a durable append-only order event stream. It is not retrofittable.
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
-| `CONT-01` | CMS-managed content pages and blog | §8 "Document store / CMS content" | 2 | ◐ |
+| `CONT-01` | CMS-managed content pages and blog | §8 "Document store / CMS content" | 2 | ✅ |
 | `CONT-02` | Legal pages: terms, privacy, returns | §4 | 1 | ⭕ |
 | `CONT-03` | Broken-link, 404-spike and redirect-chain reporting | §4 | 2 | ⭕ |
-| `CONT-04` | SEO health: index coverage, crawl errors, duplicate titles, orphaned pages | §15 | 2 | ⭕ |
+| `CONT-04` | SEO health: index coverage, crawl errors, duplicate titles, orphaned pages | §15 | 2 | ◐ |
 | `REV-01` | Customer product reviews with a moderation queue cleared within 24 h | §15 | 4 | ⭕ |
 | `REV-02` | Rejection reasons recorded | §15 | 4 | ⭕ |
 | `NOTIF-01` | Transactional email: ≥ 99% delivered within 5 minutes | §5 SLO | 3 | ⭕ |
@@ -441,17 +441,18 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 2 | 5 | 14 |
-| Cart, checkout, payments | 27 | 0 | 0 | 27 |
+| Catalogue, search, content | 21 | 4 | 5 | 12 |
+| Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
 | Back office, support, privacy | 17 | 0 | 1 | 16 |
 | Platform, security, non-functional | 28 | 6 | 1 | 21 |
-| **Total** | **134** | **8** | **7** | **119** |
+| **Total** | **134** | **11** | **7** | **116** |
 
-**8 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
-`SEC-05`/`SEC-06` (CI gates), `NFR-06` (budgets), and `PLAT-01`–`03` (health, correlation
-ids, structured logging). A further 7 are partial.
+**9 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
+`CAT-07` (product pages at stable slugs), `CONT-01` (blog served from the API),
+`CART-01` (guest cart), `SEC-05`/`SEC-06` (CI gates), `NFR-06` (budgets), and
+`PLAT-01`–`03` (health, correlation ids, structured logging). A further 7 are partial.
 
 This is not a criticism of the codebase; it is the honest distance between a static
 storefront and the trading operation Document B is written to run.

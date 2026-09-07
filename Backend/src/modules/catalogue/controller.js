@@ -60,13 +60,24 @@ export function listProducts(req, res) {
 
   const search = typeof q.q === 'string' && q.q.trim() ? q.q.trim().slice(0, 100) : null;
 
+  let slugs = null;
+  if (q.slugs) {
+    slugs = String(q.slugs).split(',').map((v) => v.trim()).filter(Boolean);
+    if (slugs.length > service.MAX_SLUGS) {
+      problems.push({ field: 'slugs', issue: `no more than ${service.MAX_SLUGS} at a time` });
+      slugs = slugs.slice(0, service.MAX_SLUGS);
+    }
+  }
+
   if (minPrice !== null && maxPrice !== null && minPrice > maxPrice) {
     problems.push({ field: 'min_price', issue: 'must not exceed max_price' });
   }
 
   if (problems.length) throw validationFailed(problems);
 
-  res.json(service.listProducts({ page, limit, category, sort, search, minPrice, maxPrice }));
+  res.json(
+    service.listProducts({ page, limit, category, sort, search, minPrice, maxPrice, slugs }),
+  );
 }
 
 export function listFeatured(req, res) {

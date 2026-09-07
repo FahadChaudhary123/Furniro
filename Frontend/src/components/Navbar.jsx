@@ -2,9 +2,11 @@ import { useState } from "react";
 import { User, Search, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import logo from "../assets/logo.svg";
 import { Link } from "react-router-dom";
+import { useCart } from "../modules/cart";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { count } = useCart();
 
   return (
     <header className="w-full bg-white shadow">
@@ -45,7 +47,21 @@ const Navbar = () => {
           <User className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
           <Search className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
           <Heart className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
-          <ShoppingCart className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
+          <Link
+            to="/cart"
+            className="relative hover:text-[#B88E2F] transition"
+            aria-label={count > 0 ? `Cart, ${count} item${count === 1 ? '' : 's'}` : 'Cart, empty'}
+          >
+            <ShoppingCart size={20} />
+            {count > 0 && (
+              <span
+                data-testid="cart-badge"
+                className="absolute -top-2 -right-2 bg-[#B88E2F] text-white text-[10px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1"
+              >
+                {count > 99 ? '99+' : count}
+              </span>
+            )}
+          </Link>
 
           {/* Hamburger - Mobile */}
           <button

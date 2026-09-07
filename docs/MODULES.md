@@ -184,6 +184,10 @@ calculator. Two price calculators is how a storefront charges the wrong amount.
 | `payments` | Gateway adapters, authorise/capture, idempotency keys, webhooks, tokens, reconciliation | `PAY-01`–`14` (14) | XL | Finance systems owner | R3, R11 |
 | `orders` | Order state machine, line snapshots, order event log, archiving | `ORD-01`–`08` (8) | XL | Engineering lead | R1 |
 
+`cart` is partially built: a **guest** cart (`CART-01`) holding `{slug, quantity}` in
+`localStorage`, with prices always re-read from the API. `CART-02`–`05` remain, each blocked
+on another module — `payments`, `inventory`, `jobs` and `identity` respectively.
+
 `checkout` owning no durable data is the point — it is a saga across cart, inventory,
 pricing, payments and orders. Give it its own tables and it becomes a second, competing
 source of truth for orders.

@@ -1,8 +1,11 @@
+import { Link } from 'react-router-dom';
 import { badgeFor } from '../modules/catalogue';
+import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
 
 const ProductCard = ({ product }) => {
   const badge = badgeFor(product);
+  const { add } = useCart();
 
   return (
     <div className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
@@ -18,16 +21,31 @@ const ProductCard = ({ product }) => {
 
       {/* Image */}
       <div className="relative h-64 bg-gray-100 flex items-center justify-center">
-        <img
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          className="h-full w-full object-cover"
-        />
+        {/* The image and the title both link to the product. Screen-reader and keyboard
+            users should not meet the same destination twice in a row, so the image link is
+            hidden from the accessibility tree and skipped in the tab order; the title link
+            is the accessible one. */}
+        <Link
+          to={`/shop/${product.slug}`}
+          className="block h-full w-full"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
+        </Link>
 
         {/* Hover actions */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
-          <button className="bg-white text-sm px-4 py-2 rounded hover:bg-gray-100">
+          <button
+            onClick={() => add(product.slug)}
+            aria-label={`Add ${product.name} to cart`}
+            className="bg-white text-sm px-4 py-2 rounded hover:bg-gray-100"
+          >
             Add to cart
           </button>
           <div className="flex gap-3 text-white text-sm">
@@ -40,7 +58,11 @@ const ProductCard = ({ product }) => {
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-medium text-gray-800">{product.name}</h3>
+        <h3 className="font-medium text-gray-800">
+          <Link to={`/shop/${product.slug}`} className="hover:text-[#B88E2F] transition">
+            {product.name}
+          </Link>
+        </h3>
         {/* The API embeds category as an object ({id, slug, name}), not a string — see
             docs/API.md. Rendering the object itself throws React error #31 and takes the
             whole page down, which is exactly what happened. */}

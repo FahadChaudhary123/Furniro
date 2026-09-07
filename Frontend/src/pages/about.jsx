@@ -3,9 +3,11 @@ import BlogBanner from '../sections/BlogBanner'
 import BlogSection from '../sections/BlogSection'
 import FeaturesSection from '../sections/FeaturesSection'
 import Footer from '../components/Footer'
+import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
 
 
-function about() {
+function About() {
+  useDocumentTitle('Blog');
   return (
     <div>
       <BlogBanner />
@@ -17,4 +19,4 @@ function about() {
   )
 }
 
-export default about
+export default About

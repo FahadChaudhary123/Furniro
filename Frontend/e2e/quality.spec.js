@@ -29,14 +29,32 @@ test.describe('page quality', () => {
       expect(failures, `failed requests on ${route}`).toEqual([]);
     });
 
-    test(`${route} gives every image alt text`, async ({ page }) => {
+    test(`${route} declares alt on every image`, async ({ page }) => {
       await page.goto(route);
       await page.waitForLoadState('networkidle');
 
+      // A MISSING alt is the defect — a screen reader falls back to reading the filename.
+      // An EMPTY alt is a deliberate signal that the image is decorative, which is correct
+      // for an image inside a link whose text already names the destination. Requiring a
+      // non-empty alt everywhere would push toward duplicated announcements, which is worse
+      // than silence.
       const missing = await page.$$eval('img', (imgs) =>
-        imgs.filter((i) => !i.getAttribute('alt')).map((i) => i.getAttribute('src')),
+        imgs.filter((i) => i.getAttribute('alt') === null).map((i) => i.getAttribute('src')),
       );
-      expect(missing, `images without alt on ${route}`).toEqual([]);
+      expect(missing, `images with no alt attribute on ${route}`).toEqual([]);
+    });
+
+    test(`${route} gives non-decorative images meaningful alt text`, async ({ page }) => {
+      await page.goto(route);
+      await page.waitForLoadState('networkidle');
+
+      // An image that is NOT inside a link must describe itself.
+      const unlabelled = await page.$$eval('img', (imgs) =>
+        imgs
+          .filter((i) => !i.closest('a') && !i.getAttribute('alt'))
+          .map((i) => i.getAttribute('src')),
+      );
+      expect(unlabelled, `standalone images without alt text on ${route}`).toEqual([]);
     });
 
     test(`${route} has at least one h1`, async ({ page }) => {

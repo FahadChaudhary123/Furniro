@@ -49,8 +49,12 @@ output, a commit, a log, or a doc. `.env.example` is the file to reference.
 **Never give a secret a `VITE_` prefix.** Vite inlines every `VITE_`-prefixed variable into
 the public bundle as a string literal. There is no way to un-publish it after a deploy.
 
-**Never invent an endpoint.** Only `/health`, `/health/ready`, `/api/products`,
-`/api/products/featured`, `/api/products/:slug` and `/api/categories` exist.
+**Never invent an endpoint.** What exists: `/health`, `/health/ready`, `/api/products`
+(+`/featured`, `/:slug`), `/api/categories`, `/api/posts` (+`/recent`, `/tags`, `/:slug`).
+
+**The cart never stores a price.** `{slug, quantity}` only; line detail is re-read from the
+API. A cart holding its own price copy shows yesterday's price after a repricing, and it is
+the same mistake as a client submitting an order total.
 
 **Error middleware stays last and keeps four parameters.** Express identifies it by arity;
 dropping `next` turns it into a normal handler that never runs. A 500 never returns a stack,
@@ -74,6 +78,9 @@ committing them. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-fi
 ## Conventions
 
 ### Structure
+
+Routes: `/`, `/shop`, `/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact`, and a
+`*` catch-all. Every page sets its title with `useDocumentTitle`.
 
 ```
 modules/<name>/   Domain modules. Import ONLY via modules/<name>/index.js

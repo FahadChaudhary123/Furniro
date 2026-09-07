@@ -1,0 +1,41 @@
+{
+  "_note": "Editorial placeholder. The three posts came from the front-end template; `body` is filler expanded from the original excerpt and is NOT finished copy. Replace before launch — see docs/REQUIREMENTS.md CONT-01.",
+  "posts": [
+    {
+      "id": 1,
+      "slug": "featured-design-trends-for-2022",
+      "title": "Featured Design Trends for 2022",
+      "excerpt": "Discover the latest design trends shaping interiors and products in 2022. From colors to textures, get inspired by modern styles.",
+      "body": "Interior design in 2022 moved away from the stark minimalism of the previous decade and toward rooms that feel lived in. Warmer woods, softer edges and materials that show their age replaced the flat white surfaces that had dominated for years.\n\nColour returned first. Muted terracotta, olive and clay appeared alongside the neutrals rather than replacing them, giving a room somewhere for the eye to rest. Texture followed: bouclé, raw linen and unfinished oak, chosen because they change with handling rather than in spite of it.\n\nThe underlying shift is toward furniture meant to be kept. A piece that develops a patina is a piece you repair rather than replace, and that changes what is worth spending on.",
+      "author": "Admin",
+      "tag": "Wood",
+      "image": "blog/blog1.jpg",
+      "published_at": "2022-10-14",
+      "_placeholder": true
+    },
+    {
+      "id": 2,
+      "slug": "going-all-in-with-millennial-design",
+      "title": "Going all-in with millennial design",
+      "excerpt": "Dive into millennial-inspired spaces that balance style and productivity. Learn how colors, textures, and layouts come together for the modern home.",
+      "body": "Millennial design is often reduced to a colour palette, but the more useful description is spatial: rooms that have to do several jobs. A dining table is also a desk. A living room is also a studio. The furniture has to survive that without looking like office equipment.\n\nThat pushes toward pieces that are light enough to move and finished on every side, because nothing stays against a wall permanently. Storage becomes visible rather than hidden, which in turn raises the standard for what goes in it.\n\nThe balance to strike is between flexibility and permanence. A room that can be rearranged easily is useful; a room that feels temporary is not.",
+      "author": "Admin",
+      "tag": "Handmade",
+      "image": "blog/blog2.jpg",
+      "published_at": "2022-10-14",
+      "_placeholder": true
+    },
+    {
+      "id": 3,
+      "slug": "creating-spaces-that-inspire-productivity",
+      "title": "Creating spaces that inspire productivity",
+      "excerpt": "Creating an environment that inspires focus is easier than you think. Discover layouts, lighting, and décor ideas to make your home office thrive.",
+      "body": "Most home offices fail for one of two reasons: the chair, or the light. Everything else is negotiable.\n\nA chair used for six hours a day is not the same purchase as a chair used at dinner, and the difference shows within a month. Light matters nearly as much — a window to the side rather than behind or in front, and a lamp warm enough that the room does not feel like a corridor after dark.\n\nLayout comes last, and the useful rule is separation. A desk that folds away, or a room you can close, does more for focus than any amount of décor. The point is to be able to stop working, not only to start.",
+      "author": "Admin",
+      "tag": "Interior",
+      "image": "blog/blog3.jpg",
+      "published_at": "2022-11-22",
+      "_placeholder": true
+    }
+  ]
+}

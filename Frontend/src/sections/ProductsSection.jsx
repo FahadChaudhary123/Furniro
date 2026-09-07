@@ -1,11 +1,13 @@
 import { Link } from "react-router-dom";
 import { FaHeart, FaShareAlt, FaBalanceScale } from "react-icons/fa";
 import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
+import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
 import { ProductGridSkeleton, CatalogueError } from "../components/CatalogueState";
 
 const ProductsSection = () => {
   const { products, loading, error, retry } = useFeaturedProducts();
+  const { add } = useCart();
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
@@ -47,7 +49,11 @@ const ProductsSection = () => {
 
               {/* Hover Overlay */}
               <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition">
-                <button className="bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold">
+                <button
+                  onClick={() => add(item.slug)}
+                  aria-label={`Add ${item.name} to cart`}
+                  className="bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold"
+                >
                   Add to cart
                 </button>
 

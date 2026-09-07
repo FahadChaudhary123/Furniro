@@ -9,8 +9,10 @@ import ProductsSection from "../sections/ProductsSection";
 import RoomsInspiration from "../sections/RoomsInspiration";
 import ShareSetup from "../sections/ShareSetup";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
 
 function HomePage() {
+  useDocumentTitle();
   return (
     <div>
        <motion.section

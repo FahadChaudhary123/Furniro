@@ -7,6 +7,7 @@ import * as repo from './repository.js';
 
 export const DEFAULT_LIMIT = 16; // matches the shop grid's page size
 export const MAX_LIMIT = 100; // an uncapped limit is a one-request denial of service
+export const MAX_SLUGS = 50; // same reasoning: a slug list is an unbounded input
 
 /**
  * Sort whitelist. A closed map, never a lookup by arbitrary string — when this is backed by
@@ -37,9 +38,18 @@ export function listProducts(q = {}) {
     search = null,
     minPrice = null,
     maxPrice = null,
+    slugs = null,
   } = q;
 
   let items = repo.findAll();
+
+  // Batch lookup by slug. The cart needs several products at once and must never trust a
+  // client-held price, so it re-reads them from here rather than caching its own copy.
+  // One request beats N.
+  if (slugs?.length) {
+    const wanted = new Set(slugs);
+    items = items.filter((p) => wanted.has(p.slug));
+  }
 
   if (category) items = items.filter((p) => p.category?.slug === category);
 

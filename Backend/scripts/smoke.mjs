@@ -160,6 +160,62 @@ async function main() {
   check('product_count sums to the catalogue',
     cats.data?.reduce((n, c) => n + c.product_count, 0) === 40);
 
+  // --- catalogue: batch slug lookup (the cart's hydration path) ---------------------------
+  const batch = await (await fetch(`${BASE}/api/products?slugs=syltherine,lolito,potty&limit=100`)).json();
+  check('batch slug lookup returns just those products', batch.meta?.total === 3, `got ${batch.meta?.total}`);
+  check(
+    'batch returns the requested slugs',
+    ['syltherine', 'lolito', 'potty'].every((s) => batch.data.some((p) => p.slug === s)),
+  );
+
+  const partial = await (await fetch(`${BASE}/api/products?slugs=syltherine,not-a-product`)).json();
+  check('an unknown slug is absent rather than an error', partial.meta?.total === 1);
+
+  const tooMany = await fetch(
+    `${BASE}/api/products?slugs=${Array.from({ length: 51 }, (_, i) => `s${i}`).join(',')}`,
+  );
+  check('rejects more slugs than the cap', tooMany.status === 400, `got ${tooMany.status}`);
+
+  // --- content: posts ---------------------------------------------------------------------
+  const posts = await fetch(`${BASE}/api/posts`);
+  const postsBody = await posts.json();
+  check('GET /api/posts returns 200', posts.status === 200, `got ${posts.status}`);
+  check('returns { data, meta }', Array.isArray(postsBody.data) && !!postsBody.meta);
+  check('defaults to 3 per page', postsBody.data.length === 3, `got ${postsBody.data?.length}`);
+  check(
+    'sorted newest first',
+    new Date(postsBody.data[0].published_at) >= new Date(postsBody.data.at(-1).published_at),
+  );
+  check(
+    'published_at is a real date, not a display string',
+    !Number.isNaN(Date.parse(postsBody.data[0].published_at)),
+  );
+  check('posts carry a slug', typeof postsBody.data[0].slug === 'string');
+
+  const recent = await (await fetch(`${BASE}/api/posts/recent`)).json();
+  check('recent posts omit the body', !('body' in (recent.data?.[0] ?? {})));
+
+  const tags = await (await fetch(`${BASE}/api/posts/tags`)).json();
+  check('tags carry counts', tags.data?.every((t) => Number.isInteger(t.count)));
+  check(
+    'tag counts sum to the post count',
+    tags.data?.reduce((n, t) => n + t.count, 0) === postsBody.meta.total,
+  );
+
+  const onePost = await fetch(`${BASE}/api/posts/${postsBody.data[0].slug}`);
+  const onePostBody = await onePost.json();
+  check('single post returns 200', onePost.status === 200, `got ${onePost.status}`);
+  check('single post is returned bare with a body', !!onePostBody.body && !onePostBody.data);
+
+  const missingPost = await fetch(`${BASE}/api/posts/no-such-post`);
+  check('unknown post slug returns 404', missingPost.status === 404, `got ${missingPost.status}`);
+
+  const badTag = await fetch(`${BASE}/api/posts?tag=nonsense`);
+  check('rejects an unknown tag', badTag.status === 400, `got ${badTag.status}`);
+
+  const badPostLimit = await fetch(`${BASE}/api/posts?limit=9999`);
+  check('rejects a post limit above the cap', badPostLimit.status === 400, `got ${badPostLimit.status}`);
+
   console.log(`\n${passed} passed, ${failed} failed\n`);
   process.exit(failed === 0 ? 0 : 1);
 }

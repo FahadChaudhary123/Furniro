@@ -1,9 +1,8 @@
 # API
 
-**Status: the catalogue endpoints are live; nothing else is.** `GET /api/products`,
-`/api/products/featured`, `/api/products/:slug` and `/api/categories` are implemented and
-covered by 29 smoke checks, and **the front end consumes them**. Everything else below is
-still the contract to build against.
+**Status: catalogue and content are live; nothing else is.** The product, category and
+blog endpoints are implemented, consumed by the front end, and covered by 60 smoke checks.
+Everything else below is still the contract to build against.
 
 Conventions and error shapes here are binding once implementation starts — agreeing them
 before the first route is written is the point of the document.
@@ -116,6 +115,11 @@ Paginated catalogue. Backs the shop grid.
 | `sort` | enum | `created_at:desc` | `price:asc`, `price:desc`, `name:asc`, `created_at:desc` |
 | `q` | string | — | Substring match on name and description |
 | `min_price` / `max_price` | integer | — | Minor units, inclusive |
+| `slugs` | string | — | Comma-separated, max 50. Batch lookup for the cart |
+
+`slugs` exists so the cart can re-read several products in one request rather than N. An
+unknown slug is simply absent from the response, not an error — a discontinued product
+should drop out of a cart, not break it.
 
 `sort` is a closed enum validated against a whitelist. **Never interpolate it into SQL** —
 a sort parameter passed through to an `ORDER BY` is a classic injection vector.
@@ -204,16 +208,34 @@ Flat list, unpaginated — there are seven.
 
 ### `GET /api/posts`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/content/`
 
 Paginated, `limit` default `3`. Sorted `published_at:desc`.
 
 `published_at` is a real timestamp; the current local data stores `"14 Oct 2022"`, a
 display string that cannot be sorted. Format at render.
 
+### `GET /api/posts/recent`
+
+> ✅ **Implemented.** Not in the original contract.
+
+The five most recent posts in a compact form — no `body`, which is the bulk of a post — for
+the blog sidebar. Added because the sidebar needs titles and dates, not article text.
+
+### `GET /api/posts/tags`
+
+> ✅ **Implemented.** Not in the original contract.
+
+```json
+{ "data": [{ "name": "Wood", "slug": "wood", "count": 1 }] }
+```
+
+Counts are derived, never stored. The sidebar previously hard-coded them (Crafts 2,
+Design 8, Handmade 7, Interior 1, Wood 6) against three real posts.
+
 ### `GET /api/posts/:slug`
 
-> 🔴 **Not implemented.**
+> ✅ **Implemented.** `Backend/src/modules/content/`
 
 ---
 
@@ -324,7 +346,7 @@ Order matters — items 1–3 are the ones that are painful to add afterwards.
 - [x] `GET /api/products` with pagination, filter, whitelisted sort
 - [x] `GET /api/categories`, `GET /api/products/featured`, `GET /api/products/:slug`
 - [ ] `POST /api/contact` with rate limit and bot check
-- [ ] `GET /api/posts`, `GET /api/posts/:slug`
+- [x] `GET /api/posts`, `GET /api/posts/:slug`, plus `/recent` and `/tags`
 - [ ] Authentication, then admin writes
 - [ ] Cart, orders, payments — server-computed totals only
 - [ ] Generate OpenAPI from the route definitions and replace this file's hand-written

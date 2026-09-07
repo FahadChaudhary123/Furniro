@@ -76,19 +76,41 @@ test.describe('mobile', () => {
   });
 });
 
-test.describe('known gaps', () => {
-  // Documented in CHANGELOG.md#known-issues. These are marked as expected failures so the
-  // suite records the gap and tells us when it closes, rather than staying quietly red.
-
-  test.fail();
-  test('an unknown path should render a 404 page', async ({ page }) => {
+test.describe('404 handling', () => {
+  test('an unknown path renders a 404 page, not a blank one', async ({ page }) => {
     await page.goto('/no-such-page');
-    await expect(page.getByText(/not found|404/i)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByRole('heading', { level: 1, name: '404' })).toBeVisible();
+    await expect(page.getByText('This page does not exist')).toBeVisible();
   });
 
-  test.fail();
-  test('the document title should name the site', async ({ page }) => {
-    await page.goto('/');
-    await expect(page).toHaveTitle(/Furniro/i);
+  test('the 404 page offers a route onward', async ({ page }) => {
+    await page.goto('/no-such-page');
+    await page.getByRole('link', { name: 'Browse the shop' }).click();
+    await expect(page).toHaveURL(/\/shop$/);
+  });
+
+  test('a deep unknown path is caught too', async ({ page }) => {
+    await page.goto('/shop/deep/nonsense/path');
+    await expect(page.getByRole('heading', { level: 1, name: '404' })).toBeVisible();
+  });
+});
+
+test.describe('document titles', () => {
+  for (const [path, expected] of [
+    ['/', /^Furniro/],
+    ['/shop', /^Shop — Furniro$/],
+    ['/about', /^Blog — Furniro$/],
+    ['/contact', /^Contact — Furniro$/],
+    ['/no-such-page', /^Page not found — Furniro$/],
+  ]) {
+    test(`${path} sets its own title`, async ({ page }) => {
+      await page.goto(path);
+      await expect(page).toHaveTitle(expected);
+    });
+  }
+
+  test('a product page is titled with the product', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await expect(page).toHaveTitle(/^Syltherine — Furniro$/);
   });
 });

@@ -9,7 +9,7 @@
  * retired the drift guard between them.
  */
 
-export { useProducts, useFeaturedProducts, useCategories } from './hooks.js';
+export { useProducts, useProduct, useFeaturedProducts, useCategories } from './hooks.js';
 export { fetchProduct, ApiError } from './api.js';
 export { badgeFor } from './lib/badge.js';
 

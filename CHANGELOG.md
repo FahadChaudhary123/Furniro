@@ -14,8 +14,35 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- **A guest cart** (`CART-01`) — `Frontend/src/modules/cart/`. Add, change quantity, remove
+  and clear, with a live navbar badge and a `/cart` page. Survives a reload via
+  `localStorage`.
+  **It stores only `{slug, quantity}`** — never a price, name or image. Line detail is
+  re-read from the API on every load, so the cart cannot show a stale price, and the
+  subtotal is a display figure that is never submitted anywhere.
+  The three "Add to cart" buttons that had done nothing since the project began now work.
+- `GET /api/products?slugs=a,b,c` — batch lookup so the cart hydrates in one request rather
+  than N. Capped at 50; an unknown slug is absent rather than an error.
+
 ### Added
 
+- **The `content` module** — the blog now comes from `GET /api/posts`, with `/recent`,
+  `/tags` and `/:slug`. Backend at `Backend/src/modules/content/`, front end at
+  `Frontend/src/modules/content/`, same layering and boundary rules as `catalogue`.
+- **Blog post pages** at `/blog/:slug`, distinguishing a missing article from a failed
+  request. Post bodies render as escaped paragraphs — never through
+  `dangerouslySetInnerHTML`, which would be a stored-XSS route once posts are CMS-authored.
+- **Product detail pages** at `/shop/:slug` (`CAT-07`) — the first consumer of
+  `GET /api/products/:slug`, which had been built and smoke-tested but unused. Slug rather
+  than id, so URLs survive a reseed. A missing product is presented as a missing product,
+  not as a site failure: no error panel, no retry, a route back to the shop.
+- **A 404 page and a `*` catch-all route.** An unknown path previously rendered the navbar
+  and nothing else — a blank page reading as a broken site rather than a wrong address.
+- **Per-page document titles** via `shared/lib/useDocumentTitle`. Every route shared one
+  title before, so tabs, bookmarks and history entries were indistinguishable.
+- `components/PageBanner.jsx` — title plus breadcrumb, used by the new pages. `ShopBanner`,
+  `BlogBanner` and the contact page still hand-roll the same markup; adopting it there is
+  separate cleanup.
 - **End-to-end test suite** (`npm run e2e`) — Playwright, 123 checks across desktop and a
   Pixel 5 viewport, running against the production build with both servers started by the
   config. Covers the catalogue contract, image decoding, derived badges, sorting,
@@ -101,6 +128,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Changed
 
+- `shop.jsx` and `about.jsx` exported lowercase-named functions (`function shop()`), which
+  React's rules-of-hooks does not recognise as components — adding a hook to them was a lint
+  error. Renamed to `Shop` and `About`. The **filenames** are still lowercase: a case-only
+  rename with no version control is risky, so that is left as separate cleanup.
 - **Catalogue reconciled into one module.** `Frontend/src/modules/catalogue/` is now the
   single source of product data: 40 products in one canonical shape, consumed by both the
   shop grid and the home-page strip. Replaces two incompatible inline arrays (`title` vs
@@ -127,6 +158,23 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **A mobile user could not remove an item from their cart.** At a 393px viewport the cart
+  table's columns crushed together until the quantity input overlapped the remove button and
+  swallowed its clicks. The table now reflows into stacked rows below `md`. Found by the
+  Playwright mobile project — it is invisible at desktop width.
+- **The blog sidebar shipped placeholder content to production** — five copies of "Sample
+  blog title here" dated 03 Aug 2022. It now lists real posts that link to them.
+- **The blog category counts were fabricated.** Crafts 2, Design 8, Handmade 7, Interior 1,
+  Wood 6 — hard-coded against three real posts. They are now derived from the posts, so
+  they cannot be wrong.
+- **Blog dates were display strings** (`"14 Oct 2022"`), which cannot be sorted or compared.
+  Stored as dates, formatted at render, and emitted in a `<time datetime>` element.
+- **Blog posts were declared inside the component body**, reallocating on every render, and
+  keyed by array index.
+- **The document title was `frontend`** on every page, including production.
+- **`ProductCard` exposed two links to the same product** — the image and the title — so
+  screen-reader and keyboard users met the same destination twice per card. The image link
+  is now `aria-hidden` and out of the tab order.
 - **`/shop` rendered a completely blank page.** The API embeds `category` as an object
   (`{id, slug, name}`) per docs/API.md, but `ProductCard` still rendered it as a string.
   React threw error #31 ("Objects are not valid as a React child"), which unmounted the
@@ -165,14 +213,13 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
 
 ### Front end
 
-- **No cart.** "Add to cart", Share, Compare and Like have no handlers and there is no cart
-  state anywhere in the app.
+- **Cart is guest-only and client-side.** No reservation (`CART-03`), no server-side
+  persistence or retention (`CART-04`), and it does not follow a customer across devices
+  (`CART-05`). Share, Compare and Like still have no handlers.
 - **Contact form discards input** — no `onSubmit`, so the page reloads and the message is
   lost. — [contact.jsx](Frontend/src/pages/contact.jsx)
 - **Navbar user, search, wishlist and cart icons are not interactive.**
-- **No 404 route.** An unknown path renders the navbar and blank space.
 - **`Footer` duplicated** across all four pages instead of sitting in `App.jsx`.
-- **Page title is still `frontend`** in `index.html`.
 - **The brand name is spelled two ways.** `Furniro` in the navbar and repo; `Funiro` in the
   footer heading, the copyright line and the `#FuniroFurniture` hashtag.
 - **Two brand golds in use** — `#B88E2F` (18 occurrences) and `#B88A2B` (2, in the Hero).

@@ -20,12 +20,12 @@ those shapes, the conflicts between them, and the Postgres schema they imply.
 | ~~Featured products~~ | **Now** `featured` in the same file | 8 | Curated slug list |
 | Range categories | [BrowseRange.jsx](Frontend/src/sections/BrowseRange.jsx) | 3 | Module-level `const` |
 | Room inspiration | [RoomsInspiration.jsx](Frontend/src/sections/RoomsInspiration.jsx) | 3 | Module-level `const` |
-| Blog posts | [BlogSection.jsx](Frontend/src/sections/BlogSection.jsx) | 3 | Inside the component body |
+| ~~Blog posts~~ | **Now** `Backend/…/content/data/posts.json`, over the API | 3 | One source |
 | Setup gallery | [ShareSetup.jsx](Frontend/src/sections/ShareSetup.jsx) | 8 | Imported images |
 
-`blogPosts` being declared inside the component body means it is reallocated on every
-render. Harmless at this size, and it becomes a real cost the moment it is passed to a
-memoised child — hoist it to module scope like the others.
+Blog posts moved to the `content` module on 2026-09-07. They were previously declared
+inside the component body — reallocated every render — with no `id` and a `date` display
+string that could not be sorted. All three are fixed.
 
 ---
 
@@ -220,9 +220,9 @@ listings.
 { title: "…", text: "…", img: blogImg, author: "Admin", date: "14 Oct 2022", tag: "Wood" }
 ```
 
-Two issues for persistence: no `id`, so React keys fall back to array index; and `date` is
-a display string (`"14 Oct 2022"`), which cannot be sorted or compared. Store `timestamptz`
-and format at render.
+**Resolved.** Posts now carry `id`, `slug`, `excerpt`, `body`, `published_at` (a real date)
+and an image key, served from `GET /api/posts`. The shape matches the `blog_posts` table
+below, so seeding it is a script rather than a rewrite.
 
 ---
 

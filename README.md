@@ -94,6 +94,7 @@ rather than at boot.
 | `GET /api/products/featured` | The eight curated home-page products |
 | `GET /api/products/:slug` | One product; 404 if absent |
 | `GET /api/categories` | The seven categories, with `product_count` |
+| `GET /api/posts` | Blog, paginated; plus `/recent`, `/tags` and `/:slug` |
 
 Full contract in [API.md](API.md). Data comes from a JSON file, not a database — see
 [Back-end structure](#back-end-structure).
@@ -110,8 +111,13 @@ npm run smoke
 
 ### What works
 
-- Four routes — `/`, `/shop`, `/about`, `/contact` — wired through React Router in
-  [App.jsx](Frontend/src/App.jsx).
+- Six routes — `/`, `/shop`, `/shop/:slug`, `/about`, `/contact` and a `*` catch-all —
+  wired through React Router in [App.jsx](Frontend/src/App.jsx), each setting its own
+  document title.
+- Product detail pages backed by `GET /api/products/:slug`, distinguishing a missing
+  product from a failed request.
+- A guest cart at `/cart` with a live navbar badge, persisted across reloads. It stores only
+  `{slug, quantity}`; prices always come from the API.
 - Responsive navbar with a mobile drawer, and a shared footer.
 - Home page composed of Hero, BrowseRange, ProductsSection, RoomsInspiration and ShareSetup
   sections, wrapped in a Framer Motion scroll-in animation.
@@ -130,6 +136,8 @@ under *Unreleased*.
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
 | Contact form has no `onSubmit` — submitting reloads the page and discards input | [contact.jsx](Frontend/src/pages/contact.jsx) |
 | Navbar user / search / wishlist / cart icons are not interactive | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
+| Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
+| `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
 | `AnimationDemo.jsx` is the only `gsap` consumer and is never imported | [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx) |
 | No unit tests (end-to-end coverage exists), and no deployment configuration | repo-wide |
 | Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |

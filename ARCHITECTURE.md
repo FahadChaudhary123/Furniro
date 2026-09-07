@@ -84,12 +84,13 @@ Server data now arrives through `useProducts()` / `useFeaturedProducts()` in
 server-state library earns its place once there is caching, revalidation and mutation to
 coordinate, and there is none of that yet.
 
-**Local state stops being sufficient at the cart** —
-a cart is read by the navbar badge and written by every product card, which are cousins in
-the tree with no common owner but the root. That is the trigger to introduce shared state,
-and the recommendation is a `CartContext` at the `App.jsx` level plus a `useCart()` hook,
-rather than a state library. Server data (products, once fetched) is a different problem
-with different caching needs; keep it out of the cart store.
+**The cart was the trigger for shared state, as predicted.** It is read by the navbar badge
+and written by every product card — cousins in the tree with no common owner but the root.
+`CartProvider` sits above the router in `main.jsx` with a `useCart()` hook, rather than a
+state library: one store, no server mutations to coordinate, no cache to invalidate.
+
+Server data stayed out of it. The cart stores `{slug, quantity}` only and re-reads prices
+from the API, so a repricing is reflected immediately and no stale price can be displayed.
 
 ### Routing
 
@@ -102,8 +103,8 @@ Two structural notes:
 - **`Footer` is not in `App.jsx`.** Every page imports and renders its own. That is four
   copies of one decision — moving `Footer` up beside `Navbar` removes the duplication and
   guarantees consistency, at the cost of pages no longer controlling their own trailer.
-- **There is no `*` catch-all route.** An unknown path renders the navbar and nothing else.
-  A `NotFound` page is needed before any public deployment.
+- **A `*` catch-all is in place**, rendering `NotFound`. Each route sets its own document
+  title through `shared/lib/useDocumentTitle`.
 
 `BrowserRouter` uses the History API, so **any static host must rewrite unknown paths to
 `index.html`** or a hard refresh on `/shop` returns a 404 from the host. See

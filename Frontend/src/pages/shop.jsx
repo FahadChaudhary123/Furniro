@@ -3,8 +3,10 @@ import ProductGrid from '../components/ProductGrid'
 import FeaturesSection from '../sections/FeaturesSection'
 import Footer from '../components/Footer'
 import ShopBanner from '../sections/ShopBanner'
+import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
 
-function shop() {
+function Shop() {
+  useDocumentTitle('Shop');
   return (
     <div>
       <ShopBanner/>
@@ -15,4 +17,4 @@ function shop() {
   )
 }
 
-export default shop
+export default Shop

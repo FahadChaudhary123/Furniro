@@ -15,6 +15,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { productsRouter, categoriesRouter } from './modules/catalogue/index.js';
+import { postsRouter } from './modules/content/index.js';
 import {
   config,
   logger,
@@ -75,6 +76,7 @@ export function createApp() {
   // Domain modules mount here as they are built — docs/MODULES.md#build-order.
   app.use('/api/products', productsRouter);
   app.use('/api/categories', categoriesRouter);
+  app.use('/api/posts', postsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

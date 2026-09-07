@@ -4,8 +4,10 @@ import { MapPin, Phone, Clock } from "lucide-react"; // install lucide-react if 
 import contactBanner from "../assets/contactBanner.jpg";
 import FeaturesSection from "../sections/FeaturesSection";
 import Footer from "../components/Footer";
+import { useDocumentTitle } from "../shared/lib/useDocumentTitle";
 
 const Contact = () => {
+  useDocumentTitle('Contact');
   return (
     <>
     <div className="w-full">

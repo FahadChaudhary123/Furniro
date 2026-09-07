@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchProducts, fetchFeaturedProducts, fetchCategories } from './api.js';
+import { fetchProducts, fetchFeaturedProducts, fetchCategories, fetchProduct } from './api.js';
 
 /**
  * Shared fetch lifecycle.
@@ -78,6 +78,21 @@ export function useProducts({ page = 1, limit = 16, sort, category, q } = {}) {
 export function useFeaturedProducts() {
   const { data, loading, error, retry } = useAsync((opts) => fetchFeaturedProducts(opts), []);
   return { products: data ?? [], loading, error, retry };
+}
+
+/**
+ * One product by slug. A 404 is a distinct outcome from a failure — an unknown slug is a
+ * missing page, not a broken site, and the two deserve different UI.
+ */
+export function useProduct(slug) {
+  const { data, loading, error, retry } = useAsync((opts) => fetchProduct(slug, opts), [slug]);
+  return {
+    product: data ?? null,
+    notFound: error?.status === 404,
+    loading,
+    error: error?.status === 404 ? null : error,
+    retry,
+  };
 }
 
 export function useCategories() {
