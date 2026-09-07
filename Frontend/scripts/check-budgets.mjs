@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+/**
+ * Performance budget gate — Document B §12.
+ *
+ *   "Budgets are enforced in CI. Bundle size, image weight and third-party script count
+ *    are gates, not guidelines."
+ *
+ * Run after `npm run build`. Exits non-zero if any budget is exceeded, which fails CI.
+ *
+ * Budgets are deliberately set just above current measured values, so they ratchet: they
+ * catch a regression without demanding an improvement nobody scheduled. Tighten them when
+ * you improve something — a budget that drifts upward silently is not a gate.
+ */
+
+import { readdirSync, statSync, readFileSync, existsSync } from 'node:fs';
+import { join, extname, relative } from 'node:path';
+import { gzipSync } from 'node:zlib';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = fileURLToPath(new URL('..', import.meta.url));
+const DIST = join(ROOT, 'dist');
+
+const KB = 1024;
+const MB = 1024 * 1024;
+
+const BUDGETS = {
+  jsGzip: 150 * KB,       // all .js, gzipped, summed
+  cssGzip: 25 * KB,       // all .css, gzipped, summed
+  totalAssets: 3.5 * MB,  // everything under dist/, raw (measured 2.51 MB)
+  largestAsset: 450 * KB, // no single file may exceed this
+  thirdPartyScripts: 0,   // Doc B §12: most storefront regressions arrive as a marketing tag
+};
+
+function walk(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const p = join(dir, e.name);
+    return e.isDirectory() ? walk(p) : [p];
+  });
+}
+
+function fmt(bytes) {
+  if (bytes >= MB) return `${(bytes / MB).toFixed(2)} MB`;
+  if (bytes >= KB) return `${(bytes / KB).toFixed(1)} kB`;
+  return `${bytes} B`;
+}
+
+if (!existsSync(DIST)) {
+  console.error('dist/ not found. Run `npm run build` first.');
+  process.exit(1);
+}
+
+const files = walk(DIST);
+if (files.length === 0) {
+  console.error('dist/ is empty. The build produced nothing.');
+  process.exit(1);
+}
+
+let jsGzip = 0;
+let cssGzip = 0;
+let totalAssets = 0;
+let largest = { path: '', size: 0 };
+
+for (const f of files) {
+  const size = statSync(f).size;
+  totalAssets += size;
+
+  if (size > largest.size) largest = { path: relative(DIST, f), size };
+
+  const ext = extname(f);
+  if (ext === '.js' || ext === '.mjs') jsGzip += gzipSync(readFileSync(f)).length;
+  if (ext === '.css') cssGzip += gzipSync(readFileSync(f)).length;
+}
+
+// Count <script src="http..."> in every emitted HTML file. Anything loaded from another
+// origin is a third party, whoever added it.
+let thirdPartyScripts = 0;
+for (const f of files.filter((f) => extname(f) === '.html')) {
+  const html = readFileSync(f, 'utf8');
+  thirdPartyScripts += (html.match(/<script[^>]+src=["']https?:\/\//gi) ?? []).length;
+}
+
+const results = [
+  ['JS (gzipped)', jsGzip, BUDGETS.jsGzip],
+  ['CSS (gzipped)', cssGzip, BUDGETS.cssGzip],
+  ['Total assets', totalAssets, BUDGETS.totalAssets],
+  [`Largest asset (${largest.path})`, largest.size, BUDGETS.largestAsset],
+  ['Third-party scripts', thirdPartyScripts, BUDGETS.thirdPartyScripts],
+];
+
+const isCount = (label) => label === 'Third-party scripts';
+const show = (label, v) => (isCount(label) ? String(v) : fmt(v));
+
+let failed = 0;
+console.log('\nPerformance budgets (Document B §12)\n');
+console.log(`  ${'Metric'.padEnd(42)} ${'Actual'.padStart(10)} ${'Budget'.padStart(10)}   Status`);
+console.log(`  ${'-'.repeat(42)} ${'-'.repeat(10)} ${'-'.repeat(10)}   ------`);
+
+for (const [label, actual, budget] of results) {
+  const over = actual > budget;
+  if (over) failed++;
+  const pct = budget > 0 ? ` (${Math.round((actual / budget) * 100)}%)` : '';
+  console.log(
+    `  ${label.padEnd(42)} ${show(label, actual).padStart(10)} ${show(label, budget).padStart(10)}   ${
+      over ? `OVER${pct}` : 'ok'
+    }`,
+  );
+}
+
+console.log('');
+
+if (failed > 0) {
+  console.error(
+    `${failed} budget${failed > 1 ? 's' : ''} exceeded. See docs/OPS_CONFORMANCE.md#12-performance-budgets--currently-unmet\n` +
+      'If the increase is intentional and justified, raise the budget in this file in the ' +
+      'same commit — with a reason in the message, not silently.\n',
+  );
+  process.exit(1);
+}
+
+console.log('All budgets within limits.\n');

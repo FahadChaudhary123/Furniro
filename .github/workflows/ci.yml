@@ -1,0 +1,119 @@
+# CI gates — Document B §3, reduced to what this project can actually enforce today.
+#
+# Doc B specifies seven gates: unit + integration tests, end-to-end purchase journey,
+# dependency vulnerability scan, secret scan, bundle-size budget, and accessibility checks.
+# Four are implementable now. The other three need a test suite and a purchase path that do
+# not exist yet — they get added alongside the thing they test, per
+# docs/OPS_CONFORMANCE.md#recommended-reductions.
+#
+# Doc B: "A red gate blocks merge — no manual overrides without a recorded reason."
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Least privilege: the workflow only reads the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: Frontend — lint, build, budgets
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Must satisfy Vite 8's engines: ^20.19.0 || >=22.12.0
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: Frontend/package-lock.json
+
+      # ci, not install — respects the lockfile exactly and fails if it is out of sync.
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      # Doc B §12: "Bundle size, image weight and third-party script count are gates,
+      # not guidelines."
+      - name: Enforce performance budgets
+        run: node scripts/check-budgets.mjs
+
+      - name: Upload build output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: Frontend/dist
+          retention-days: 7
+
+  audit:
+    name: Dependency vulnerability scan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [Frontend, Backend]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Doc B §10: critical patched in 48h, high in 7 days, medium in 30.
+      # The gate blocks on high and critical; medium is reported, not enforced.
+      - name: npm audit (high + critical block)
+        working-directory: ${{ matrix.package }}
+        run: npm audit --audit-level=high
+
+      - name: npm audit (full report, advisory)
+        if: always()
+        working-directory: ${{ matrix.package }}
+        run: npm audit || true
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # gitleaks needs history to scan commits, not just the working tree.
+          fetch-depth: 0
+
+      # Doc B §2: "Committing a secret is treated as a Sev 2 incident and the secret is
+      # rotated, not just removed from history." This gate is what stops it reaching main.
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Belt and braces: gitleaks scans content, this catches the file itself being tracked.
+      - name: Assert no .env file is tracked
+        run: |
+          if git ls-files --error-unmatch '**/.env' 2>/dev/null; then
+            echo "::error::A .env file is tracked by git. Remove it and ROTATE the credentials."
+            echo "See docs/runbooks/secret-rotation.md"
+            exit 1
+          fi
+          echo "No tracked .env files."

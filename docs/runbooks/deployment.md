@@ -1,0 +1,138 @@
+# Runbook: deployment
+
+🔴 **Nothing is deployed and no host has been chosen.** There is no `vercel.json`, no
+Dockerfile, and no environment configuration anywhere in the repository. CI is defined
+(`.github/workflows/ci.yml`) but has never run — it activates on the first push. This is
+the procedure to follow once there is a host, and the set of decisions to make first.
+
+---
+
+## Prerequisites, none of which exist yet
+
+- [ ] A git repository, with `main` as the default branch — this also switches CI on
+- [ ] A hosting account for the front end (static)
+- [ ] A hosting account for the back end (Node), once it has code
+- [ ] Environment variables configured in the host — **not** committed
+- [ ] `SUPABASE_ANON_KEY` and `DATABASE_URL` rotated; the current values must be treated as
+      compromised, see [secret-rotation.md](secret-rotation.md)
+- [ ] Row-level security enabled on every Supabase table
+      ([why](../../SECURITY.md#2-know-what-the-anon-key-is))
+
+---
+
+## Front end
+
+The front end is a static bundle. `npm run build` produces `Frontend/dist/`; anything that
+serves files can host it.
+
+### One setting that is not optional
+
+The app uses `BrowserRouter`, which relies on the History API. **The host must rewrite all
+unknown paths to `/index.html`.** Without it, a visitor who reloads on `/shop` — or opens a
+shared link to it — gets a 404 from the host, because no `shop` file exists on disk. The
+front end works perfectly in dev and breaks on first refresh in production, which is why
+this is worth checking before the first deploy rather than after.
+
+| Host | Setting |
+|---|---|
+| Vercel | Automatic for SPAs, or a `rewrites` entry in `vercel.json` |
+| Netlify | `/* /index.html 200` in `_redirects` |
+| Nginx | `try_files $uri $uri/ /index.html;` |
+| Cloudflare Pages | Automatic with a `_redirects` file |
+
+### Procedure
+
+1. **Confirm you are deploying what you think you are.**
+
+   ```bash
+   git status          # clean
+   git log --oneline -1
+   ```
+
+2. **Build locally first.** A build that fails in CI after a merge is a worse discovery.
+
+   ```bash
+   cd Frontend
+   npm ci              # not `npm install` — respects the lockfile exactly
+   npm run verify      # lint + build + performance budgets, the same gates CI runs
+   ```
+
+   **Verify:** `dist/index.html` and `dist/assets/` exist, all budgets report `ok`, and the
+   build printed no browserslist warning.
+
+3. **Smoke-test the built output**, not just the dev server.
+
+   ```bash
+   npm run preview
+   ```
+
+   Load `/`, `/shop`, `/about`, `/contact`. Then **reload the page while on `/shop`** — this
+   is the check that catches a missing SPA rewrite.
+
+4. **Set environment variables in the host.** Only `VITE_`-prefixed variables reach the
+   front end, and **every one of them is public** — inlined into the bundle as a string
+   literal. Never put a secret behind that prefix.
+
+5. **Deploy**, per your host's mechanism.
+
+6. **Verify in production:** all four routes, a hard refresh on a non-root route, browser
+   console free of errors, and images loading.
+
+---
+
+## Back end
+
+🔴 There is no back end to deploy. Before there can be, three things must be true — see
+[README.md](../../README.md#wiring-up-the-back-end):
+
+1. `"type": "module"` set in `Backend/package.json`
+2. `start` and `dev` scripts defined
+3. One data layer chosen; `mongoose` removed
+
+Then, at deploy time:
+
+- Set `PORT`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL` and `ALLOWED_ORIGINS` in
+  the host's environment configuration. Never in the repository.
+- `ALLOWED_ORIGINS` must list the production front-end origin. **`cors()` with no arguments
+  reflects any origin** and must never reach production.
+- Serve over HTTPS only.
+- Health check endpoint (`GET /health`) for the platform to probe.
+
+---
+
+## Bundle size
+
+Enforced, not advisory. `npm run budgets` runs in CI as a blocking gate (Doc B §12) and
+fails the build on regression.
+
+Current, from a production build:
+
+| Metric | Value | Budget |
+|---|---|---|
+| Total assets | 2.51 MB | 3.5 MB |
+| Largest single asset | 389 kB (JS bundle) | 450 kB |
+| JS gzipped | 129 kB | 150 kB |
+
+Remaining work, in order of payoff:
+
+- **Route-level code splitting** with `React.lazy` — the JS bundle is now the largest single
+  asset, and `/shop` does not need the blog section's code.
+- **Drop `gsap`** — bundled for `AnimationDemo.jsx`, which nothing imports.
+- **WebP/AVIF with `<picture>` fallbacks** (Doc B §15) — needs a component change.
+- **`loading="lazy"`** on below-the-fold images.
+
+If a budget legitimately needs raising, change it in `Frontend/scripts/check-budgets.mjs`
+in the same commit, with the reason in the commit message. A budget that drifts upward
+silently is not a gate.
+
+## After deploying
+
+- [ ] All four routes load
+- [ ] Hard refresh on `/shop` works (SPA rewrite confirmed)
+- [ ] No console errors
+- [ ] Images load
+- [ ] Mobile layout and navbar drawer work
+- [ ] Note the release in [CHANGELOG.md](../../CHANGELOG.md)
+
+If something is wrong: [rollback.md](rollback.md). Roll back first, diagnose after — a
+production fault is not the place to debug forward.

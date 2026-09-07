@@ -1,0 +1,41 @@
+Copyright (c) 2026 Furniro. All rights reserved.
+
+PROPRIETARY AND CONFIDENTIAL
+
+This software and its associated source code, documentation, design assets, and
+other materials (collectively, the "Software") are the proprietary and
+confidential property of the copyright holder named above.
+
+NO LICENSE IS GRANTED. No right or license, express or implied, is granted to any
+person or entity to use, copy, modify, merge, publish, distribute, sublicense,
+create derivative works from, publicly display, publicly perform, or sell the
+Software, in whole or in part, except under a separate written agreement signed
+by the copyright holder.
+
+Unauthorized copying, distribution, modification, public display, or public
+performance of the Software, by any means and in any form, is strictly
+prohibited.
+
+Access to the Software does not constitute a grant of any license or other
+rights. Any person granted access for the purpose of contributing to or
+evaluating the Software may do so only for that purpose, and remains bound by any
+applicable confidentiality obligations.
+
+THIRD-PARTY COMPONENTS
+
+The Software depends on third-party open-source packages, each governed by its
+own license. Those licenses are unaffected by this notice and continue to apply
+to their respective components. Dependencies are declared in the package.json and
+package-lock.json files in this repository; their license texts are distributed
+with the packages themselves under node_modules/.
+
+NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, TITLE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For licensing enquiries, contact: app@digitaiz.com
