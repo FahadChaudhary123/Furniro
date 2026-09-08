@@ -35,6 +35,25 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Broken-link and link-quality checks** (`CONT-03`) — `Frontend/e2e/links.spec.js`. The
+  suite crawls every page, collects every link instance, and follows each internal one,
+  failing if it lands on the 404 page. It also rejects a link to a product the publish gate
+  blocks, a link with no accessible name, and `target="_blank"` without `rel="noopener"`.
+  It runs in a browser because it has to: links live in React components and exist only
+  after the app renders, so a static checker parsing `dist/index.html` finds one
+  `<div id="root">` and reports a clean site with every link on it broken. "Resolves" also
+  cannot mean HTTP 200 — an SPA returns 200 for `/shopp` as well — so the signal is landing
+  on the 404 page, which is what a visitor actually experiences.
+  Verified by injecting three faults into the footer (a dead route, an unlabelled link, an
+  unprotected new tab) and confirming each was caught and located, then reverting.
+
+### Fixed
+
+- **Placeholder blog posts were excluded from the sitemap but still indexable.** The
+  generated sitemap leaves them out as thin content, but three pages link to each one, so a
+  crawler reaches them anyway and the exclusion achieved nothing. `/blog/:slug` now emits
+  `noindex` for a post carrying `_placeholder`, so the two rules agree; clearing the flag in
+  `posts.json` publishes a post in both places at once.
 - **Per-page SEO metadata, a generated sitemap, and an SEO health check** (`CONT-04`).
   Every static route is now declared once in `Frontend/src/shared/lib/routes.js`, and the
   page meta, the sitemap and the audit all read that one manifest instead of three lists

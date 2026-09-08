@@ -93,7 +93,7 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
 | `npm run smoke` | `Backend/` | 72 checks against a running API |
 | `npm run completeness` | `Backend/` | Catalogue data-quality report; non-zero if any product is blocked |
-| `npm run e2e` | `Frontend/` | 297 browser checks; starts both servers itself |
+| `npm run e2e` | `Frontend/` | 311 browser checks; starts both servers itself |
 
 Run `npm run verify` and `npm run e2e` (front end) and `npm test` + `npm run completeness`
 + `npm run smoke` (back end) before opening a PR.

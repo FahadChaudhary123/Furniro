@@ -252,9 +252,13 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 251 checks across
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 311 checks across
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
+
+Two of those specs are checkers rather than feature tests: `seo.spec.js` asserts the head
+tags a crawler receives, and `links.spec.js` crawls the site and follows every internal
+link. Both must run in a browser — the links and the head only exist after React renders.
 
 **API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 72 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and
@@ -286,12 +290,12 @@ entirely, while lint, build, performance budgets and all 46 API smoke checks wer
 Known gaps are recorded as `test.fail()` cases, so the suite documents them and tells you
 when one closes rather than sitting quietly red.
 
-**Unit tests, with Vitest.** `npm test` in either package — 39 checks in `Frontend/`, 34 in
+**Unit tests, with Vitest.** `npm test` in either package — 39 checks in `Frontend/`, 52 in
 `Backend/`, all in under a second.
 
 ```bash
 cd Frontend && npm test        # money, badges, cart reducers
-cd Backend  && npm test        # catalogue and content services
+cd Backend  && npm test        # catalogue and content services, publish gate
 ```
 
 They cover pure logic at its boundaries: rounding, quantity clamping, pagination arithmetic,
@@ -301,6 +305,16 @@ number right"; reach for the end-to-end suite when it is "does this work in a br
 Writing them found two defects the browser suite could not see — `toMinorUnits` losing a
 unit at a floating-point half-boundary, and a non-breaking space in formatted prices that
 Playwright's whitespace normalisation had been hiding.
+
+**Data and structure checks.** Three more gates run in CI and are worth running locally:
+
+```bash
+cd Backend  && npm run completeness   # catalogue data quality (CAT-04)
+cd Frontend && npm run seo            # duplicate titles, orphaned pages (CONT-04)
+```
+
+Each fails the build on an error and reports warnings without failing. When one of them
+flags something, fix the data or the route — never relax the rule to get a green build.
 
 ---
 

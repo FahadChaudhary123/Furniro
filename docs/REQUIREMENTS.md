@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **17 built, 5 partial, 112 not built.** Counted from the
+Of the 134 requirements below: **17 built, 6 partial, 111 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -288,7 +288,7 @@ a durable append-only order event stream. It is not retrofittable.
 |---|---|---|---|---|
 | `CONT-01` | CMS-managed content pages and blog | §8 "Document store / CMS content" | 2 | ✅ |
 | `CONT-02` | Legal pages: terms, privacy, returns | §4 | 1 | ⭕ |
-| `CONT-03` | Broken-link, 404-spike and redirect-chain reporting | §4 | 2 | ⭕ |
+| `CONT-03` | Broken-link, 404-spike and redirect-chain reporting | §4 | 2 | ◐ |
 | `CONT-04` | SEO health: index coverage, crawl errors, duplicate titles, orphaned pages | §15 | 2 | ◐ |
 | `REV-01` | Customer product reviews with a moderation queue cleared within 24 h | §15 | 4 | ⭕ |
 | `REV-02` | Rejection reasons recorded | §15 | 4 | ⭕ |
@@ -300,6 +300,21 @@ a durable append-only order event stream. It is not retrofittable.
 
 `CONT-01` is partial: a blog section exists, hardcoded in a component, with a display-string
 date that cannot be sorted.
+
+**`CONT-03` is partial.** Broken-link detection is built as browser checks
+(`Frontend/e2e/links.spec.js`): the suite crawls every page, collects every link instance and
+follows each internal one, failing if it lands on the 404 page. It also refuses a link to a
+product the publish gate blocks, a link with no accessible name, and `target="_blank"`
+without `rel="noopener"`.
+
+It has to run in a browser. Links live in React components and exist only after the app
+renders — a static checker parsing `dist/index.html` finds one `<div id="root">` and reports
+a clean site with every link on it broken. And "resolves" cannot mean HTTP 200, because an
+SPA returns 200 for `/shopp` too; the signal is landing on the 404 page, which is what a
+visitor experiences.
+
+404-spike and redirect-chain reporting are *not* built. Both need production traffic logs
+and a deployed site with redirects to chain. Neither exists.
 
 **`CONT-04` stays partial, deliberately.** Two of its four parts are built and enforced;
 two cannot be built yet, and marking the whole thing ✅ would be a lie of rounding.

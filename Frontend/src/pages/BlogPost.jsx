@@ -20,11 +20,15 @@ const BlogPost = () => {
   const { slug } = useParams();
   const { post, notFound, loading, error, retry } = usePost(slug);
 
+  // Placeholder posts are noindex, matching their exclusion from the sitemap. Excluding a
+  // page from the sitemap does not stop it being indexed — three pages link to each of
+  // these, so a crawler finds them regardless. Without this the sitemap rule is decorative.
+  // Clearing `_placeholder` in posts.json is what makes a post indexable, in both places.
   usePageMeta({
     title: post?.title ?? (notFound ? 'Post not found' : 'Blog'),
     description: post?.excerpt ?? post?.body?.slice(0, 150),
     path: `/blog/${slug}`,
-    index: Boolean(post),
+    index: Boolean(post) && !post._placeholder,
   });
 
   const paragraphs = post?.body ? post.body.split(/\n\s*\n/).filter(Boolean) : [];

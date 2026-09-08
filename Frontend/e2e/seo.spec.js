@@ -123,6 +123,15 @@ test.describe('data-driven pages', () => {
     expect((await meta(page, 'robots')) ?? '').not.toContain('noindex');
   });
 
+  test('a placeholder blog post is noindex, matching its sitemap exclusion', async ({ page }) => {
+    // The sitemap leaves placeholder posts out as thin content, but three pages link to
+    // each one, so a crawler finds them regardless. Without noindex here the sitemap rule
+    // is decorative. Clearing `_placeholder` in posts.json is what publishes a post.
+    await page.goto('/blog/going-all-in-with-millennial-design');
+    await expect(page).toHaveTitle(/millennial design/i);
+    await expectMeta(page, 'robots').toContain('noindex');
+  });
+
   test('an unknown product slug is noindex', async ({ page }) => {
     // An SPA answers HTTP 200 for every path. Without noindex, every dead product URL
     // becomes an indexed page of thin content.
