@@ -64,6 +64,12 @@ a SQL fragment or a driver message — log those with the correlation id.
 **Never store a formatted price string or use a float for money.** Integers in minor units,
 formatted at the render boundary. [Why.](DATA_MODEL.md#money)
 
+**A product is published by the gate, not by eye.** `publishGate.js` is the only definition
+of a complete product. Adding a rule there is correct; adding a check in the service, the
+controller or a component creates a second definition that will drift from the first. If
+`npm run completeness` blocks a product, fix the data — never loosen the rule to make the
+build green.
+
 **Never use `dangerouslySetInnerHTML`.** It is not used anywhere in this codebase and it is
 the most common route to stored XSS in React. Keep it that way.
 
@@ -113,12 +119,14 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Verify before claiming done
 
 ```bash
-cd Frontend && npm run verify   # lint + build + performance budgets
-cd Frontend && npm run e2e      # 251 browser checks; starts both servers itself
+cd Frontend && npm run verify   # lint + 39 unit checks + build + performance budgets
+cd Frontend && npm run e2e      # 275 browser checks; starts both servers itself
+cd Backend  && npm test         # 52 unit checks
+cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 72 API checks against a running server
 ```
 
-All three must pass. **A build that succeeds is not a page that renders** — the e2e suite
+All of these must pass. **A build that succeeds is not a page that renders** — the e2e suite
 exists because lint, build, budgets and every API check were green while `/shop` rendered a
 blank page. There are still no unit tests.
 

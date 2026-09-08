@@ -85,6 +85,11 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
+Of the 134 requirements below: **17 built, 5 partial, 112 not built.** Counted from the
+tables in this file, not from memory. Almost everything not built needs a database, an
+authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
+what the current architecture can reach, not a stalled project.
+
 ---
 
 ## 3. Actors
@@ -113,14 +118,33 @@ has one person, which is a staffing question, not a requirements one.
 |---|---|---|---|---|
 | `CAT-01` | Products carry: name, description, images, price, tax class, weight, category, SEO fields | §15 onboarding | 1 | ◐ |
 | `CAT-02` | Every product image has alt text | §15 | 0 | ✅ |
-| `CAT-03` | A publish gate blocks incomplete products — "checked by the publish gate, not by eye" | §15 | 2 | ⭕ |
-| `CAT-04` | Completeness report of products failing rules, resolved within 14 days | §15 data-quality sweep | 2 | ⭕ |
+| `CAT-03` | A publish gate blocks incomplete products — "checked by the publish gate, not by eye" | §15 | 2 | ✅ |
+| `CAT-04` | Completeness report of products failing rules, resolved within 14 days | §15 data-quality sweep | 2 | ✅ |
 | `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ✅ |
 | `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ✅ |
 | `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ✅ |
 | `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ⭕ |
 | `CAT-09` | Price and stock ingested from ERP/PIM; storefront reconciles daily within tolerance | §15 | 4 | ⭕ |
 | `CAT-10`ⁱ | Product variants (size, finish, fabric) — implied by "SKU" being distinct from product throughout §7 R8 | — | 2 | ⭕ |
+
+**`CAT-03` and `CAT-04` are met.** `Backend/src/modules/catalogue/publishGate.js` is the
+single definition of a complete product; the repository applies it at load, so no read path
+can bypass it, and `npm run completeness` prints the report. Rules have two severities: a
+product that would render visibly broken is **blocked** and never served; one that renders
+but is missing something needed to sell or index it **warns** and stays visible. That split
+is deliberate — unpublishing a live slug turns it into a 404 on an indexed URL, which is the
+failure §15 itself warns about, so blocking is reserved for the case where showing the
+product is worse.
+
+Doc B allows 14 days to resolve a failure. There is no ageing ledger, because none is
+needed: the report runs in CI and exits non-zero on any blocking failure, so a bad catalogue
+edit fails the build rather than starting a two-week clock.
+
+**`CAT-01` remains partial** and the report says so explicitly. `tax_class`, `weight`,
+`seo_title` and `seo_description` are absent from *every* product, so they are listed once as
+a catalogue-wide gap rather than as forty identical per-product failures. They are not
+invented: a weight or a tax class guessed by an agent is worse than a blank, because it
+looks authoritative to whoever rates the shipment.
 
 **Note on `CAT-09`:** Doc B treats an ERP/PIM as the source of truth for price and stock,
 making the storefront a downstream consumer. That is a significant architectural constraint

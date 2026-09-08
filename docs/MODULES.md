@@ -167,6 +167,10 @@ tracing across 20 modules is far more expensive than starting with it.
 
 **`catalogue` is built across both tiers** — `Backend/src/modules/catalogue/` serves it,
 `Frontend/src/modules/catalogue/` fetches it, and product data exists in exactly one file.
+The publish gate (`CAT-03`) lives in `publishGate.js` and is applied by `repository.js`, so
+it sits at the module's data boundary: every read path inherits it and none can opt out.
+`npm run completeness` is the `CAT-04` report over the same rules — one definition, two
+consumers, no chance of the report and the API disagreeing.
 The remaining `CAT-*` work is variants, the publish gate and the ERP/PIM feed. The other
 three modules in this layer are unstarted.
 

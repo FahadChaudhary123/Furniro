@@ -15,6 +15,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { logger } from '../../platform/logger.js';
+import { evaluateAll } from './publishGate.js';
+
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 const raw = JSON.parse(readFileSync(join(HERE, 'data', 'products.json'), 'utf8'));
@@ -28,10 +31,31 @@ const categories = raw.categories.map((name, index) => ({
 
 const categoryByName = new Map(categories.map((c) => [c.name, c]));
 
+/**
+ * CAT-03 — the publish gate runs here, once, at load.
+ *
+ * A product that fails a blocking rule is not served: not on a listing, not by slug, not as
+ * a featured item. Doing it at the data boundary rather than in each read means there is no
+ * path that can accidentally bypass it, which is what "not by eye" has to mean in code.
+ *
+ * The count is logged at boot so a catalogue that quietly shrank after a data edit is
+ * visible in the log rather than discovered by a customer. `npm run completeness` prints
+ * the detail.
+ */
+const gate = evaluateAll(raw.products, { categoryNames: new Set(raw.categories) });
+
+if (gate.blocked.length > 0) {
+  logger.warn('publish gate blocked products', {
+    blocked: gate.blocked.length,
+    of: raw.products.length,
+    slugs: gate.blocked.map((b) => b.report.slug),
+  });
+}
+
 // Frozen: this is module state shared by every request. A caller that sorts it in place
 // would reorder the catalogue for everyone.
 const products = Object.freeze(
-  raw.products.map((p) =>
+  gate.publishable.map((p) =>
     Object.freeze({ ...p, category: categoryByName.get(p.category) ?? null }),
   ),
 );

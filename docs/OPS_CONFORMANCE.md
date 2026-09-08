@@ -75,7 +75,7 @@ passing it.
 | §12 | Performance and capacity | ✅ | Budgets now enforced in CI and met. Capacity planning still needs traffic |
 | §13 | Peak event readiness | ➖ | No peak, no traffic |
 | §14 | Cost management | ➖ | No infrastructure spend |
-| §15 | Catalogue and content operations | ◐ | Oversized originals fixed. Alt text already correct. Modern formats (WebP/AVIF) still outstanding; the rest needs a PIM |
+| §15 | Catalogue and content operations | ◐ | Oversized originals fixed, alt text correct, WebP served via `<picture>` (39 derivatives), publish gate and completeness report built. AVIF and ERP/PIM ingestion outstanding |
 | §16 | Third-party dependency register | ✅ | One real dependency (Supabase). Register created |
 | §17 | Support tiers and SLAs | ➖ | No customers, no tickets |
 | §18 | Documentation discipline | ✅ | Docs, runbooks and decision records all in place. Runbook testing is the remaining habit |
@@ -86,6 +86,7 @@ passing it.
 exist (5) · ➖ not applicable at this scope (4)
 
 *Updated after the Stage 0 pass of 2026-09-07: §12 met, §3 and §15 advanced.*
+*Updated 2026-09-08: §15 advanced again — publish gate (`CAT-03`) and completeness report (`CAT-04`) built.*
 
 ---
 
@@ -151,8 +152,16 @@ Both were done. Routes are code-split, and `gsap`, `react-icons` and `framer-mot
 gone — JS is down to **93.1 kB gzipped** and the largest asset is an image again. Budgets
 were ratcheted to match.
 
-**Still outstanding for §15:** WebP/AVIF derivatives. That needs a `<picture>` element with
-fallbacks rather than a build script, so it is a component change, not an asset change.
+**Done since for §15:** WebP derivatives are served through `<picture>` with the original as
+fallback (`Frontend/src/shared/ui/Picture.jsx`, 39 derivatives), and §15's "checked by the
+publish gate, not by eye" is now literally true — `publishGate.js` blocks incomplete products
+at the data boundary and `npm run completeness` reports the rest. Measured first: correcting
+intrinsic dimensions to the rendered box saved 42% of image weight against 25% for the format
+change, so sizing was done before format.
+
+**Still outstanding for §15:** AVIF, which needs another `<source>` and another derivative
+pass, and ERP/PIM ingestion of price and stock (`CAT-09`) — that one is an architectural
+decision, not a task.
 
 ### §16 Third-party register
 

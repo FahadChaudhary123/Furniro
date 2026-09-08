@@ -103,6 +103,17 @@ change.
 
 ## Products
 
+> **Every product endpoint serves only products that pass the publish gate** (`CAT-03`).
+> A product failing a blocking rule — no slug, a non-integer price, a missing image, an
+> unknown category — is absent from listings, absent from `featured`, and returns `404` by
+> slug. It is filtered once at the data boundary, so no endpoint can accidentally expose it
+> and none needs a flag to opt in.
+>
+> This means **the catalogue can be smaller than the source data**, and that difference is
+> deliberately loud rather than silent: the server logs `publish gate blocked products` with
+> the offending slugs at startup, and `npm run completeness` prints why. Rules live in
+> `Backend/src/modules/catalogue/publishGate.js`.
+
 ### `GET /api/products`
 
 > ✅ **Implemented.** `Backend/src/modules/catalogue/`

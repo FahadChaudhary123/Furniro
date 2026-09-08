@@ -115,11 +115,17 @@ jobs:
       - name: Install
         run: npm ci
 
-      # Boots the server and exercises the real HTTP surface: health, correlation, error
-      # shape, CORS, and the whole catalogue API contract.
       - name: Unit tests
         run: npm test
 
+      # CAT-04. Exits non-zero if any product fails a blocking publish-gate rule, so a bad
+      # catalogue edit fails the build instead of silently shrinking the shop. Doc B §15
+      # allows 14 days to resolve; a gate that runs on every push is stricter and cheaper.
+      - name: Catalogue completeness
+        run: npm run completeness
+
+      # Boots the server and exercises the real HTTP surface: health, correlation, error
+      # shape, CORS, and the whole catalogue API contract.
       - name: Smoke test
         run: |
           npm start > /tmp/boot.log 2>&1 &

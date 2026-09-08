@@ -35,6 +35,24 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **A catalogue publish gate and completeness report** (`CAT-03`, `CAT-04`) —
+  `Backend/src/modules/catalogue/publishGate.js` is the single definition of what makes a
+  product complete, applied by the repository at load so no read path can bypass it.
+  Rules carry one of two severities. A product that would render visibly broken — no slug,
+  a non-integer price, a missing image, an unknown category — is **blocked** and served
+  nowhere: not on a listing, not by slug, not as featured. One that renders but is missing
+  something needed to sell or index it **warns** and stays visible.
+  That split is the point. Unpublishing a live slug turns it into a 404 on an indexed URL,
+  which is the failure Doc B §15 warns about, so blocking is reserved for the case where
+  showing the product is worse than hiding it.
+  `npm run completeness` prints the report (`--json` for a dashboard, `--strict` to fail on
+  warnings) and exits non-zero on any blocking failure, so CI fails the build rather than
+  starting Doc B's 14-day resolution clock. Verified by breaking two products deliberately:
+  the boot log named them, both returned 404, and the listing total fell from 40 to 38.
+  `CAT-01` stays partial — `tax_class`, `weight`, `seo_title` and `seo_description` are
+  absent from every product, so the report lists them once as a catalogue-wide gap rather
+  than as forty identical failures. They are reported, not invented: a guessed shipping
+  weight is worse than a blank because it looks authoritative to whoever rates the shipment.
 - **The `content` module** — the blog now comes from `GET /api/posts`, with `/recent`,
   `/tags` and `/:slug`. Backend at `Backend/src/modules/content/`, front end at
   `Frontend/src/modules/content/`, same layering and boundary rules as `catalogue`.
