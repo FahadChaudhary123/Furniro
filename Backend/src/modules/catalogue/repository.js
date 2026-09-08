@@ -44,6 +44,30 @@ const categoryByName = new Map(categories.map((c) => [c.name, c]));
  */
 const gate = evaluateAll(raw.products, { categoryNames: new Set(raw.categories) });
 
+/**
+ * CAT-08 — slugs that exist in the data but are not served.
+ *
+ * Two ways a product gets here: it failed a blocking publish-gate rule, or it carries
+ * `discontinued: true`. Both are "this URL was real and is not any more", which is a
+ * different thing from a URL that never existed, and it deserves a different answer.
+ *
+ * Keeping the row rather than dropping it is the whole point. A slug the server has
+ * forgotten can only 404, and Doc B §15 is explicit that an indexed URL should never land
+ * on a bare 404. Retaining the slug and its category is what makes a redirect to the
+ * nearest live alternative possible at all.
+ */
+const unpublished = new Map(
+  [
+    ...gate.blocked.map((b) => ({ row: b.product, reason: 'failed the publish gate' })),
+    ...raw.products
+      .filter((p) => p.discontinued === true)
+      .map((row) => ({ row, reason: 'discontinued' })),
+  ]
+    .filter(({ row }) => typeof row?.slug === 'string' && row.slug)
+    // A discontinued product that ALSO fails the gate appears twice; the Map keeps one.
+    .map(({ row, reason }) => [row.slug, { slug: row.slug, category: row.category, reason }]),
+);
+
 if (gate.blocked.length > 0) {
   logger.warn('publish gate blocked products', {
     blocked: gate.blocked.length,
@@ -55,9 +79,11 @@ if (gate.blocked.length > 0) {
 // Frozen: this is module state shared by every request. A caller that sorts it in place
 // would reorder the catalogue for everyone.
 const products = Object.freeze(
-  gate.publishable.map((p) =>
-    Object.freeze({ ...p, category: categoryByName.get(p.category) ?? null }),
-  ),
+  gate.publishable
+    // `discontinued` removes a product from sale without deleting the row, so the redirect
+    // above still has a category to work from.
+    .filter((p) => p.discontinued !== true)
+    .map((p) => Object.freeze({ ...p, category: categoryByName.get(p.category) ?? null })),
 );
 
 const featuredSlugs = raw.featured;
@@ -76,3 +102,12 @@ export const findCategories = () =>
   }));
 
 export const findCategoryBySlug = (slug) => categories.find((c) => c.slug === slug) ?? null;
+
+/**
+ * A slug that is known but not served — `CAT-08`.
+ * @returns {{slug: string, category: string, reason: string}|null}
+ */
+export const findUnpublished = (slug) => unpublished.get(slug) ?? null;
+
+/** Every unpublished slug, for the redirect map the host serves as real 301s. */
+export const findAllUnpublished = () => [...unpublished.values()];

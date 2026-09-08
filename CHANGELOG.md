@@ -35,6 +35,30 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Discontinued products redirect instead of dying** (`CAT-08`). A product leaves the
+  catalogue by failing the publish gate or by carrying `"discontinued": true`. Its slug is
+  **retained** rather than dropped — a slug the server has forgotten can only 404, and Doc B
+  §15 is explicit that an indexed URL should never land on one.
+  `GET /api/products/:slug` now has three outcomes: `200` live, `410 Gone` with
+  `redirect_to` for a product that existed and is no longer sold, and `404` for a slug that
+  never existed. That last distinction is load-bearing and covered by a smoke check —
+  soft-redirecting every typo to a plausible product hides broken links from the very checks
+  that exist to find them.
+  **The API deliberately does not answer `301`.** `fetch` follows redirects transparently, so
+  a 301 there would hand the caller a different product's JSON under the URL it asked for,
+  with nothing reporting the substitution. The 301 belongs on the page URL, so `npm run build`
+  now writes `dist/_redirects` from the same `listRedirects()` the API answers with — one
+  definition, so the redirect map cannot disagree with the API about where a product went.
+  The sitemap drops discontinued URLs too; advertising a URL that answers 410 is a crawl
+  error per page.
+  "Nearest live alternative" is a judgement, not a fact: newest live product in the same
+  category, then the category listing, then `/shop`. Without a successor field in the data,
+  recency is the best proxy available for "the thing that replaced it".
+  Verified end to end by discontinuing a product temporarily: 410 with the right target, the
+  page redirected with `replace` so the back button does not trap the visitor, the sitemap
+  fell from 44 to 43 URLs, and `_redirects` gained the rule. The flag was then reverted —
+  **no product is currently discontinued**, and `redirect.test.js` asserts that, so setting
+  it changes a test result rather than changing the live sitemap silently.
 - **An API latency benchmark** (`NFR-04`) — `Backend/scripts/latency.mjs`, `npm run latency`.
   Measures p50/p95/p99 across every catalogue and content endpoint and runs in CI on its own
   port, so the smoke server's rate limits stay untouched and its `SEC-03` checks keep meaning

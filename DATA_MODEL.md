@@ -175,6 +175,16 @@ The catalogue item. Canonical shape above.
 | `old_price` | integer \| null | Must exceed `price` when present |
 | `image` | text | Storage key |
 | `created_at` | timestamptz | Drives the "New" badge |
+| `discontinued` | boolean \| absent | Optional. `true` withdraws the product from sale |
+
+**`discontinued` withdraws a product without deleting it** (`CAT-08`). Set it to `true` and
+the product leaves every listing, leaves the sitemap, and gains a rule in `dist/_redirects`;
+`GET /api/products/:slug` answers `410 Gone` with the nearest live alternative instead of
+`200`. Absent and `false` both mean "on sale" — only the literal `true` withdraws it.
+
+**Do not delete the row instead.** A deleted slug can only 404, and Doc B §15 is explicit
+that an indexed URL should never land on a bare 404. The row is what makes the redirect
+possible: it carries the category the alternative is chosen from.
 
 Observed categories across the 32 shop rows: **Living Room, Bedroom, Dining, Office,
 Outdoor, Decor, Storage** — seven values, free text today. Free text means `"Living Room"`,

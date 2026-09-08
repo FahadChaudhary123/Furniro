@@ -81,16 +81,23 @@ export function useFeaturedProducts() {
 }
 
 /**
- * One product by slug. A 404 is a distinct outcome from a failure — an unknown slug is a
- * missing page, not a broken site, and the two deserve different UI.
+ * One product by slug.
+ *
+ * Three outcomes, not two. A 404 is a missing page, not a broken site. A 410 is different
+ * again: the product existed, it is discontinued, and the API has named its replacement
+ * (`CAT-08`). Collapsing 410 into 404 would throw that answer away and show a dead end.
  */
 export function useProduct(slug) {
   const { data, loading, error, retry } = useAsync((opts) => fetchProduct(slug, opts), [slug]);
+  const gone = error?.status === 410;
+
   return {
     product: data ?? null,
     notFound: error?.status === 404,
+    gone,
+    redirectTo: gone ? (error.redirectTo ?? '/shop') : null,
     loading,
-    error: error?.status === 404 ? null : error,
+    error: error?.status === 404 || gone ? null : error,
     retry,
   };
 }

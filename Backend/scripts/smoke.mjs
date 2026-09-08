@@ -196,6 +196,16 @@ async function main() {
   const gone = await fetch(`${BASE}/api/products/does-not-exist`);
   check('unknown slug returns 404', gone.status === 404, `got ${gone.status}`);
 
+  // CAT-08. A slug that never existed must stay a 404 — never a 410 with a redirect.
+  // Soft-redirecting every typo to a plausible product hides broken links from the very
+  // check that exists to find them, and sends visitors somewhere they did not ask for.
+  const goneBody = await gone.json();
+  check(
+    'a slug that never existed carries no redirect',
+    goneBody.error?.code === 'NOT_FOUND' && goneBody.error?.redirect_to === undefined,
+    `got ${goneBody.error?.code}, redirect_to=${goneBody.error?.redirect_to}`,
+  );
+
   const cats = await (await fetch(`${BASE}/api/categories`)).json();
   check('categories returns 7', cats.data?.length === 7, `got ${cats.data?.length}`);
   check('categories carry product_count',

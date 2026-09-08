@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { useProduct, badgeFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
@@ -18,7 +18,7 @@ import Picture from '../shared/ui/Picture';
  */
 const ProductDetail = () => {
   const { slug } = useParams();
-  const { product, notFound, loading, error, retry } = useProduct(slug);
+  const { product, notFound, gone, redirectTo, loading, error, retry } = useProduct(slug);
   const { add } = useCart();
 
   // A product page that 404s must not stay indexed, and a page still loading has nothing
@@ -33,6 +33,20 @@ const ProductDetail = () => {
   });
 
   const badge = product ? badgeFor(product) : null;
+
+  /**
+   * CAT-08. A discontinued product redirects to the alternative the API named, rather than
+   * rendering a dead end.
+   *
+   * `replace` matters: without it the discontinued URL stays in history, so the browser's
+   * back button returns here, redirects again, and the visitor is trapped.
+   *
+   * This is the FALLBACK path. The real fix is the 301 in `dist/_redirects`, which the host
+   * serves before the app ever loads. A client-side redirect costs a round trip and search
+   * engines treat it less reliably — but it works on a host with no redirect support, and
+   * it works immediately after a product is discontinued without waiting for a deploy.
+   */
+  if (gone && redirectTo) return <Navigate to={redirectTo} replace />;
 
   return (
     <div>

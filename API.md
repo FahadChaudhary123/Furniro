@@ -48,9 +48,15 @@ end to end; no transform layer to forget.
 | `403` | Authenticated, not permitted |
 | `404` | No such resource |
 | `409` | Conflict — duplicate slug, out of stock |
+| `410` | Existed, permanently gone; carries `redirect_to` |
 | `422` | Well-formed but semantically invalid |
 | `429` | Rate limited |
 | `500` | Server fault — never leak internals |
+
+`404` and `410` are not interchangeable. `404` says "no such resource", which a crawler
+treats as possibly transient and will retry for months. `410` says "this existed and is
+permanently gone", which it acts on. Using `404` for a discontinued product keeps a dead URL
+in the index; using `410` for a typo tells a crawler a page it never had is now deleted.
 
 `401` means "who are you?"; `403` means "I know who you are, no". Returning `403` for an
 unauthenticated request tells an attacker the resource exists.
@@ -181,8 +187,42 @@ shape as above.
 
 > ✅ **Implemented.** `Backend/src/modules/catalogue/`
 
-One product by slug. `404` if absent. Slug, not id, so URLs are readable and stable across
-a reseed.
+One product by slug. Slug, not id, so URLs are readable and stable across a reseed.
+
+**Three outcomes, and clients must distinguish them** (`CAT-08`):
+
+| Status | Meaning | Client action |
+|---|---|---|
+| `200` | Live product | Render it |
+| `410` | Existed, no longer sold | Redirect to `error.redirect_to` |
+| `404` | Never existed | Show "not found" |
+
+A `410` body carries two extra fields inside `error`:
+
+```json
+{
+  "error": {
+    "code": "GONE",
+    "message": "Product \"pingky\" is no longer available.",
+    "correlationId": "943d2c01-…",
+    "redirect_to": "/shop/luxury-king-bed",
+    "redirect_kind": "product"
+  }
+}
+```
+
+`redirect_kind` is `product`, `category` or `shop`, in descending order of how close the
+alternative is. `redirect_to` is always present on a `410` — a redirect target that might be
+missing is a 404 with extra steps.
+
+**This endpoint deliberately does not answer with an HTTP `301`.** `fetch` follows redirects
+transparently, so a 301 here would hand the caller a *different* product's JSON under the URL
+it requested — the page would render "Luxury King Bed" at `/shop/pingky` and nothing would
+report a substitution. The 301 belongs on the page URL, and `npm run build` generates
+`dist/_redirects` so a host can serve it.
+
+A product becomes `410` either by failing the publish gate or by carrying
+`"discontinued": true` in the catalogue data.
 
 Returns the item shape plus `gallery` (array of image keys) and `stock` (integer) once a
 product detail page exists. There is no such page today.

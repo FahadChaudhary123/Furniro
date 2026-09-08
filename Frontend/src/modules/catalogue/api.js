@@ -14,13 +14,15 @@ const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
 /** The API's documented error shape (docs/API.md#error-shape), as an Error. */
 export class ApiError extends Error {
-  constructor(message, { status, code, correlationId } = {}) {
+  constructor(message, { status, code, correlationId, redirectTo } = {}) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
     // Worth surfacing in a bug report: it ties the failure to a server-side log line.
     this.correlationId = correlationId;
+    // CAT-08. Set on a 410: the product existed and the API is naming its replacement.
+    this.redirectTo = redirectTo;
   }
 }
 
@@ -57,6 +59,7 @@ async function request(path, { signal } = {}) {
       status: response.status,
       code: body?.error?.code,
       correlationId: body?.error?.correlationId,
+      redirectTo: body?.error?.redirect_to,
     });
   }
 

@@ -10,7 +10,7 @@
  */
 
 import * as service from './service.js';
-import { validationFailed, notFound } from '../../platform/index.js';
+import { validationFailed, notFound, getCorrelationId } from '../../platform/index.js';
 
 /** Parse a bounded positive integer, collecting a problem rather than throwing per-field. */
 function intParam(raw, { field, min = 1, max = Number.MAX_SAFE_INTEGER, fallback }, problems) {
@@ -88,8 +88,39 @@ export function listFeatured(req, res) {
 
 export function getProduct(req, res) {
   const product = service.getBySlug(req.params.slug);
-  if (!product) throw notFound(`No product with slug "${req.params.slug}"`);
-  res.json(product);
+  if (product) {
+    res.json(product);
+    return;
+  }
+
+  /**
+   * CAT-08. A slug that WAS a product and is not any more gets 410 Gone with somewhere to
+   * go, not a bare 404.
+   *
+   * Deliberately not an HTTP 301 on this endpoint. A `fetch` follows redirects
+   * transparently, so a 301 here would hand the client a different product's JSON under the
+   * URL it asked for — the page would render "Syltherine" at `/shop/old-chair` and the
+   * caller would never know it had been substituted. The redirect belongs on the PAGE url,
+   * which is what `npm run redirects` generates host configuration for.
+   *
+   * 410 rather than 404 because it is the more specific truth: this resource existed and is
+   * permanently gone. Crawlers act on that; they treat a 404 as possibly transient.
+   */
+  const redirect = service.resolveRedirect(req.params.slug);
+  if (redirect) {
+    res.status(410).json({
+      error: {
+        code: 'GONE',
+        message: `Product "${req.params.slug}" is no longer available.`,
+        correlationId: getCorrelationId(),
+        redirect_to: redirect.to,
+        redirect_kind: redirect.kind,
+      },
+    });
+    return;
+  }
+
+  throw notFound(`No product with slug "${req.params.slug}"`);
 }
 
 export function listCategories(req, res) {

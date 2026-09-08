@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **17 built, 8 partial, 109 not built.** Counted from the
+Of the 134 requirements below: **17 built, 9 partial, 108 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -123,7 +123,7 @@ has one person, which is a staffing question, not a requirements one.
 | `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ✅ |
 | `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ✅ |
 | `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ✅ |
-| `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ⭕ |
+| `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ◐ |
 | `CAT-09` | Price and stock ingested from ERP/PIM; storefront reconciles daily within tolerance | §15 | 4 | ⭕ |
 | `CAT-10`ⁱ | Product variants (size, finish, fabric) — implied by "SKU" being distinct from product throughout §7 R8 | — | 2 | ⭕ |
 
@@ -145,6 +145,24 @@ edit fails the build rather than starting a two-week clock.
 a catalogue-wide gap rather than as forty identical per-product failures. They are not
 invented: a weight or a tax class guessed by an agent is worse than a blank, because it
 looks authoritative to whoever rates the shipment.
+
+**`CAT-08` is partial.** A product leaves the catalogue by failing the publish gate or by
+carrying `"discontinued": true`. Its slug is retained rather than dropped — a slug the server
+has forgotten can only 404, and §15 is explicit that an indexed URL should never land on one.
+`GET /api/products/:slug` then answers `410 Gone` with `redirect_to`, the page redirects, the
+sitemap drops the URL, and `npm run build` writes `dist/_redirects` so a host can serve a
+real `301`.
+
+"Nearest live alternative" is a judgement, not a fact: newest live product in the same
+category, then the category listing, then `/shop`. Without a successor field in the data,
+recency is the best available proxy for "the thing that replaced it".
+
+**What is missing is the `301` itself.** A static host serves it only if `_redirects` is
+deployed and the host understands that format; otherwise the SPA redirects client-side,
+which costs a round trip and which search engines treat less reliably. That is a deployment
+capability, not code. **No product is currently discontinued**, so the redirect map is empty
+by design — `redirect.test.js` asserts that explicitly, so setting the flag changes a test
+result rather than changing the live sitemap silently.
 
 **Note on `CAT-09`:** Doc B treats an ERP/PIM as the source of truth for price and stock,
 making the storefront a downstream consumer. That is a significant architectural constraint

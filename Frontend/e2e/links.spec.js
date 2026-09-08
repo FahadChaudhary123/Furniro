@@ -69,13 +69,18 @@ async function crawl(page) {
 /**
  * Follow a link and report the page a visitor actually lands on.
  *
- * `waitUntil: 'networkidle'` is load-bearing. React sets the title in an effect that runs
+ * Waiting for the TITLE, not for the network. React sets the title in an effect that runs
  * after `goto` resolves, so reading it immediately returns `STATIC_TITLE` — which never
- * matches /not found/, so every broken link passes. That bug was in this file first, and it
- * is why the caller also asserts the app actually rendered.
+ * matches /not found/, so every broken link would pass. That bug was in this file first.
+ *
+ * `networkidle` also fixed it and was the first thing tried here, but it waits for every
+ * product image on a full grid to finish decoding; `/shop?category=living-room` exceeded the
+ * 30s timeout under load. The title is the only thing this function returns, so waiting for
+ * anything more is waiting for the wrong signal.
  */
 async function visit(page, href) {
-  await page.goto(href, { waitUntil: 'networkidle' });
+  await page.goto(href);
+  await expect.poll(() => page.title(), { timeout: 15_000 }).not.toBe(STATIC_TITLE);
   return page.title();
 }
 
