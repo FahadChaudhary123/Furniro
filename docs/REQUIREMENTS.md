@@ -136,10 +136,11 @@ and one of the largest unknowns — see [Open decisions](#open-decisions).
 | `SRCH-04` | Configurable synonyms and ranking rules, with expiry dates | §15 | 4 | ⭕ |
 | `SRCH-05` | Zero-result and low-conversion queries logged for weekly review | §4, §15 | 4 | ⭕ |
 | `SRCH-06` | Graceful degradation: hide the search box and fall back to category browse rather than return empty results | §7 R7 | 4 | ⭕ |
-| `SRCH-07`ⁱ | Faceted filtering and sorting on listing pages | — | 1 | ◐ |
+| `SRCH-07`ⁱ | Faceted filtering and sorting on listing pages | — | 1 | ✅ |
 
-`SRCH-07` is inferred but partially present: the shop page has sort and page-size dropdowns
-that are decorative — no `onChange`, and prices are formatted strings that cannot be sorted.
+`SRCH-07` is met. Category, search term, sort, page and page size all live in the URL and
+map onto parameters the API already validates, so a filtered view is shareable and the back
+button works. Full-text search (`SRCH-01`–`06`) is still a separate concern needing an index.
 
 ## 6. Cart — `CART`
 
@@ -441,18 +442,19 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 4 | 5 | 12 |
+| Catalogue, search, content | 21 | 5 | 4 | 12 |
 | Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
 | Back office, support, privacy | 17 | 0 | 1 | 16 |
 | Platform, security, non-functional | 28 | 6 | 1 | 21 |
-| **Total** | **134** | **11** | **7** | **116** |
+| **Total** | **134** | **12** | **6** | **116** |
 
 **9 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
 `CAT-07` (product pages at stable slugs), `CONT-01` (blog served from the API),
-`CART-01` (guest cart), `SEC-05`/`SEC-06` (CI gates), `NFR-06` (budgets), and
-`PLAT-01`–`03` (health, correlation ids, structured logging). A further 7 are partial.
+`CART-01` (guest cart), `SRCH-07` (faceted filtering and sorting), `SEC-05`/`SEC-06`
+(CI gates), `NFR-06` (budgets), and `PLAT-01`–`03` (health, correlation ids, structured
+logging). A further 6 are partial.
 
 This is not a criticism of the codebase; it is the honest distance between a static
 storefront and the trading operation Document B is written to run.

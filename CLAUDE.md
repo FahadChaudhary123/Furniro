@@ -112,7 +112,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 
 ```bash
 cd Frontend && npm run verify   # lint + build + performance budgets
-cd Frontend && npm run e2e      # 221 browser checks; starts both servers itself
+cd Frontend && npm run e2e      # 251 browser checks; starts both servers itself
 cd Backend  && npm run smoke    # 64 API checks against a running server
 ```
 

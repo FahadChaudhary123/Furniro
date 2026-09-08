@@ -61,7 +61,7 @@ contact) renders standalone.
 | `npm run budgets` | Enforce performance budgets against `dist/` (Doc B §12) |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm run verify` | lint + build + budgets — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (221 checks; starts both servers) |
+| `npm run e2e` | Playwright end-to-end suite (251 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined
@@ -118,6 +118,8 @@ npm run smoke
   product from a failed request.
 - A guest cart at `/cart` with a live navbar badge, persisted across reloads. It stores only
   `{slug, quantity}`; prices always come from the API.
+- Shop filtering, search, sorting and paging held in the URL, so a filtered view can be
+  shared and the back button works.
 - Responsive navbar with a mobile drawer, and a shared footer.
 - Home page composed of Hero, BrowseRange, ProductsSection, RoomsInspiration and ShareSetup
   sections, wrapped in a Framer Motion scroll-in animation.
@@ -135,7 +137,7 @@ under *Unreleased*.
 |---|---|
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
 | Contact form has no `onSubmit` — submitting reloads the page and discards input | [contact.jsx](Frontend/src/pages/contact.jsx) |
-| Navbar user / search / wishlist / cart icons are not interactive | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
+| Navbar user and wishlist icons are not interactive (search and cart now work) | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
 | Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
 | `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
 | `AnimationDemo.jsx` is the only `gsap` consumer and is never imported | [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx) |

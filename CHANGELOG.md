@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- **Shop filtering, search and sorting, all driven by the URL** (`SRCH-07`). Category
+  chips with live counts, a search box, sort and page size — every one a parameter the API
+  already validated. A filtered view is now shareable and bookmarkable, and the browser's
+  back button works through filter changes. Defaults are kept out of the URL.
 - **A guest cart** (`CART-01`) — `Frontend/src/modules/cart/`. Add, change quantity, remove
   and clear, with a live navbar badge and a `/cart` page. Survives a reload via
   `localStorage`.
@@ -159,6 +163,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **The category link on every product page did nothing.** It pointed at
+  `/shop?category=…`, but the grid kept its state in `useState` and never read the query
+  string, so the click silently no-opped. Introduced when product detail pages landed.
+- **The navbar search icon did nothing** since the project began. It now reaches the shop's
+  search.
 - **CI's front-end job failed at the end-to-end step** with
   `ERR_MODULE_NOT_FOUND: express`. The Playwright config starts the API itself, but the job
   installed only the front end's dependencies, so the API could not boot. It now runs
@@ -225,7 +234,7 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
   (`CART-05`). Share, Compare and Like still have no handlers.
 - **Contact form discards input** — no `onSubmit`, so the page reloads and the message is
   lost. — [contact.jsx](Frontend/src/pages/contact.jsx)
-- **Navbar user, search, wishlist and cart icons are not interactive.**
+- **Navbar user and wishlist icons are not interactive.** Search and cart now work.
 - **`Footer` duplicated** across all four pages instead of sitting in `App.jsx`.
 - **The brand name is spelled two ways.** `Furniro` in the navbar and repo; `Funiro` in the
   footer heading, the copyright line and the `#FuniroFurniture` hashtag.

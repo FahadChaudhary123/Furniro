@@ -247,7 +247,7 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 221 checks across
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 251 checks across
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
 

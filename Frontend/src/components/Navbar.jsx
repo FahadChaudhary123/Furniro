@@ -45,7 +45,9 @@ const Navbar = () => {
         {/* Icons + Hamburger */}
         <div className="flex items-center gap-4 md:gap-6">
           <User className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
-          <Search className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
+          <Link to="/shop" aria-label="Search products" className="hover:text-[#B88E2F] transition">
+            <Search size={20} />
+          </Link>
           <Heart className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
           <Link
             to="/cart"
