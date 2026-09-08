@@ -147,9 +147,9 @@ The single largest win was a format error rather than a compression one: `hero-b
 a photograph with no alpha channel stored as PNG. As JPEG it is **69 kB against 1.27 MB** —
 95% smaller for one changed import line.
 
-Note the largest asset is now the JS bundle, not an image. That is the correct next target:
-route-level code splitting with `React.lazy`, and dropping `gsap`, which is bundled for a
-component nothing imports.
+Both were done. Routes are code-split, and `gsap`, `react-icons` and `framer-motion` are
+gone — JS is down to **93.1 kB gzipped** and the largest asset is an image again. Budgets
+were ratcheted to match.
 
 **Still outstanding for §15:** WebP/AVIF derivatives. That needs a `<picture>` element with
 fallbacks rather than a build script, so it is a component change, not an asset change.

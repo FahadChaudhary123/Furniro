@@ -114,11 +114,21 @@ jobs:
       # shape, CORS, and the whole catalogue API contract.
       - name: Smoke test
         run: |
-          npm start &
+          npm start > /tmp/boot.log 2>&1 &
           for i in $(seq 1 30); do
             curl -sf http://localhost:3000/health > /dev/null && break
             sleep 1
           done
+
+          # A misconfigured middleware can log a ValidationError and keep serving, so every
+          # request-level check still passes. That is how an IPv6 rate-limit bypass reached
+          # main: the limiter worked, it just could be walked around. Boot output is a gate.
+          echo '--- boot log ---'; cat /tmp/boot.log
+          if grep -qiE 'ValidationError|ERR_ERL|DeprecationWarning|Error:' /tmp/boot.log; then
+            echo "::error::Server logged an error or warning during startup"
+            exit 1
+          fi
+
           npm run smoke
         env:
           PORT: 3000

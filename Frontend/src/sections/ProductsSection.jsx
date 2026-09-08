@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaHeart, FaShareAlt, FaBalanceScale } from "react-icons/fa";
+import { Heart, Share2, Scale } from "lucide-react";
 import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
 import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
@@ -59,13 +59,13 @@ const ProductsSection = () => {
 
                 <div className="flex gap-6 text-white text-sm">
                   <span className="flex items-center gap-1 cursor-pointer">
-                    <FaShareAlt /> Share
+                    <Share2 size={16} /> Share
                   </span>
                   <span className="flex items-center gap-1 cursor-pointer">
-                    <FaBalanceScale /> Compare
+                    <Scale size={16} /> Compare
                   </span>
                   <span className="flex items-center gap-1 cursor-pointer">
-                    <FaHeart /> Like
+                    <Heart size={16} /> Like
                   </span>
                 </div>
               </div>

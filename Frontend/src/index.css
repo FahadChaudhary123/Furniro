@@ -1,6 +1,31 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Page reveal.
+ *
+ * Replaces a Framer Motion `whileInView` wrapper that cost 38.5 kB gzipped — 31% of the
+ * JS bundle — for this one effect. The wrapper spanned the whole page starting at the top,
+ * so it was in view immediately and `whileInView` was really a load animation; CSS does the
+ * same thing for nothing.
+ *
+ * Unlike the original, this honours prefers-reduced-motion.
+ */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(50px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.animate-reveal-up {
+  animation: reveal-up 0.5s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal-up {
+    animation: none;
+  }
+}
 @keyframes marquee-right {
   0% {
     transform: translateX(-50%);

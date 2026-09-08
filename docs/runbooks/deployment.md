@@ -118,17 +118,16 @@ Current, from a production build:
 
 | Metric | Value | Budget |
 |---|---|---|
-| Total assets | 2.51 MB | 3.5 MB |
-| Largest single asset | 389 kB (JS bundle) | 450 kB |
-| JS gzipped | 129 kB | 150 kB |
+| Total assets | 2.41 MB | 3 MB |
+| Largest single asset | 359 kB (an image) | 400 kB |
+| JS gzipped | 93.1 kB | 110 kB |
 
 Remaining work, in order of payoff:
 
-- **Route-level code splitting** with `React.lazy` — the JS bundle is now the largest single
-  asset, and `/shop` does not need the blog section's code.
-- **Drop `gsap`** — bundled for `AnimationDemo.jsx`, which nothing imports.
-- **WebP/AVIF with `<picture>` fallbacks** (Doc B §15) — needs a component change.
-- **`loading="lazy"`** on below-the-fold images.
+- **WebP/AVIF with `<picture>` fallbacks** (Doc B §15) — the largest assets are images
+  again, so this is now the top item. Needs a component change, not just a build script.
+- **`loading="lazy"`** on the remaining below-the-fold images outside the product grid.
+- **A CDN**, once there is a host — Doc B §12 wants a documented per-surface cache strategy.
 
 If a budget legitimately needs raising, change it in `Frontend/scripts/check-budgets.mjs`
 in the same commit, with the reason in the commit message. A budget that drifts upward

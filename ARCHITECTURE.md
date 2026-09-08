@@ -49,8 +49,12 @@ later. That is the trade this repo has chosen.
 
 ## Front end
 
-**Stack:** React 19, React Router 7, Vite 8 (beta), Tailwind CSS 3, Framer Motion 12,
-`lucide-react` and `react-icons` for iconography.
+**Stack:** React 19, React Router 7, Vite 8 (beta), Tailwind CSS 3, `lucide-react` for
+iconography. No animation library — see [Animation](#animation).
+
+`react-icons` was also removed: it was 83 MB installed and used in one file for three
+icons, while `lucide-react` served the other seven files. Same duplication as the animation
+libraries, same resolution — pick one.
 
 ### Composition model
 
@@ -122,17 +126,35 @@ CSS in [index.css](Frontend/src/index.css).
 
 ### Animation
 
-Two libraries are installed for one job:
+**Neither animation library remains.** Two were installed for one effect.
 
-- **Framer Motion** — used, in `HomePage.jsx`, for a scroll-triggered fade-and-rise.
-- **GSAP** — imported only by
-  [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx), which nothing imports. It
-  is dead weight in the dependency tree and in the bundle budget.
+- **GSAP** — imported only by an `AnimationDemo` component that nothing imported. Tree-shaken
+  out of the bundle, so it cost nothing to ship and 6.4 MB to install. Both removed.
+- **Framer Motion** — used in exactly one place, a fade-and-rise wrapping the whole home
+  page. Measured at **38.5 kB gzipped, 31% of the JS bundle**, for that single effect. Since
+  the wrapper spanned the page from the top it was in view immediately, so `whileInView` was
+  really a load animation. Replaced by an `animate-reveal-up` keyframe in `index.css`, which
+  is visually identical, costs nothing, and additionally honours
+  `prefers-reduced-motion` — which the Framer configuration did not.
 
-Pick one. Framer Motion is the one in use and the better fit for React's declarative model;
-GSAP earns its place only for timeline-heavy sequencing this project does not have.
+This is a measured decision, not a principle. If real animation work arrives — timeline
+sequencing, gesture-driven motion, shared-element transitions — Framer Motion is one
+`npm install` away and remains the better fit for React's declarative model. A 38.5 kB
+dependency for one fade was simply poor value on a storefront where weight is a CI gate.
 
 ### Build
+
+A `RouteErrorBoundary` wraps the route tree inside the shell, so a chunk that fails to load
+keeps the navbar and offers a reload instead of unmounting everything to a blank page. Two
+behaviours are worth knowing and are pinned by tests: the Suspense fallback renders only on
+a **direct** load of a lazy route, because React Router navigates inside a transition and
+React retains the previous UI rather than flashing a fallback; and a failed chunk is a
+**post-deploy** failure mode, not a hypothetical one.
+
+Routes are code-split with `React.lazy`, except `HomePage` — lazy-loading the page a
+visitor has just landed on costs a round trip before anything renders, which optimises the
+wrong thing. Each other route is its own chunk, so someone reading the blog no longer
+downloads the cart and the shop grid.
 
 Vite 8 with `@vitejs/plugin-react`. `vite.config.js` is at defaults — no path aliases, so
 imports are relative, which is why `App.jsx` reaches for `../src/components/Navbar` from

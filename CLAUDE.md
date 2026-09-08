@@ -104,6 +104,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 - Stable `key` on every mapped element, never the array index.
 - Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind cannot express.
 - Brand gold is `#B88E2F`. (`#B88A2B` appears twice in `Hero.jsx` — that is a bug, not a second brand colour.)
+- Icons come from `lucide-react`. There is no animation library; use CSS keyframes in `index.css`. (`#B88A2B` appears twice in `Hero.jsx` — that is a bug, not a second brand colour.)
 - The brand is spelled **Furniro**. `Funiro` in the footer and hashtag is a leftover to fix.
 - Relative imports — no path alias is configured.
 - Mobile-first: unprefixed utilities are small-screen, `sm:`/`md:`/`lg:` layer on top.
@@ -137,9 +138,10 @@ of a task, say which part and why. Never report success you have not verified �
 running the check over reasoning about whether it would pass.
 
 **Prefer the smallest change that works.** Ask whether twenty lines would do before adding
-a dependency. There is precedent here for getting that wrong: `gsap` is installed for one
-component nothing imports, and `mongoose` — a MongoDB driver — is a dependency of a
-Postgres project.
+a dependency. This project has removed four for exactly that reason: `gsap` (imported by
+one component nothing imported), `mongoose` (a MongoDB driver in a Postgres project),
+`react-icons` (83 MB, one file, three icons) and `framer-motion` (38.5 kB gzipped for a
+single fade). Measure before assuming a dependency earns its weight.
 
 **Say when a request rests on a wrong premise.** A task that assumes a working API or a
 cart is a task built on something that is not there. Flag it, then do what can actually be

@@ -24,10 +24,10 @@ const KB = 1024;
 const MB = 1024 * 1024;
 
 const BUDGETS = {
-  jsGzip: 150 * KB,       // all .js, gzipped, summed
+  jsGzip: 110 * KB,       // all .js, gzipped, summed (measured 93.1 kB)
   cssGzip: 25 * KB,       // all .css, gzipped, summed
-  totalAssets: 3.5 * MB,  // everything under dist/, raw (measured 2.51 MB)
-  largestAsset: 450 * KB, // no single file may exceed this
+  totalAssets: 3 * MB,    // everything under dist/, raw (measured 2.41 MB)
+  largestAsset: 400 * KB, // no single file may exceed this (measured 358.6 kB)
   thirdPartyScripts: 0,   // Doc B §12: most storefront regressions arrive as a marketing tag
 };
 

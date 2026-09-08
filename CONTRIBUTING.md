@@ -214,10 +214,11 @@ source of quiet correctness bugs in a storefront —
 Adding one is a decision with an ongoing cost: install time, bundle size, a lockfile entry,
 and a vulnerability surface you now own. Ask whether ~20 lines would do instead.
 
-There is precedent for getting this wrong here. `gsap` is installed for a single component
-that nothing imports, and `mongoose` — a MongoDB driver — is a dependency of a project
-whose database is Postgres. Both are pure cost. See
-[ARCHITECTURE.md](ARCHITECTURE.md#three-data-layers-pick-one).
+There is precedent for getting this wrong here, and for fixing it. Four dependencies have
+been removed after measurement: `gsap` (one component nothing imported), `mongoose` (a
+MongoDB driver in a Postgres project), `react-icons` (83 MB for three icons in one file)
+and `framer-motion` (38.5 kB gzipped, 31% of the bundle, for one fade). See
+[ARCHITECTURE.md](ARCHITECTURE.md#animation).
 
 If you do add one: justify it in the PR description, check the maintenance status and
 transitive weight, and prefer the smaller option.
@@ -318,7 +319,10 @@ Small, self-contained, and each fixes something real:
 2. **`Rs` → `Rp`** on the struck-through old price in `ProductCard.jsx`.
 3. **Add a `*` route** rendering a `NotFound` page.
 4. **Lift `Footer` into `App.jsx`** and delete the four per-page copies.
-5. **Remove `gsap` and `AnimationDemo.jsx`** — unused.
-6. **Remove `mongoose`** from `Backend/package.json` — wrong database entirely.
-7. **Hoist `blogPosts`** to module scope.
-8. **Set the page `<title>`** — `index.html` still says `frontend`.
+5. **Fix the brand name.** `Furniro` in the navbar, `Funiro` in the footer and the
+   `#FuniroFurniture` hashtag. Pick one and make it consistent.
+6. **Fix the second brand gold.** `#B88A2B` appears twice in `Hero.jsx`; everywhere else is
+   `#B88E2F`.
+7. **Lift `Footer` into `App.jsx`** — every page renders its own copy.
+8. **Rename the lowercase page files** (`shop.jsx`, `about.jsx`) to match their now-PascalCase
+   components.

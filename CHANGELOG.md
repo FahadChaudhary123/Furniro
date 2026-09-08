@@ -168,6 +168,17 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **A failed route chunk blanked the entire site.** With code splitting and no error
+  boundary, a rejected `import()` propagated past Suspense and React unmounted the whole
+  tree — navbar included — to a white page. This is the standard post-deploy failure: a
+  visitor holding the previous HTML requests a chunk filename that no longer exists, gets a
+  404, and the site disappears. `RouteErrorBoundary` now keeps the shell and offers a reload,
+  which is the correct remedy for a stale chunk.
+- **The API rate limiter could be bypassed over IPv6.** A custom `keyGenerator` using
+  `req.ip` keyed on the full address, so a single IPv6 allocation — billions of addresses —
+  looked like unlimited distinct clients. `express-rate-limit` logged
+  `ERR_ERL_KEY_GEN_IPV6` at startup and kept serving, so every request-level check still
+  passed. Removed the override; the default groups IPv6 by /64.
 - **The category link on every product page did nothing.** It pointed at
   `/shop?category=…`, but the grid kept its state in `useState` and never read the query
   string, so the click silently no-opped. Introduced when product detail pages landed.
@@ -262,7 +273,6 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
 - **No deployment configuration** for either tier, and no host chosen.
 - **Whether `Backend/.env` ever reached git history is unverified.** Rotation is outstanding
   regardless — see [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
-- **`gsap` is dead weight** — its only consumer, `AnimationDemo.jsx`, is never imported.
 
 ---
 

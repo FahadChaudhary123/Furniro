@@ -140,7 +140,6 @@ under *Unreleased*.
 | Navbar user and wishlist icons are not interactive (search and cart now work) | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
 | Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
 | `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
-| `AnimationDemo.jsx` is the only `gsap` consumer and is never imported | [AnimationDemo.jsx](Frontend/src/components/AnimationDemo.jsx) |
 | No unit tests (end-to-end coverage exists), and no deployment configuration | repo-wide |
 | Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |
 | `Backend/.env` rotation outstanding; whether it reached git history is unverified | [SECURITY.md](SECURITY.md) |
