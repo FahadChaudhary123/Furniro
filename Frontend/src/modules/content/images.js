@@ -6,22 +6,26 @@
  * resolver, so a module can be lifted out without dragging another's images with it.
  */
 
-const bundled = import.meta.glob('../../assets/blog*.jpg', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
+import { buildAssetPairs } from '../../shared/lib/assetPairs.js';
 
-const byKey = Object.fromEntries(
-  Object.entries(bundled).map(([path, url]) => [`blog/${path.split('/').pop()}`, url]),
+const pairs = buildAssetPairs(
+  import.meta.glob('../../assets/blog*.{jpg,webp}', {
+    eager: true,
+    query: '?url',
+    import: 'default',
+  }),
 );
 
+/** @returns {{src: string, webp?: string}} sources for <Picture> */
 export function resolveImage(key) {
-  if (!key) return '';
-  if (/^(https?:)?\//.test(key)) return key;
-  const url = byKey[key];
-  if (!url && import.meta.env.DEV) {
+  if (!key) return { src: '' };
+  if (/^(https?:)?\//.test(key)) return { src: key };
+
+  const name = key.split('/').pop().replace(/\.[^.]+$/, '');
+  const pair = pairs[name];
+
+  if (!pair && import.meta.env.DEV) {
     console.warn(`[content] no bundled asset for image key "${key}"`);
   }
-  return url ?? '';
+  return pair ?? { src: '' };
 }

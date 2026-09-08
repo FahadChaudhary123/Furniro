@@ -43,6 +43,7 @@ async function request(path, { signal } = {}) {
   return body;
 }
 
+/** `image` becomes `{src, webp}` so components can render a <picture>. */
 const hydrate = (post) => ({ ...post, image: resolveImage(post.image) });
 
 export async function fetchPosts(params = {}, options = {}) {

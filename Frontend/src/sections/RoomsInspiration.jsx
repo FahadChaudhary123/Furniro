@@ -1,25 +1,33 @@
 import { useState } from "react";
-import bedroom from "../assets/rooms/bedroom.jpg";
-import livingroom from "../assets/rooms/livingroom.jpg";
-import living from "../assets/rooms/living.jpg";
+import { buildAssetPairs } from "../shared/lib/assetPairs";
+import Picture from "../shared/ui/Picture";
+
+// One glob rather than a JPEG and a WebP import per image.
+const img = buildAssetPairs(
+  import.meta.glob("../assets/rooms/*.{jpg,webp}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+);
 const rooms = [
   {
     id: 1,
     title: "Inner Peace",
     category: "Bed Room",
-    image: bedroom ,
+    image: img["bedroom"],
   },
   {
     id: 2,
     title: "Minimal Living",
     category: "Living Room",
-    image: livingroom,
+    image: img["livingroom"],
   },
   {
     id: 3,
     title: "Cozy Space",
     category: "Dining Room",
-    image: living,
+    image: img["living"],
   },
 ];
 
@@ -64,9 +72,11 @@ const RoomsInspiration = () => {
             >
               {rooms.map((room) => (
                 <div key={room.id} className="min-w-full relative">
-                  <img
-                    src={room.image}
+                  <Picture
+                    src={room.image.src}
+                    webp={room.image.webp}
                     alt={room.title}
+                    loading="lazy"
                     className="w-full h-[480px] object-cover"
                   />
 

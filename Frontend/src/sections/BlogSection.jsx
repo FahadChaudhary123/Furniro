@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Search, User, Calendar, Tag } from "lucide-react";
 import { usePosts, useRecentPosts, useTags, formatPostDate } from "../modules/content";
 import { CatalogueError } from "../components/CatalogueState";
+import Picture from "../shared/ui/Picture";
 
 /**
  * The blog listing and its sidebar.
@@ -61,8 +62,9 @@ const BlogSection = () => {
                   Read more
                 </Link>
 
-                <img
-                  src={post.image}
+                <Picture
+                  src={post.image.src}
+                  webp={post.image.webp}
                   alt={post.title}
                   loading="lazy"
                   className="w-full rounded-xl object-cover"
@@ -131,8 +133,9 @@ const BlogSection = () => {
                 {recent.map((post) => (
                   <li key={post.id}>
                     <Link to={`/blog/${post.slug}`} className="flex gap-4 items-center group">
-                      <img
-                        src={post.image}
+                      <Picture
+                        src={post.image.src}
+                        webp={post.image.webp}
                         alt=""
                         loading="lazy"
                         className="w-20 h-20 object-cover rounded-lg flex-shrink-0"

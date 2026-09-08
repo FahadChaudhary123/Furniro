@@ -7,6 +7,7 @@ import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
 import Footer from '../components/Footer';
+import Picture from '../shared/ui/Picture';
 
 /**
  * The cart.
@@ -69,8 +70,9 @@ const Cart = () => {
                     >
                       <td className="block md:table-cell py-2 md:py-6 px-4">
                         <div className="flex items-center gap-4">
-                          <img
-                            src={product.image}
+                          <Picture
+                            src={product.image.src}
+                            webp={product.image.webp}
                             alt=""
                             className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                           />

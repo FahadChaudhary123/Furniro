@@ -168,6 +168,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **The home page's featured products stopped loading** when image resolvers began returning
+  `{src, webp}`: `ProductsSection` still passed the whole object to `<img src>`, so every
+  featured image 404'd. The same class of bug as the category object that blanked `/shop` —
+  a shape change applied to some consumers but not all.
 - **A failed route chunk blanked the entire site.** With code splitting and no error
   boundary, a rejected `import()` propagated past Suspense and React unmounted the whole
   tree — navbar included — to a white page. This is the standard post-deploy failure: a

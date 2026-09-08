@@ -7,6 +7,7 @@ import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
 import Footer from '../components/Footer';
+import Picture from '../shared/ui/Picture';
 
 /**
  * Product detail — `CAT-07`, a stable indexable URL per product.
@@ -73,8 +74,9 @@ const ProductDetail = () => {
                   {badge.label}
                 </span>
               )}
-              <img
-                src={product.image}
+              <Picture
+                src={product.image.src}
+                webp={product.image.webp}
                 alt={product.name}
                 className="w-full h-96 object-cover"
               />

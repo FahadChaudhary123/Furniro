@@ -14,6 +14,10 @@
  *   - To restore: copy .image-originals/ back over src/assets/.
  *
  * Usage:
+ * Also emits a .webp beside every image. Doc B §15 requires modern formats served, and
+ * WebP is universally supported by browsers in use today — a <picture> element keeps the
+ * JPEG as the fallback for anything that is not.
+ *
  *   node scripts/optimise-images.mjs            # optimise
  *   node scripts/optimise-images.mjs --dry-run  # report only, write nothing
  */
@@ -22,6 +26,7 @@ import { readdirSync, statSync, existsSync, mkdirSync, copyFileSync, writeFileSy
 import { join, extname, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import { displayWidthFor } from './image-display-widths.mjs';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
 const SRC = join(ROOT, 'src', 'assets');
@@ -29,17 +34,26 @@ const BACKUP = join(ROOT, '.image-originals');
 
 const DRY = process.argv.includes('--dry-run');
 
-// 1600 keeps a full-bleed hero crisp on a 1080p display without paying for camera
-// resolution -- nothing on this site is displayed larger. 1920 was tried first and left a
-// single 486 kB room photo over the 450 kB per-asset budget; 1600 meets the budget rather
-// than moving it, at no visible cost on the sizes actually rendered.
-const MAX_EDGE = 1600;
+/**
+ * Target width per image: twice the box it renders into, for retina. The measurements live
+ * in image-display-widths.mjs so the optimiser and the audit cannot disagree.
+ */
+const RETINA = 2;
+const FALLBACK_MAX_EDGE = 1600;
+
+const targetWidth = (rel) => {
+  const display = displayWidthFor(rel);
+  return display ? Math.min(display * RETINA, FALLBACK_MAX_EDGE) : FALLBACK_MAX_EDGE;
+};
 // 82 rather than a more aggressive 75: these are product photographs on a storefront, and
 // the difference in bytes is small next to the cost of a customer seeing artefacts.
 const JPEG = { quality: 82, mozjpeg: true, progressive: true };
 // Lossless. `palette: true` quantises to 256 colours, which bands a photographic PNG
 // visibly — hero-bg.png is a photograph. Savings are smaller; the image stays intact.
 const PNG = { compressionLevel: 9, effort: 10 };
+// WebP at the same visual quality lands well below JPEG. `effort: 6` is the encoder's
+// default-ish upper-middle: slower to build, smaller to ship, and this runs rarely.
+const WEBP = { quality: 80, effort: 6 };
 
 const EXTS = new Set(['.jpg', '.jpeg', '.png']);
 
@@ -63,7 +77,9 @@ if (images.length === 0) {
   process.exit(1);
 }
 
-console.log(`\n${DRY ? 'DRY RUN — ' : ''}Optimising ${images.length} images (max edge ${MAX_EDGE}px)\n`);
+console.log(
+  `\n${DRY ? 'DRY RUN — ' : ''}Optimising ${images.length} images, each sized to ${RETINA}x its display box\n`,
+);
 
 let before = 0;
 let after = 0;
@@ -88,13 +104,14 @@ for (const file of images) {
   const img = sharp(source);
   const meta = await img.metadata();
 
-  const needsResize = meta.width > MAX_EDGE || meta.height > MAX_EDGE;
+  const maxEdge = targetWidth(rel);
+  const needsResize = meta.width > maxEdge || meta.height > maxEdge;
   let pipeline = sharp(source).rotate(); // rotate() applies EXIF orientation, then strips it
 
   if (needsResize) {
     pipeline = pipeline.resize({
-      width: MAX_EDGE,
-      height: MAX_EDGE,
+      width: maxEdge,
+      height: maxEdge,
       fit: 'inside',
       withoutEnlargement: true,
     });
@@ -105,6 +122,18 @@ for (const file of images) {
 
   const buf = await pipeline.toBuffer();
 
+  // Modern format, same pixels. Written from the pristine original, not from the JPEG we
+  // just produced — encoding a lossy format from another lossy format compounds artefacts.
+  let webpBytes = null;
+  const webpPath = file.replace(/\.(jpe?g|png)$/i, '.webp');
+  {
+    let wp = sharp(source).rotate();
+    if (needsResize) {
+      wp = wp.resize({ width: maxEdge, height: maxEdge, fit: 'inside', withoutEnlargement: true });
+    }
+    webpBytes = await wp.webp(WEBP).toBuffer();
+  }
+
   before += origSize;
   // Never make a file bigger: if optimisation loses, keep the original bytes.
   const useOptimised = buf.length < origSize;
@@ -112,9 +141,10 @@ for (const file of images) {
 
   rows.push({
     rel,
-    dims: `${meta.width}x${meta.height}${needsResize ? ` -> ${MAX_EDGE}max` : ''}`,
+    dims: `${meta.width}${needsResize ? ` -> ${maxEdge}` : ''}`,
     from: origSize,
     to: useOptimised ? buf.length : origSize,
+    webp: webpBytes.length,
     skipped: !useOptimised,
   });
 
@@ -127,6 +157,7 @@ for (const file of images) {
     } else if (source !== file) {
       copyFileSync(source, file);
     }
+    writeFileSync(webpPath, webpBytes);
   }
 }
 

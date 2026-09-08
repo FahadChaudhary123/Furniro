@@ -130,6 +130,69 @@ test.describe('code splitting', () => {
   });
 });
 
+test.describe('images', () => {
+  test('a modern browser is served WebP, not the JPEG fallback', async ({ page }) => {
+    const images = [];
+    page.on('response', (r) => {
+      const u = r.url();
+      if (/\.(jpe?g|png|webp)$/i.test(u)) images.push(u.split('/').pop());
+    });
+
+    await page.goto('/');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForLoadState('networkidle');
+
+    const webp = images.filter((f) => f.endsWith('.webp'));
+    const jpeg = images.filter((f) => /\.(jpe?g|png)$/i.test(f));
+
+    expect(webp.length, 'Chromium accepts WebP and should receive it').toBeGreaterThan(0);
+    // The <img> fallback must not also be fetched — that would double the payload.
+    expect(jpeg, 'no JPEG should be fetched alongside a WebP').toEqual([]);
+  });
+
+  test('the JPEG fallback is still reachable', async ({ page }) => {
+    // <picture> is only safe if the fallback works for anything that cannot decode WebP.
+    await page.goto('/');
+    const fallback = await page.locator('picture img').first().getAttribute('src');
+    expect(fallback).toMatch(/\.(jpe?g|png)$/i);
+
+    const res = await page.request.get(fallback);
+    expect(res.status()).toBe(200);
+  });
+
+  test('images are not oversized for the box they render into', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'display widths in image-display-widths.mjs are measured at desktop');
+
+    /**
+     * Guards scripts/image-display-widths.mjs. Those numbers drive how every image is
+     * resized, so a layout change that widens a slot silently ships a blurry image, and one
+     * that narrows it silently ships wasted bytes. Six files once held 1.1 MB of pure waste
+     * this way.
+     */
+    await page.goto('/');
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForLoadState('networkidle');
+
+    const oversized = await page.$$eval('img', (els) =>
+      els
+        .map((e) => ({
+          src: e.currentSrc.split('/').pop(),
+          natural: e.naturalWidth,
+          shown: Math.round(e.getBoundingClientRect().width),
+        }))
+        // 4x rather than 2x (the retina target) because a few assets deliberately serve
+        // more than one slot from a single file: a product image appears at ~288px in the
+        // featured strip and ~600px on its detail page, and without `srcset` one file has
+        // to satisfy the larger. `srcset` is the proper fix and is on the perf backlog;
+        // this threshold still catches gross waste like a 1600px file in a 384px slot.
+        .filter((x) => x.natural > 0 && x.shown > 0 && x.natural / x.shown > 4)
+        .map((x) => `${x.src}: ${x.natural}px in a ${x.shown}px box`),
+    );
+
+    expect(oversized, 'resize these, or update scripts/image-display-widths.mjs').toEqual([]);
+  });
+});
+
 test.describe('motion', () => {
   test('the home page reveal is applied', async ({ page }) => {
     await page.goto('/');

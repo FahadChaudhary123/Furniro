@@ -4,6 +4,7 @@ import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
 import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
 import { ProductGridSkeleton, CatalogueError } from "../components/CatalogueState";
+import Picture from "../shared/ui/Picture";
 
 const ProductsSection = () => {
   const { products, loading, error, retry } = useFeaturedProducts();
@@ -40,8 +41,9 @@ const ProductsSection = () => {
               )}
 
               {/* Image */}
-              <img
-                src={item.image}
+              <Picture
+                src={item.image.src}
+                webp={item.image.webp}
                 alt={item.name}
                 loading="lazy"
                 className="w-full h-72 object-cover"

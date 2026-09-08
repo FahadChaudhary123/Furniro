@@ -6,6 +6,7 @@ import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
 import Footer from '../components/Footer';
+import Picture from '../shared/ui/Picture';
 
 /**
  * A single blog post — the first consumer of GET /api/posts/:slug.
@@ -72,8 +73,9 @@ const BlogPost = () => {
               </span>
             </div>
 
-            <img
-              src={post.image}
+            <Picture
+              src={post.image.src}
+              webp={post.image.webp}
               alt={post.title}
               className="w-full rounded-xl object-cover mt-8"
             />

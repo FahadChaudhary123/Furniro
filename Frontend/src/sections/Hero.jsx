@@ -1,11 +1,24 @@
-import hero from "../assets/hero-bg.jpg";
+import { buildAssetPairs } from "../shared/lib/assetPairs";
+import Picture from "../shared/ui/Picture";
+
+const hero = buildAssetPairs(
+  import.meta.glob("../assets/hero-bg.{jpg,webp}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+)["hero-bg"];
 const Hero = () => {
   return (
     <section className="relative w-full h-[80vh] min-h-[500px]">
       {/* Background Image */}
-      <img
-        src={hero} // replace with your image path
+      {/* Above the fold and full-bleed: eager, and fetchpriority high so it is not
+          queued behind the product images below. */}
+      <Picture
+        src={hero.src}
+        webp={hero.webp}
         alt="Hero Background"
+        fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover"
       />
 

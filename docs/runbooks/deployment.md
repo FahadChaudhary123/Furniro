@@ -118,15 +118,22 @@ Current, from a production build:
 
 | Metric | Value | Budget |
 |---|---|---|
-| Total assets | 2.41 MB | 3 MB |
-| Largest single asset | 359 kB (an image) | 400 kB |
-| JS gzipped | 93.1 kB | 110 kB |
+| Total assets, one visitor | 1.60 MB | 1.9 MB |
+| Of which images (JPEG path) | 1.26 MB | — |
+| Of which images (WebP path) | 0.97 MB | — |
+| Largest single asset | 266 kB (JS bundle) | 300 kB |
+| JS gzipped | 102 kB | 115 kB |
+
+The budget counts each image **once**, at its larger variant: `<picture>` ships both a JPEG
+and a WebP but a browser fetches one, so summing the directory would count both and make a
+modern format look like a regression.
 
 Remaining work, in order of payoff:
 
-- **WebP/AVIF with `<picture>` fallbacks** (Doc B §15) — the largest assets are images
-  again, so this is now the top item. Needs a component change, not just a build script.
-- **`loading="lazy"`** on the remaining below-the-fold images outside the product grid.
+- **`srcset` for images that serve more than one slot.** A product image is ~288px in the
+  featured strip and ~600px on its detail page; without `srcset` the single file has to
+  satisfy the larger, so the strip over-downloads by roughly 3x.
+- **AVIF** alongside WebP — another step down for photographic content, at more encode time.
 - **A CDN**, once there is a host — Doc B §12 wants a documented per-surface cache strategy.
 
 If a budget legitimately needs raising, change it in `Frontend/scripts/check-budgets.mjs`

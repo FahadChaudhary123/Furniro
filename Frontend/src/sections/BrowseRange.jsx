@@ -1,35 +1,34 @@
 import { useState, useEffect } from "react";
 
-import dining1 from "../assets/BrowseRange/dining-1.jpg";
-import dining2 from "../assets/BrowseRange/dining-2.jpg";
-import dining3 from "../assets/BrowseRange/dining-3.jpg";
+import { buildAssetPairs } from "../shared/lib/assetPairs";
+import Picture from "../shared/ui/Picture";
 
-import living1 from "../assets/BrowseRange/living-1.jpg";
-import living2 from "../assets/BrowseRange/living-2.jpg";
-import living3 from "../assets/BrowseRange/living-3.jpg";
-
-import bedroom1 from "../assets/BrowseRange/bedroom-1.jpg";
-import bedroom2 from "../assets/BrowseRange/bedroom-2.jpg";
-import bedroom3 from "../assets/BrowseRange/bedroom-3.jpg";
+const img = buildAssetPairs(
+  import.meta.glob("../assets/BrowseRange/*.{jpg,webp}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+);
 
 const categories = [
   {
     title: "Dining",
     description:
       "Where moments are shared and future-ready design meets everyday functionality.",
-    images: [dining1, dining2, dining3],
+    images: [img["dining-1"], img["dining-2"], img["dining-3"]],
   },
   {
     title: "Living",
     description:
       "Comfort reimagined with intelligent design crafted for modern lifestyles.",
-    images: [living1, living2, living3],
+    images: [img["living-1"], img["living-2"], img["living-3"]],
   },
   {
     title: "Bedroom",
     description:
       "A calming sanctuary designed to help you rest, recharge, and dream ahead.",
-    images: [bedroom1, bedroom2, bedroom3],
+    images: [img["bedroom-1"], img["bedroom-2"], img["bedroom-3"]],
   },
 ];
 
@@ -77,12 +76,18 @@ const BrowseRange = () => {
               }}
             >
               <div className="overflow-hidden rounded-xl">
-                <img
-                  src={
+                <Picture
+                src={
                     hoveredIndex === index
                       ? cat.images[imageIndex]
                       : cat.images[0]
-                  }
+                  .src}
+                webp={
+                    hoveredIndex === index
+                      ? cat.images[imageIndex]
+                      : cat.images[0]
+                  .webp}
+                loading="lazy"
                   alt={cat.title}
                   className="w-full h-[420px] object-cover transition-all duration-500 group-hover:scale-105"
                 />

@@ -1,13 +1,15 @@
-import img1 from "../assets/setup/1.jpg";
-import img2 from "../assets/setup/2.jpg";
-import img3 from "../assets/setup/3.jpg";
-import img4 from "../assets/setup/4.jpg";
-import img5 from "../assets/setup/5.jpg";
-import img6 from "../assets/setup/6.jpg";
-import img7 from "../assets/setup/7.jpg";
-import img8 from "../assets/setup/8.jpg";
+import { buildAssetPairs } from "../shared/lib/assetPairs";
+import Picture from "../shared/ui/Picture";
 
-const images = [img1, img2, img3, img4, img5, img6, img7, img8];
+const pairs = buildAssetPairs(
+  import.meta.glob("../assets/setup/*.{jpg,webp}", {
+    eager: true,
+    query: "?url",
+    import: "default",
+  }),
+);
+
+const images = ["1", "2", "3", "4", "5", "6", "7", "8"].map((n) => pairs[n]);
 
 
 const ShareSetup = () => {
@@ -26,20 +28,25 @@ const ShareSetup = () => {
        <div className="flex w-max animate-marquee-right gap-6">
   {/* First set */}
   {images.map((img, index) => (
-    <img
+    <Picture
       key={index}
-      src={img}
+      src={img.src}
+      webp={img.webp}
       alt="setup"
+      loading="lazy"
       className="w-[280px] h-[280px] object-cover rounded-md"
     />
   ))}
 
   {/* Duplicate set for seamless loop */}
   {images.map((img, index) => (
-    <img
+    <Picture
       key={`dup-${index}`}
-      src={img}
-      alt="setup"
+      src={img.src}
+      webp={img.webp}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
       className="w-[280px] h-[280px] object-cover rounded-md"
     />
   ))}

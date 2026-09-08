@@ -56,6 +56,7 @@ async function request(path, { signal } = {}) {
 }
 
 /** Turn API rows into render-ready ones. Only the image needs it; prices stay integers. */
+/** `image` becomes `{src, webp}` so components can render a <picture>. */
 const hydrate = (product) => ({ ...product, image: resolveImage(product.image) });
 
 /**

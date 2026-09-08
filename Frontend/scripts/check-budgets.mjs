@@ -24,10 +24,10 @@ const KB = 1024;
 const MB = 1024 * 1024;
 
 const BUDGETS = {
-  jsGzip: 110 * KB,       // all .js, gzipped, summed (measured 93.1 kB)
+  jsGzip: 115 * KB,       // all .js, gzipped, summed (measured 102.2 kB)
   cssGzip: 25 * KB,       // all .css, gzipped, summed
-  totalAssets: 3 * MB,    // everything under dist/, raw (measured 2.41 MB)
-  largestAsset: 400 * KB, // no single file may exceed this (measured 358.6 kB)
+  totalAssets: 1.9 * MB,  // worst-case single visitor (measured 1.60 MB)
+  largestAsset: 300 * KB, // no single file may exceed this (measured 265.5 kB)
   thirdPartyScripts: 0,   // Doc B §12: most storefront regressions arrive as a marketing tag
 };
 
@@ -58,19 +58,44 @@ if (files.length === 0) {
 
 let jsGzip = 0;
 let cssGzip = 0;
-let totalAssets = 0;
 let largest = { path: '', size: 0 };
 
+/**
+ * Bytes ONE VISITOR downloads — not bytes on disk.
+ *
+ * With <picture>, every image ships as both a JPEG and a WebP, but a browser fetches
+ * exactly one of them. Summing the directory counts both and makes adding a modern format
+ * look like a regression, which would turn this gate against the improvement it should be
+ * rewarding.
+ *
+ * Each image is therefore counted once, at its LARGER variant: the worst case is an old
+ * browser taking the JPEG.
+ */
+const sizes = new Map();
 for (const f of files) {
+  const rel = relative(DIST, f);
+  /*
+   * Group a.jpg / a.webp under one key, stripping Vite's per-file hash.
+   *
+   * The hash is EXACTLY 8 characters. An earlier `{8,}` here was greedy and ate the
+   * filename too — `bedroom-1-T6WbvKiL` collapsed to `bedroom`, merging four distinct
+   * images into one group and under-reporting the total by ~25%.
+   */
+  const key = rel.replace(/\.(jpe?g|png|webp)$/i, '').replace(/-[A-Za-z0-9_-]{8}$/, '');
+  const isImage = /\.(jpe?g|png|webp)$/i.test(rel);
   const size = statSync(f).size;
-  totalAssets += size;
 
-  if (size > largest.size) largest = { path: relative(DIST, f), size };
+  if (isImage) sizes.set(key, Math.max(sizes.get(key) ?? 0, size));
+  else sizes.set(rel, size);
+
+  if (size > largest.size) largest = { path: rel, size };
 
   const ext = extname(f);
   if (ext === '.js' || ext === '.mjs') jsGzip += gzipSync(readFileSync(f)).length;
   if (ext === '.css') cssGzip += gzipSync(readFileSync(f)).length;
 }
+
+const totalAssets = [...sizes.values()].reduce((a, b) => a + b, 0);
 
 // Count <script src="http..."> in every emitted HTML file. Anything loaded from another
 // origin is a third party, whoever added it.
@@ -83,7 +108,7 @@ for (const f of files.filter((f) => extname(f) === '.html')) {
 const results = [
   ['JS (gzipped)', jsGzip, BUDGETS.jsGzip],
   ['CSS (gzipped)', cssGzip, BUDGETS.cssGzip],
-  ['Total assets', totalAssets, BUDGETS.totalAssets],
+  ['Total assets (one visitor)', totalAssets, BUDGETS.totalAssets],
   [`Largest asset (${largest.path})`, largest.size, BUDGETS.largestAsset],
   ['Third-party scripts', thirdPartyScripts, BUDGETS.thirdPartyScripts],
 ];

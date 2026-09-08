@@ -13,31 +13,31 @@
  * API returns absolute URLs and this file shrinks to a passthrough.
  */
 
-const bundled = import.meta.glob('../../assets/Products/*.jpg', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
+import { buildAssetPairs } from '../../shared/lib/assetPairs.js';
 
-/** "…/assets/Products/product1.jpg" -> "products/product1.jpg" */
-const byKey = Object.fromEntries(
-  Object.entries(bundled).map(([path, url]) => {
-    const file = path.split('/').pop();
-    return [`products/${file}`, url];
+// Both formats: the JPEG is the fallback, the WebP is what most browsers will take.
+const pairs = buildAssetPairs(
+  import.meta.glob('../../assets/Products/*.{jpg,webp}', {
+    eager: true,
+    query: '?url',
+    import: 'default',
   }),
 );
 
 /**
  * @param {string} key - e.g. "products/product1.jpg"
- * @returns {string} a URL the browser can load, or '' when unknown
+ * @returns {{src: string, webp?: string}} sources for <Picture>
  */
 export function resolveImage(key) {
-  if (!key) return '';
-  if (key.startsWith('http://') || key.startsWith('https://') || key.startsWith('/')) return key;
-  const url = byKey[key];
-  if (!url && import.meta.env.DEV) {
+  if (!key) return { src: '' };
+  if (/^(https?:)?\//.test(key)) return { src: key };
+
+  const name = key.split('/').pop().replace(/\.[^.]+$/, '');
+  const pair = pairs[name];
+
+  if (!pair && import.meta.env.DEV) {
     // Loud in development, silent in production: a missing image should not blank a page.
     console.warn(`[catalogue] no bundled asset for image key "${key}"`);
   }
-  return url ?? '';
+  return pair ?? { src: '' };
 }

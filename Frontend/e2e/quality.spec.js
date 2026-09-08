@@ -48,10 +48,19 @@ test.describe('page quality', () => {
       await page.goto(route);
       await page.waitForLoadState('networkidle');
 
-      // An image that is NOT inside a link must describe itself.
+      // An image that is NOT inside a link must describe itself — unless it is explicitly
+      // hidden from assistive technology, which is the correct marking for a decorative
+      // duplicate (the marquee repeats its images to loop seamlessly; announcing them twice
+      // would be worse than not announcing the copies at all).
       const unlabelled = await page.$$eval('img', (imgs) =>
         imgs
-          .filter((i) => !i.closest('a') && !i.getAttribute('alt'))
+          .filter(
+            (i) =>
+              !i.closest('a') &&
+              !i.getAttribute('alt') &&
+              !i.closest('[aria-hidden="true"]') &&
+              i.getAttribute('aria-hidden') !== 'true',
+          )
           .map((i) => i.getAttribute('src')),
       );
       expect(unlabelled, `standalone images without alt text on ${route}`).toEqual([]);

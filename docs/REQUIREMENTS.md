@@ -115,7 +115,7 @@ has one person, which is a staffing question, not a requirements one.
 | `CAT-02` | Every product image has alt text | §15 | 0 | ✅ |
 | `CAT-03` | A publish gate blocks incomplete products — "checked by the publish gate, not by eye" | §15 | 2 | ⭕ |
 | `CAT-04` | Completeness report of products failing rules, resolved within 14 days | §15 data-quality sweep | 2 | ⭕ |
-| `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ◐ |
+| `CAT-05` | Image derivatives generated on upload; modern formats served; no oversized originals | §15 | 0 | ✅ |
 | `CAT-06` | Category hierarchy, browsable | §7 R7 "fall back to category browse" | 1 | ✅ |
 | `CAT-07` | Product detail page at a stable, indexable URL | §15 "bare 404 on an indexed URL" | 1 | ✅ |
 | `CAT-08` | Discontinued products unpublish with a 301 to the nearest live alternative | §15 | 3 | ⭕ |
@@ -444,13 +444,13 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 5 | 4 | 12 |
+| Catalogue, search, content | 21 | 6 | 3 | 12 |
 | Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
 | Back office, support, privacy | 17 | 0 | 1 | 16 |
 | Platform, security, non-functional | 28 | 8 | 1 | 19 |
-| **Total** | **134** | **14** | **6** | **114** |
+| **Total** | **134** | **15** | **5** | **114** |
 
 **9 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
 `CAT-07` (product pages at stable slugs), `CONT-01` (blog served from the API),

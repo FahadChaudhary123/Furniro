@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { badgeFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
+import Picture from '../shared/ui/Picture';
 
 const ProductCard = ({ product }) => {
   const badge = badgeFor(product);
@@ -31,8 +32,9 @@ const ProductCard = ({ product }) => {
           aria-hidden="true"
           tabIndex={-1}
         >
-          <img
-            src={product.image}
+          <Picture
+            src={product.image.src}
+            webp={product.image.webp}
             alt={product.name}
             loading="lazy"
             className="h-full w-full object-cover"
