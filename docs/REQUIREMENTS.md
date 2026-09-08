@@ -333,13 +333,15 @@ someone might skip.
 | `PLAT-10` | CDN with documented per-surface cache strategy and purge-on-publish | §12 | 3 | ⭕ |
 | `SEC-01` | Secrets in a managed store with per-environment scoping and access logging | §2 | 1 | ⭕ |
 | `SEC-02` | WAF and bot rules, tuned after incidents | §10, §7 R11 | 3 | ⭕ |
-| `SEC-03` | Edge rate-limiting and challenge, targeted rather than blanket blocks | §7 R11 | 3 | ⭕ |
-| `SEC-04` | Security headers: CSP, HSTS, frame and referrer policies; modern ciphers only | §10 | 1 | ⭕ |
+| `SEC-03` | Edge rate-limiting and challenge, targeted rather than blanket blocks | §7 R11 | 3 | ✅ |
+| `SEC-04` | Security headers: CSP, HSTS, frame and referrer policies; modern ciphers only | §10 | 1 | ✅ |
 | `SEC-05` | Dependency vulnerability scanning every build plus weekly sweep | §10 | 0 | ✅ |
 | `SEC-06` | Secret scanning in CI | §2, §3 | 0 | ✅ |
 
 `PLAT-01`–`03` landed with the platform module; `PLAT-04` is partial — the error middleware
-exists, an error-tracking service does not. `SEC-05` and `SEC-06` landed in the Stage 0 pass. `SEC-01` is actively breached: credentials sit in a plaintext `.env` with
+exists, an error-tracking service does not. `SEC-03`/`SEC-04` landed with the security
+module, `SEC-05`/`SEC-06` in the Stage 0 pass. `SEC-01` (managed secret store) and `SEC-02`
+(WAF) need infrastructure that does not exist. `SEC-01` is actively breached: credentials sit in a plaintext `.env` with
 rotation outstanding.
 
 ## 19. Non-functional — `NFR`
@@ -447,8 +449,8 @@ complete and non-overlapping.
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
 | Back office, support, privacy | 17 | 0 | 1 | 16 |
-| Platform, security, non-functional | 28 | 6 | 1 | 21 |
-| **Total** | **134** | **12** | **6** | **116** |
+| Platform, security, non-functional | 28 | 8 | 1 | 19 |
+| **Total** | **134** | **14** | **6** | **114** |
 
 **9 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
 `CAT-07` (product pages at stable slugs), `CONT-01` (blog served from the API),

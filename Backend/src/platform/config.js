@@ -45,9 +45,19 @@ export const config = {
   logLevel: process.env.LOG_LEVEL ?? (isProduction ? 'info' : 'debug'),
 
   /**
+   * Rate limiting. Generous by default — the limit is there to stop abuse, not to police
+   * a visitor browsing quickly. Lower it once there is real traffic to measure against.
+   */
+  rateLimit: {
+    windowMs: int(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
+    max: int(process.env.RATE_LIMIT_MAX, 1200),
+    writeMax: int(process.env.RATE_LIMIT_WRITE_MAX, 5),
+  },
+
+  /**
    * Identifies what is actually running (Doc B §2: "so 'what is actually running' is never
-   * guesswork"). No git repository yet, so these fall back to 'unknown' until CI injects
-   * them at build time.
+   * guesswork"). These fall back to 'unknown' until CI injects them at build time — see
+   * docs/runbooks/deployment.md.
    */
   build: {
     sha: process.env.GIT_SHA ?? 'unknown',

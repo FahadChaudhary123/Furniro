@@ -14,6 +14,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- **The `security` module** (`Backend/src/security/`) — `SEC-04` security headers via
+  helmet (CSP `default-src 'none'`, nosniff, `X-Frame-Options: DENY`, no-referrer, HSTS in
+  production only) and `SEC-03` rate limiting on `/api`. The API previously sent no security
+  headers at all. The 429 uses the documented error shape and carries a correlation id;
+  health probes are exempt, so a throttled probe cannot read as an outage.
 - **Shop filtering, search and sorting, all driven by the URL** (`SRCH-07`). Category
   chips with live counts, a search box, sort and page size — every one a parameter the API
   already validated. A filtered view is now shareable and bookmarkable, and the browser's

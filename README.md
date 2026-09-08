@@ -84,7 +84,7 @@ rather than at boot.
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon reload |
-| `npm run smoke` | Smoke-test a running server (64 checks) |
+| `npm run smoke` | Smoke-test a running server (72 checks) |
 
 | Endpoint | Purpose |
 |---|---|

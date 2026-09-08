@@ -113,7 +113,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ```bash
 cd Frontend && npm run verify   # lint + build + performance budgets
 cd Frontend && npm run e2e      # 251 browser checks; starts both servers itself
-cd Backend  && npm run smoke    # 64 API checks against a running server
+cd Backend  && npm run smoke    # 72 API checks against a running server
 ```
 
 All three must pass. **A build that succeeds is not a page that renders** — the e2e suite

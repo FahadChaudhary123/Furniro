@@ -229,9 +229,22 @@ Set on the front-end host:
 | `X-Frame-Options` | `DENY` — or a CSP `frame-ancestors 'none'` |
 | `Content-Security-Policy` | Start in report-only, tighten, then enforce |
 
-On the API, use `helmet` (not currently a dependency) and configure `cors` with an explicit
-origin allowlist. **`cors()` with no arguments reflects any origin** — see
-[API.md](API.md#cors).
+**The API now sends its own set** via `helmet` (`Backend/src/security/headers.js`): a
+`default-src 'none'` CSP, `nosniff`, `X-Frame-Options: DENY`, `no-referrer`, and HSTS in
+production only. `cors` uses an explicit origin allowlist — **`cors()` with no arguments
+reflects any origin**, see [API.md](API.md#cors).
+
+One trap worth knowing: helmet defaults `Cross-Origin-Resource-Policy` to `same-origin`,
+which blocks the storefront from reading its own API *even with correct CORS headers*. It is
+set to `cross-origin` deliberately, and a smoke check asserts it.
+
+**Rate limiting is in place** on `/api` — 1200 requests per minute per IP by default,
+configurable, with health probes exempt so a throttled probe cannot read as an outage. The
+store is in-memory, so the limit is per-process: with two instances the real limit is
+double what it says, and a shared store is needed then.
+
+The table above still applies to whatever serves the front-end bundle, which sends none of
+these yet because no host has been chosen.
 
 ---
 

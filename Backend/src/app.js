@@ -14,6 +14,7 @@
 import express from 'express';
 import cors from 'cors';
 
+import { securityHeaders, apiLimiter } from './security/index.js';
 import { productsRouter, categoriesRouter } from './modules/catalogue/index.js';
 import { postsRouter } from './modules/content/index.js';
 import {
@@ -34,6 +35,9 @@ export function createApp() {
   app.disable('x-powered-by');
 
   app.use(correlationMiddleware);
+
+  // Headers before anything can respond, so even an error carries them.
+  app.use(securityHeaders());
 
   /**
    * Explicit allowlist. `cors()` with no arguments reflects ANY origin — see
@@ -72,6 +76,10 @@ export function createApp() {
   });
 
   app.use(healthRouter);
+
+  // Rate limiting applies to /api only. Health probes are skipped inside the limiter — a
+  // throttled health check reads as an outage and can trigger a restart loop.
+  app.use('/api', apiLimiter);
 
   // Domain modules mount here as they are built — docs/MODULES.md#build-order.
   app.use('/api/products', productsRouter);

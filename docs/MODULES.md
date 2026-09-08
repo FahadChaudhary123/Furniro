@@ -147,6 +147,11 @@ Size is relative build effort, not a schedule: **S** small, **M** medium, **L** 
 | `jobs` | Queue, workers, retries, dead-letter queue, scheduled jobs, backfill runner with kill switch | `PLAT-05`–`07` (3) | M | Platform engineer | R6 |
 | `security` | Secret access, security headers, rate limiting, WAF/bot rules, dependency and secret scanning | `SEC-01`–`06` (6) | M | Security owner | R11, R12 |
 
+`security` is built for what can be built without infrastructure: `SEC-03` rate limiting
+and `SEC-04` headers, with `SEC-05`/`SEC-06` living in CI. `SEC-01` (managed secret store)
+and `SEC-02` (WAF) need a platform that does not exist yet. `jobs` is unstarted — there is
+nothing to schedule.
+
 `platform` is the first thing built and the thing every other module assumes. `PLAT-02`
 (correlation IDs) in particular must exist before there is anything to debug — retrofitting
 tracing across 20 modules is far more expensive than starting with it.

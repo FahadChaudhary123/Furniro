@@ -86,6 +86,37 @@ async function main() {
     goodOrigin.headers.get('access-control-allow-origin') === 'http://localhost:5173',
   );
 
+  // --- security headers (SEC-04) ----------------------------------------------------------
+  const secured = await fetch(`${BASE}/api/categories`);
+  const h = (n) => secured.headers.get(n);
+  check('sets Content-Security-Policy', (h('content-security-policy') ?? '').includes("default-src 'none'"));
+  check('sets X-Content-Type-Options', h('x-content-type-options') === 'nosniff');
+  check('sets X-Frame-Options', h('x-frame-options') === 'DENY');
+  check('sets Referrer-Policy', h('referrer-policy') === 'no-referrer');
+  check(
+    'Cross-Origin-Resource-Policy allows the storefront',
+    h('cross-origin-resource-policy') === 'cross-origin',
+    'helmet defaults this to same-origin, which silently breaks the front end despite correct CORS',
+  );
+
+  // --- rate limiting (SEC-03) -------------------------------------------------------------
+  check('advertises a rate-limit policy', Boolean(h('ratelimit-policy')));
+  const first = await fetch(`${BASE}/api/categories`);
+  const second = await fetch(`${BASE}/api/categories`);
+  const remaining = (r) => Number(/remaining=(\d+)/.exec(r.headers.get('ratelimit') ?? '')?.[1]);
+  check(
+    'the remaining budget decreases',
+    remaining(second) < remaining(first),
+    `${remaining(first)} -> ${remaining(second)}`,
+  );
+
+  const healthProbe = await fetch(`${BASE}/health`);
+  check(
+    'health probes are exempt from rate limiting',
+    !healthProbe.headers.get('ratelimit'),
+    'a throttled health check reads as an outage and can trigger a restart loop',
+  );
+
   // --- catalogue: list ------------------------------------------------------------------
   const list = await fetch(`${BASE}/api/products`);
   const listBody = await list.json();

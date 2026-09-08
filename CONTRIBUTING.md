@@ -222,6 +222,10 @@ whose database is Postgres. Both are pure cost. See
 If you do add one: justify it in the PR description, check the maintenance status and
 transitive weight, and prefer the smaller option.
 
+`helmet` and `express-rate-limit` are the standing exception to "would twenty lines do".
+Both are security-critical and easy to get subtly wrong — a hand-rolled limiter leaks memory
+or mishandles IPv6, and a hand-rolled header set drifts as browser guidance changes.
+
 ### The Vite 8 beta
 
 `Frontend` runs `vite@8.0.0-beta.13`, pinned through an `overrides` block that forces the
@@ -251,7 +255,7 @@ will keep printing the warning.
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
 
-**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 64 checks against a
+**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 72 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and
 content contracts.
 
