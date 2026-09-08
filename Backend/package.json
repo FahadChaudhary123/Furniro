@@ -1,13 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Furniro API — Express 5 + Supabase. See ../docs/MODULES.md",
+  "description": "Furniro API \u2014 Express 5 + Supabase. See ../docs/MODULES.md",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
     "smoke": "node scripts/smoke.mjs",
-    "test": "echo \"No tests yet — see docs/OPS_CONFORMANCE.md\" && exit 0"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +23,8 @@
     "pg": "^8.18.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11"
+    "nodemon": "^3.1.11",
+    "vitest": "^5.0.0"
   },
   "type": "module",
   "private": true,

@@ -17,10 +17,12 @@ safety net. API-level checks stay in a smoke suite; byte budgets stay in a scrip
 
 ## Alternatives
 
-**Unit tests first (Vitest).** Still wanted, and still absent. But no unit test would have
-caught the blank page: every unit was fine and the composition was broken. Unit tests are the
-right home for `badgeFor` boundaries and price formatting, which are currently covered only
-indirectly through the UI.
+**Unit tests first (Vitest).** Rejected as *first*, not as unnecessary — and they landed on
+2026-09-08. No unit test would have caught the blank page: every unit was fine and the
+composition was broken. But the reverse also holds, and writing them found two things the
+browser suite could not: `toMinorUnits` losing a unit at floating-point half-boundaries, and
+`formatPrice` separating the symbol with U+00A0 rather than a space, which Playwright's
+whitespace normalisation had been hiding.
 
 **Component tests (Testing Library).** Faster and closer to the code, but they render in a
 simulated DOM. Several defects found here were only visible in a real browser: a mobile
@@ -36,6 +38,9 @@ decoded, WebP negotiation, `prefers-reduced-motion`.
 - Written against roles and accessible names, so it doubles as accessibility pressure. It
   has already forced two real fixes: duplicate adjacent links to the same product, and the
   distinction between a missing `alt` and a deliberately empty one.
+- The two layers answer different questions and both are needed. 73 unit tests run in under
+  a second and cover arithmetic at its boundaries; 275 browser checks take 90 seconds and
+  cover composition, layout and real network behaviour.
 - It only tests what someone thought to assert. Running the suite after a change proves
   nothing broke; it says nothing about whether the new behaviour works. Coverage for
   code splitting, the CSS reveal and reduced motion was written **after** those shipped —

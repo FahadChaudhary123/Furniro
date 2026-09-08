@@ -57,7 +57,10 @@ this runbook did before it was executed.
 npm run smoke             # 72 checks; all should pass
 ```
 
-`npm run smoke` reads the same `.env`, so it follows the server wherever it binds.
+`npm run smoke` reads the same `.env`, so it follows the server wherever it binds — both
+the port and the CORS allowlist. Start the API with an `ALLOWED_ORIGINS` that `.env` does
+not have and the CORS check will fail: it is asserting the configuration it can see, not
+the one that shell happens to hold.
 
 **If you change `PORT`, set `VITE_API_URL` to match** in `Frontend/.env.local`, or the front
 end will keep asking `http://localhost:3000/api` and show an error panel instead of products.
@@ -83,14 +86,15 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run preview` | `Frontend/` | Serve the built `dist/` |
 | `npm run lint` | `Frontend/` | ESLint over `**/*.{js,jsx}` |
 | `npm run budgets` | `Frontend/` | Performance budgets against `dist/` |
-| `npm run verify` | `Frontend/` | lint + build + budgets |
+| `npm test` | either | Unit tests (39 front end, 34 back end) |
+| `npm run verify` | `Frontend/` | lint + unit + build + budgets |
 | `npm start` | `Backend/` | Run the API |
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
 | `npm run smoke` | `Backend/` | 72 checks against a running API |
 | `npm run e2e` | `Frontend/` | 275 browser checks; starts both servers itself |
 
-Run `npm run verify` and `npm run e2e` (front end) and `npm run smoke` (back end) before
-opening a PR. There is no unit test suite yet.
+Run `npm run verify` and `npm run e2e` (front end) and `npm test` + `npm run smoke`
+(back end) before opening a PR.
 
 ---
 

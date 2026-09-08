@@ -51,6 +51,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Fast, pure-logic checks. They run before the build because a rounding bug should
+      # fail in under a second, not after a bundle.
+      - name: Unit tests
+        run: npm test
+
       - name: Build
         run: npm run build
 
@@ -92,7 +97,7 @@ jobs:
           retention-days: 7
 
   backend:
-    name: Back end — boot and smoke
+    name: Back end — unit, boot and smoke
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -112,6 +117,9 @@ jobs:
 
       # Boots the server and exercises the real HTTP surface: health, correlation, error
       # shape, CORS, and the whole catalogue API contract.
+      - name: Unit tests
+        run: npm test
+
       - name: Smoke test
         run: |
           npm start > /tmp/boot.log 2>&1 &

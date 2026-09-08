@@ -168,6 +168,17 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **The smoke suite reported a CORS defect that was really a test defect.** The check
+  hardcoded `http://localhost:5173` as the allowed origin, so it failed against any server
+  whose allowlist had been configured to anything else — including the one used to demo the
+  app. It now reads `ALLOWED_ORIGINS` from the same source the server does, the way the
+  `PORT` fix already did, and names the expected origin when it fails. `ALLOWED_ORIGINS` and
+  `LOG_LEVEL` are also set in `Backend/.env` rather than being supplied ad hoc per shell, so
+  the documented `npm run dev` reproduces the configuration the smoke suite asserts.
+- **`toMinorUnits` silently lost a unit at floating-point half-boundaries.**
+  `1.005 * 100` is `100.49999999999999`, so `Math.round` returned 100. Whole-rupiah prices —
+  everything currently authored — were unaffected, but the helper was a trap for the next
+  person to reach for it. Found by a unit test; invisible to the browser suite.
 - **The documented local setup did not work.** Executing
   `docs/runbooks/local-development.md` as written — Doc B §18's monthly runbook test, never
   done before — found the API binds to `PORT` from `.env` (5000 here) while both the front
@@ -282,7 +293,7 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
 
 ### Repository
 
-- **No tests.** CI now exists but runs no test suite — there is none to run.
+
 - **No deployment configuration** for either tier, and no host chosen.
 - **Whether `Backend/.env` ever reached git history is unverified.** Rotation is outstanding
   regardless — see [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).

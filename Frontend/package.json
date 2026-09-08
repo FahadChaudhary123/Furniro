@@ -10,10 +10,12 @@
     "preview": "vite preview",
     "budgets": "node scripts/check-budgets.mjs",
     "optimise:images": "node scripts/optimise-images.mjs",
-    "verify": "npm run lint && npm run build && npm run budgets",
+    "verify": "npm run lint && npm run test && npm run build && npm run budgets",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "lucide-react": "^0.563.0",
@@ -36,7 +38,8 @@
     "postcss": "^8.5.6",
     "sharp": "^0.35.4",
     "tailwindcss": "^3.4.13",
-    "vite": "^8.0.0-beta.13"
+    "vite": "^8.0.0-beta.13",
+    "vitest": "^5.0.0"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"

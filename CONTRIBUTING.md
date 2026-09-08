@@ -286,9 +286,21 @@ entirely, while lint, build, performance budgets and all 46 API smoke checks wer
 Known gaps are recorded as `test.fail()` cases, so the suite documents them and tells you
 when one closes rather than sitting quietly red.
 
-**There are still no unit tests.** Vitest remains the natural fit — it shares Vite's
-config and transform pipeline. Highest-value targets: `badgeFor()` boundaries, price
-formatting, and the catalogue service's pagination arithmetic.
+**Unit tests, with Vitest.** `npm test` in either package — 39 checks in `Frontend/`, 34 in
+`Backend/`, all in under a second.
+
+```bash
+cd Frontend && npm test        # money, badges, cart reducers
+cd Backend  && npm test        # catalogue and content services
+```
+
+They cover pure logic at its boundaries: rounding, quantity clamping, pagination arithmetic,
+the last page, an empty result set. Reach for a unit test when the question is "is this
+number right"; reach for the end-to-end suite when it is "does this work in a browser".
+
+Writing them found two defects the browser suite could not see — `toMinorUnits` losing a
+unit at a floating-point half-boundary, and a non-breaking space in formatted prices that
+Playwright's whitespace normalisation had been hiding.
 
 ---
 

@@ -20,6 +20,14 @@ import 'dotenv/config';
 
 const BASE = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
 
+/**
+ * The origin the server is configured to allow. Read from the same source the server uses
+ * rather than hardcoded — asserting a fixed 5173 made this fail against any server whose
+ * allowlist had been set, which is a test bug reported as a CORS bug.
+ */
+const ALLOWED_ORIGIN =
+  (process.env.ALLOWED_ORIGINS ?? '').split(',')[0].trim() || 'http://localhost:5173';
+
 let passed = 0;
 let failed = 0;
 
@@ -83,12 +91,11 @@ async function main() {
     badOrigin.headers.get('access-control-allow-origin') !== 'https://evil.example',
   );
 
-  const goodOrigin = await fetch(`${BASE}/health`, {
-    headers: { Origin: 'http://localhost:5173' },
-  });
+  const goodOrigin = await fetch(`${BASE}/health`, { headers: { Origin: ALLOWED_ORIGIN } });
   check(
     'allowed CORS origin is reflected',
-    goodOrigin.headers.get('access-control-allow-origin') === 'http://localhost:5173',
+    goodOrigin.headers.get('access-control-allow-origin') === ALLOWED_ORIGIN,
+    `expected ${ALLOWED_ORIGIN}; set ALLOWED_ORIGINS to match the server under test`,
   );
 
   // --- security headers (SEC-04) ----------------------------------------------------------

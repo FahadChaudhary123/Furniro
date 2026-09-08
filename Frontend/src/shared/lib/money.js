@@ -33,6 +33,14 @@ export function formatPrice(minorUnits) {
 /**
  * Convert major units to minor units. Use when authoring catalogue data, so the
  * conversion is visible rather than a magic trailing "00".
+ *
+ * The `toFixed` round-trip is not decoration. `1.005 * 100` is `100.49999999999999` in
+ * binary floating point, so a bare `Math.round` returns 100 and silently loses a unit at
+ * exact-half boundaries. Whole-rupiah input — everything this project actually authors —
+ * is unaffected either way, but a helper that quietly drops a cent on fractional input is
+ * a trap for whoever reaches for it next.
+ *
  * @param {number} major - e.g. 2_500_000 rupiah
  */
-export const toMinorUnits = (major) => Math.round(major * MINOR_UNITS_PER_MAJOR);
+export const toMinorUnits = (major) =>
+  Math.round(Number((major * MINOR_UNITS_PER_MAJOR).toFixed(4)));

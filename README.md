@@ -61,7 +61,8 @@ contact) renders standalone.
 | `npm run lint` | ESLint across `**/*.{js,jsx}` |
 | `npm run budgets` | Enforce performance budgets against `dist/` (Doc B §12) |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
-| `npm run verify` | lint + build + budgets — run this before opening a PR |
+| `npm test` | Unit tests (39 checks, under a second) |
+| `npm run verify` | lint + unit + build + budgets — run this before opening a PR |
 | `npm run e2e` | Playwright end-to-end suite (251 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
@@ -88,6 +89,7 @@ fails at the point of use rather than at boot.
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon reload |
+| `npm test` | Unit tests for the services (34 checks) |
 | `npm run smoke` | Smoke-test a running server (72 checks) |
 
 | Endpoint | Purpose |
@@ -144,7 +146,7 @@ under *Unreleased*.
 | Navbar user and wishlist icons are not interactive (search and cart now work) | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
 | Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
 | `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
-| No unit tests (end-to-end coverage exists), and no deployment configuration | repo-wide |
+| No deployment configuration, and no host chosen | repo-wide |
 | Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |
 | `Backend/.env` rotation outstanding; whether it reached git history is unverified | [SECURITY.md](SECURITY.md) |
 
