@@ -98,13 +98,15 @@ rotated, not just removed from history."*
 
 `Backend/.env` holds live, non-placeholder values for `SUPABASE_ANON_KEY` and
 `DATABASE_URL`. `Backend/.gitignore` was a 0-byte file until the previous pass. Nothing has
-leaked only because there is no git repository yet.
+leaked only because there was no git repository at the time. **That is no longer true** —
+the repository exists on GitHub with CI running against it, and whether `.env` reached the
+history has not been verified.
 
 By Doc B's own rule this is **Sev 2 the moment `git init` runs**, and the required response
 is rotation, not deletion. §10 also schedules secret rotation quarterly regardless.
 
 **Outstanding:** rotate both credentials. Procedure:
-[secret-rotation.md](runbooks/secret-rotation.md#-outstanding-rotate-before-the-first-commit).
+[secret-rotation.md](runbooks/secret-rotation.md#-outstanding-rotate-now).
 
 Also adoptable from §10 with no back end at all:
 
@@ -185,9 +187,9 @@ requires adopting Doc B out of order, which is the usual way an ops standard get
 
 Everything here is doable this week and none of it is thrown away later.
 
-- [ ] `git init`, `main` as default, **after** confirming `.env` is ignored
+- [x] `git init`, `main` as default — done; `.env` handling still needs verifying
 - [ ] **Rotate `DATABASE_URL` and `SUPABASE_ANON_KEY`** (§2, §10)
-- [x] CI running lint + build + `npm audit` + secret scan on every PR (§3 gates, reduced) — `.github/workflows/ci.yml`; activates on first push
+- [x] CI running lint + build + `npm audit` + secret scan on every PR (§3 gates, reduced) — `.github/workflows/ci.yml`; running
 - [x] Bundle and image budgets enforced in CI (§12) — `Frontend/scripts/check-budgets.mjs`
 - [~] Compress images (§12, §15) — **done**, 24 MB -> 2.51 MB. WebP/AVIF derivatives and
       below-the-fold lazy-loading still outstanding (both need component changes)

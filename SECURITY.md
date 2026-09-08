@@ -31,29 +31,45 @@ service for others.
 ## Scope note
 
 The table that prompted this policy assumed the project handles user data and payments.
-**Today it handles neither.** There is no authentication, no cart, no checkout, no payment
-integration, and no persistence of any kind — the contact form has no submit handler and
-discards what is typed into it. The front end makes no network calls at all.
+**It still handles neither.** There is no authentication, no checkout, no payment
+integration, and no database. The contact form has no submit handler and discards what is
+typed into it.
+
+What has changed since this was written: the front end now calls an API, and there is a
+guest cart. Neither collects personal data — the cart holds product slugs and quantities in
+the visitor's own browser and sends nothing.
 
 That does not make the project risk-free, and the exposure below is real and current. The
-controls in the later sections are the ones that must be in place *before* the first byte
-of user data is accepted — which will be the contact form.
+controls in the later sections must be in place *before* the first byte of user data is
+accepted — which will be the contact form.
 
 ---
 
 ## ⚠ Current exposure — act on this first
 
-### 1. Live credentials sit in `Backend/.env` with no ignore rule
+### 1. Live credentials sit in `Backend/.env`, and rotation is overdue
 
 `Backend/.env` contains real, non-placeholder values for `SUPABASE_URL`,
-`SUPABASE_ANON_KEY` and `DATABASE_URL`. **`Backend/.gitignore` is an empty file** and there
-is no `.gitignore` at the repository root.
+`SUPABASE_ANON_KEY` and `DATABASE_URL`. `Backend/.gitignore` was an **empty file** for part
+of this project's life; ignore rules now exist at the root and in `Backend/` and
+`Frontend/`.
 
-The project is not yet a git repository, which is the only reason nothing has leaked. The
-moment someone runs `git init && git add .`, those credentials are committed — and a
-credential that has ever been committed must be treated as compromised, because rewriting
-history does not reach forks, clones, CI caches or the scrapers that watch public pushes in
-real time.
+**That protection is gone.** This is now a git repository with a GitHub remote and CI
+running against it, so the earlier reasoning — "nothing has leaked because there is no
+repository" — no longer holds.
+
+**Whether `Backend/.env` was ever committed has not been verified.** Check it:
+
+```bash
+git log --all --oneline --name-only -- '**/.env'   # any commit that touched it
+git ls-files | grep '\.env$'                       # tracked right now
+git check-ignore -v Backend/.env                   # is the ignore rule active
+```
+
+If any of those finds it, treat the credentials as **compromised** and rotate immediately:
+rewriting history does not reach forks, clones, CI caches, or the scrapers that watch public
+pushes in real time. If none of them finds it, rotate anyway — see below. The values have sat
+in a working directory across a long session and rotation was already outstanding.
 
 `DATABASE_URL` is the serious one. A Postgres connection string embeds the **database
 password** and grants direct read/write access to the whole database, bypassing row-level
@@ -62,13 +78,15 @@ repository.
 
 **Fix, in order:**
 
-1. Ignore rules are now in place — `.gitignore` at the root and in `Backend/`, both
-   covering `.env` and its variants. Verify with `git check-ignore -v Backend/.env` once
-   the repo is initialised.
-2. **Rotate `DATABASE_URL` and `SUPABASE_ANON_KEY` now**, in the Supabase dashboard, before
-   any git history exists. Rotating is cheap today and expensive after the first push.
-3. Confirm `git status` never lists `.env` before the first commit.
-4. Use `Backend/.env.example` — committed, keys only, no values — as the template.
+1. Run the three commands above and establish whether `.env` is in the history.
+2. **Rotate `DATABASE_URL` and `SUPABASE_ANON_KEY`** in the Supabase dashboard. This is
+   outstanding either way and has been since the credentials were first noticed.
+3. Confirm the ignore rules are active — `.gitignore` exists at the root and in `Backend/`
+   and `Frontend/`, all covering `.env` and its variants.
+4. If `.env` is tracked, `git rm --cached Backend/.env`, commit, and purge history
+   ([procedure](docs/runbooks/secret-rotation.md#purging-a-secret-from-git-history)) —
+   **after** rotating, never instead of it.
+5. Use `Backend/.env.example` — committed, keys only, no values — as the template.
 
 ### 2. Know what the anon key is
 
@@ -84,15 +102,20 @@ The `service_role` key is the opposite: it bypasses RLS completely. It belongs o
 server, in an environment variable, and nowhere else — never in `Frontend/`, never behind a
 `VITE_` prefix, never in a log line.
 
-### 3. No dependency auditing
+### 3. Dependency auditing — now enforced
 
-No CI, no `npm audit` in any workflow, and `Frontend` runs a **beta** of Vite 8 pinned
-through `overrides` — which forces that version onto transitive dependents too, including
-any that have not been tested against it. Nothing currently tells you when a dependency
-develops a known vulnerability.
+`npm audit --audit-level=high` runs in CI across both packages and blocks a merge, alongside
+a `gitleaks` secret scan and an explicit check that no `.env` is tracked
+(`.github/workflows/ci.yml`).
 
-Run `npm audit` in both `Frontend/` and `Backend/` before each release, and add Dependabot
-or equivalent when the repo goes to a host that supports it.
+It found 23 vulnerabilities the first time it ran — 15 in `Frontend`, 8 in `Backend`,
+including `react-router-dom`, a runtime dependency that shipped to users. All were resolved.
+
+Still outstanding: `Frontend` runs a **beta** of Vite 8 pinned through `overrides`, which
+forces that version onto transitive dependents including any not tested against it. And
+there is no Dependabot or scheduled sweep — the gate only fires on a pull request, so a
+vulnerability disclosed between PRs goes unnoticed until the next one. Doc B §10 asks for a
+weekly full sweep.
 
 ---
 

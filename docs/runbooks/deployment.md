@@ -1,15 +1,16 @@
 # Runbook: deployment
 
 🔴 **Nothing is deployed and no host has been chosen.** There is no `vercel.json`, no
-Dockerfile, and no environment configuration anywhere in the repository. CI is defined
-(`.github/workflows/ci.yml`) but has never run — it activates on the first push. This is
-the procedure to follow once there is a host, and the set of decisions to make first.
+Dockerfile, and no environment configuration for a host. CI **is** running
+(`.github/workflows/ci.yml`) — lint, build, budgets, end-to-end, API smoke, dependency
+audit and secret scan. This is the procedure to follow once there is a host, and the set of
+decisions to make first.
 
 ---
 
 ## Prerequisites, none of which exist yet
 
-- [ ] A git repository, with `main` as the default branch — this also switches CI on
+- [x] A git repository, with `main` as the default branch — done, CI is running
 - [ ] A hosting account for the front end (static)
 - [ ] A hosting account for the back end (Node), once it has code
 - [ ] Environment variables configured in the host — **not** committed

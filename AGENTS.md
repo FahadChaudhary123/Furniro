@@ -14,18 +14,20 @@ the two cannot drift apart.
 
 ## The short version
 
-- **The back end does not exist.** `Backend/index.js` is empty; `controllers/`, `models/`,
-  `routes/`, `middlewares/` and `utils/` are empty directories. The front end makes zero
-  network calls. Do not write code assuming an API, database, cart, or logged-in user.
+- **What exists:** a running API (`platform`, `catalogue`, `content` modules) and a front
+  end that fetches from it, plus a guest cart. **What does not:** a database, auth,
+  checkout, payments, orders or inventory. Do not write code assuming any of those.
 - **Never print, commit or expose a secret.** `Backend/.env` holds live credentials,
   including a `DATABASE_URL` containing the database password.
 - **Never give a secret a `VITE_` prefix** — Vite inlines those into the public bundle.
 - **Never store formatted price strings or use floats for money.** Integers in minor units.
 - **Do not run `git init`, commit, or push** unless asked. The repo is uninitialised and
   `.env` holds live credentials.
-- **Verify with `npm run lint` and `npm run build` in `Frontend/`** before reporting done.
-  There are no tests.
-- **Read [DATA_MODEL.md](DATA_MODEL.md) before touching product data** — two incompatible
-  shapes exist in the codebase.
+- **Verify with `npm run verify` and `npm run e2e` in `Frontend/`, and `npm run smoke` in
+  `Backend/`** before reporting done. A build that succeeds is not a page that renders — the
+  end-to-end suite exists because lint, build and API tests were all green while `/shop`
+  rendered blank.
+- **Product data has exactly one home:** `Backend/src/modules/catalogue/data/products.json`.
+  Never add a second copy. The cart stores `{slug, quantity}` and never a price.
 
 Full rules, conventions, and the list of known traps: [CLAUDE.md](CLAUDE.md).

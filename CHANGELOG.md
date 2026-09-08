@@ -43,9 +43,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 - `components/PageBanner.jsx` — title plus breadcrumb, used by the new pages. `ShopBanner`,
   `BlogBanner` and the contact page still hand-roll the same markup; adopting it there is
   separate cleanup.
-- **End-to-end test suite** (`npm run e2e`) — Playwright, 123 checks across desktop and a
-  Pixel 5 viewport, running against the production build with both servers started by the
-  config. Covers the catalogue contract, image decoding, derived badges, sorting,
+- **End-to-end test suite** (`npm run e2e`) — Playwright, across desktop and a Pixel 5
+  viewport, running against the production build with both servers started by the config.
+  Started at 123 checks and has grown with each module since. Covers the catalogue contract, image decoding, derived badges, sorting,
   pagination, routing, the SPA rewrite, mobile drawer, console errors, failed requests, alt
   text, third-party scripts, and API-failure handling. Now a CI gate.
 - **The front end now fetches products from the API.** `useProducts()` and
@@ -64,7 +64,7 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   `product_count`. Layered `routes -> controller -> service -> repository` per
   docs/MODULES.md, with the repository as the only data-touching file — swapping it for
   Supabase is the whole migration.
-- **Smoke suite grew to 46 checks**, 29 of them covering the catalogue contract: response
+- **Smoke suite grew to cover the catalogue contract** — 29 new checks: response
   envelope, integer prices, embedded category objects, absence of a stored badge field,
   pagination boundaries, sort ordering, filters, and five validation rejections including
   an injection-shaped `sort`.
@@ -116,7 +116,8 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   `.env` and its variants. `Backend/.gitignore` previously existed but was **empty**, and
   `Backend/.env` holds live Supabase and Postgres credentials — including a `DATABASE_URL`
   that embeds the database password and bypasses row-level security. Nothing had leaked
-  only because the project is not yet a git repository.
+  only because the project was not a git repository at the time. It is now, so whether
+  `.env` reached the history needs verifying — see SECURITY.md.
 - **23 dependency vulnerabilities resolved** — 15 in `Frontend/` (10 high) and 8 in
   `Backend/` (5 high), all via non-breaking `npm audit fix`. Both packages now report zero.
   Surfaced by the new CI audit gate, which was red on arrival. Most were dev-only, but
@@ -243,9 +244,10 @@ Carried forward until fixed. Each is a real defect, not a missing feature.
 
 ### Repository
 
-- **Not a git repository.** No version control, so no history, no branches, no review.
 - **No tests.** CI now exists but runs no test suite — there is none to run.
-- **No deployment configuration** for either tier.
+- **No deployment configuration** for either tier, and no host chosen.
+- **Whether `Backend/.env` ever reached git history is unverified.** Rotation is outstanding
+  regardless — see [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
 - **`gsap` is dead weight** — its only consumer, `AnimationDemo.jsx`, is never imported.
 
 ---

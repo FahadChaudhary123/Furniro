@@ -3,7 +3,7 @@
 For a leaked credential, and for routine rotation.
 
 **There is an outstanding rotation for this project.** See
-[Outstanding](#-outstanding-rotate-before-the-first-commit).
+[Outstanding](#-outstanding-rotate-now).
 
 ---
 
@@ -23,16 +23,17 @@ Removing the file does not un-leak the value. Only rotation does.
 
 ---
 
-## ⚠ Outstanding: rotate before the first commit
+## ⚠ Outstanding: rotate now
 
 `Backend/.env` holds live, non-placeholder values for `SUPABASE_URL`, `SUPABASE_ANON_KEY`
-and `DATABASE_URL`. `Backend/.gitignore` was an empty file until recently, and the project
-is still not a git repository.
+and `DATABASE_URL`. `Backend/.gitignore` was an empty file for part of this project's life.
 
-Nothing has leaked yet — the absence of a repository is the only reason. But `git init &&
-git add .` under the old ignore rules would have committed all three, and the safe
-assumption once code starts moving between machines is that anything sitting in a working
-directory this long may have been copied, backed up or synced somewhere you did not intend.
+**The repository now exists on GitHub with CI running against it.** Whether `.env` was ever
+committed has not been verified — see
+[SECURITY.md](../../SECURITY.md#-current-exposure--act-on-this-first) for the three commands
+that answer it. Rotate regardless of the answer: the safe assumption for a credential that
+has sat in a working directory across a long session, on a machine that syncs and backs up,
+is that it has been somewhere you did not intend.
 
 **`DATABASE_URL` is the one that matters.** It embeds the database password and grants
 direct read/write access to the entire database, bypassing row-level security completely.
@@ -55,8 +56,9 @@ procedure and zero downtime.
 6. **Verify:** the app connects with the new value, and confirm the old one fails.
 
 **Consequence:** every consumer of the old string loses access immediately. Know what those
-are before you start. Today the answer is "nothing" — the back end has no code — which
-makes now the cheapest possible moment to do it.
+are before you start. Today the answer is still "nothing" — the API reads from JSON files
+and no code has ever opened a database connection — which makes now the cheapest possible
+moment to do it. That stops being true the day a schema exists.
 
 ### `SUPABASE_ANON_KEY`
 

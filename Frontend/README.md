@@ -28,8 +28,13 @@ Requires Node `^20.19.0` or `>=22.12.0` — Vite 8 will not start below that.
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Serve the built `dist/` |
 | `npm run lint` | ESLint over `**/*.{js,jsx}` |
+| `npm run budgets` | Performance budgets against `dist/` |
+| `npm run verify` | lint + build + budgets |
+| `npm run e2e` | Playwright end-to-end suite (starts both servers) |
 
-Run `lint` and `build` before opening a PR. There are no tests yet.
+Run `npm run verify` and `npm run e2e` before opening a PR. There are no unit tests yet.
+
+The e2e suite starts the API itself, so `Backend/` needs its dependencies installed too.
 
 > This file replaced the default Vite template README, which described a starter template
 > rather than this project.

@@ -111,12 +111,14 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Verify before claiming done
 
 ```bash
-cd Frontend
-npm run verify     # lint + build + performance budgets
+cd Frontend && npm run verify   # lint + build + performance budgets
+cd Frontend && npm run e2e      # 221 browser checks; starts both servers itself
+cd Backend  && npm run smoke    # 64 API checks against a running server
 ```
 
-All three must pass. There are no tests, so a change that "should work" has not been checked —
-run the dev server and load the routes you touched.
+All three must pass. **A build that succeeds is not a page that renders** — the e2e suite
+exists because lint, build, budgets and every API check were green while `/shop` rendered a
+blank page. There are still no unit tests.
 
 ---
 

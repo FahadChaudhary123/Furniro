@@ -32,17 +32,18 @@ cd Backend && npm install && npm run dev
 Verify it with `npm run smoke` in another shell — 17 checks against the running server.
 Structure and boundary rules: [docs/MODULES.md](docs/MODULES.md).
 
-### Before your first commit
+### Before you commit
 
-The repository is **not yet initialised with git**. If you are the one to do it, read
-[SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) first — `Backend/.env`
-holds live credentials, and committing it once means rotating them. Ignore rules are in
-place; verify before staging:
+`Backend/.env` holds live credentials. Ignore rules are in place, but verify before staging
+— committing it once means rotating, and rotation is already outstanding:
 
 ```bash
 git check-ignore -v Backend/.env    # must print the matching rule
 git status                          # .env must not appear
 ```
+
+Read [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) for what to do if it
+turns out `.env` is already in the history.
 
 ---
 
@@ -246,9 +247,13 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — 123 checks across a desktop
-and a Pixel 5 viewport, run against the production build. The config starts both servers
-itself, so it is the whole command.
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 221 checks across
+a desktop and a Pixel 5 viewport, run against the production build. The config starts both
+servers itself, so it is the whole command.
+
+**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 64 checks against a
+running server: health, correlation ids, error shape, CORS, and the full catalogue and
+content contracts.
 
 ```bash
 cd Frontend
