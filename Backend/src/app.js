@@ -14,7 +14,7 @@
 import express from 'express';
 import cors from 'cors';
 
-import { securityHeaders, apiLimiter } from './security/index.js';
+import { securityHeaders, apiLimiter, clientErrorLimiter } from './security/index.js';
 import { productsRouter, categoriesRouter } from './modules/catalogue/index.js';
 import { postsRouter } from './modules/content/index.js';
 import {
@@ -22,6 +22,7 @@ import {
   logger,
   correlationMiddleware,
   healthRouter,
+  clientErrorsRouter,
   notFoundHandler,
   errorHandler,
 } from './platform/index.js';
@@ -85,6 +86,11 @@ export function createApp() {
   app.use('/api/products', productsRouter);
   app.use('/api/categories', categoriesRouter);
   app.use('/api/posts', postsRouter);
+
+  // PLAT-04. The only unauthenticated write in the API. It gets its own limit rather than
+  // the contact-form one: reports arrive without anyone choosing to send them, and the key
+  // is an IP, which behind a NAT is a whole office. See security/rateLimit.js.
+  app.use('/api/client-errors', clientErrorLimiter, clientErrorsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

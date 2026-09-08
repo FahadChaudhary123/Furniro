@@ -292,6 +292,47 @@ Design 8, Handmade 7, Interior 1, Wood 6) against three real posts.
 
 ---
 
+## Client errors
+
+### `POST /api/client-errors`
+
+> ✅ **Implemented.** `Backend/src/platform/clientErrors.js`
+
+Receives a crash from a visitor's browser and writes it to the structured log (`PLAT-04`).
+**The only unauthenticated write in the API, and the only `POST`.**
+
+```json
+{
+  "kind": "render",
+  "message": "Cannot read properties of undefined",
+  "path": "/shop",
+  "stack": "…",
+  "componentStack": "…",
+  "release": "a1b2c3d"
+}
+```
+
+`kind` is one of `render`, `unhandled-rejection`, `window-error`, `chunk-load`; anything else
+is recorded as `unknown` rather than reflected. Every field is read from that allowlist and
+truncated — `message` 500 characters, `stack` and `componentStack` 4000 each. Nothing else in
+the body is read, so an invented key cannot grow a log line.
+
+**Always answers `204` with no body**, including for a body that made no sense. There is
+nothing useful a crashed page can do with a `400`, and returning validation detail to an
+anonymous caller only describes the parser to whoever is probing it. A report with no
+`message` is dropped rather than logged as an empty line.
+
+`path` must be the path only. A query string can carry a search term, which is the visitor's
+and not needed to fix a bug.
+
+Rate-limited by `RATE_LIMIT_CLIENT_ERROR_MAX` (60/hour per IP), **not** by
+`RATE_LIMIT_WRITE_MAX`. The write limit is five an hour, which suits a contact form and not
+this: reports arrive without anyone choosing to send them, and the key is an IP, so behind a
+corporate NAT or mobile CGNAT one budget covers an entire office. One log line per request is
+still cheap for the caller and disk for us, hence a limit at all. Reports are logged at `warn`, not `error` — a visitor's browser extension
+throwing is not a server fault, and burying real 500s under extension noise is how alerting
+gets ignored.
+
 ## Contact
 
 ### `POST /api/contact`

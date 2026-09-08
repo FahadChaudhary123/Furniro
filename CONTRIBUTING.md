@@ -267,7 +267,7 @@ When an accessibility check fails, fix the markup. The brand-gold contrast excep
 that the colour decision can no longer be deferred. See
 [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
 
-**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 72 checks against a
+**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 81 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and
 content contracts.
 
@@ -297,7 +297,7 @@ entirely, while lint, build, performance budgets and all 46 API smoke checks wer
 Known gaps are recorded as `test.fail()` cases, so the suite documents them and tells you
 when one closes rather than sitting quietly red.
 
-**Unit tests, with Vitest.** `npm test` in either package — 39 checks in `Frontend/`, 52 in
+**Unit tests, with Vitest.** `npm test` in either package — 56 checks in `Frontend/`, 59 in
 `Backend/`, all in under a second.
 
 ```bash

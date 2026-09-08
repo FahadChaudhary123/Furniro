@@ -8,4 +8,4 @@
  */
 
 export { securityHeaders } from './headers.js';
-export { apiLimiter, writeLimiter, createLimiter } from './rateLimit.js';
+export { apiLimiter, writeLimiter, clientErrorLimiter, createLimiter } from './rateLimit.js';

@@ -413,8 +413,26 @@ someone might skip.
 | `SEC-05` | Dependency vulnerability scanning every build plus weekly sweep | §10 | 0 | ✅ |
 | `SEC-06` | Secret scanning in CI | §2, §3 | 0 | ✅ |
 
-`PLAT-01`–`03` landed with the platform module; `PLAT-04` is partial — the error middleware
-exists, an error-tracking service does not. `SEC-03`/`SEC-04` landed with the security
+`PLAT-01`–`03` landed with the platform module.
+
+**`PLAT-04` is partial: tracking exists, alerting does not.** A crash in a visitor's browser
+used to be invisible — the API answered 200 and the bundle threw afterwards, so nothing
+anywhere knew. The blank `/shop` page that prompted the end-to-end suite was exactly this
+shape, and it was found by a person opening the page.
+
+`POST /api/client-errors` now receives render crashes, unhandled rejections, window errors
+and failed chunk loads, and logs them beside every other structured line with the same
+correlation id. It is the only unauthenticated write in the API, so it is allowlisted field
+by field, length-capped, rate-limited, and answers `204` with no body — nothing submitted is
+ever echoed back.
+
+The reporter must never make things worse, so it never throws, never reports a failure that
+happened inside itself, deduplicates by message so a render loop cannot flood, and caps
+distinct reports per page load.
+
+**What is missing is somewhere to alert.** Logs are a record, not a page. A service (Sentry,
+or a log-based alert rule) is what turns "it is in the log" into "someone knows", and that
+needs infrastructure that does not exist. `SEC-03`/`SEC-04` landed with the security
 module, `SEC-05`/`SEC-06` in the Stage 0 pass. `SEC-01` (managed secret store) and `SEC-02`
 (WAF) need infrastructure that does not exist. `SEC-01` is actively breached: credentials sit in a plaintext `.env` with
 rotation outstanding.

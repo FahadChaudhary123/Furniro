@@ -51,7 +51,8 @@ output, a commit, a log, or a doc. `.env.example` is the file to reference.
 the public bundle as a string literal. There is no way to un-publish it after a deploy.
 
 **Never invent an endpoint.** What exists: `/health`, `/health/ready`, `/api/products`
-(+`/featured`, `/:slug`), `/api/categories`, `/api/posts` (+`/recent`, `/tags`, `/:slug`).
+(+`/featured`, `/:slug`), `/api/categories`, `/api/posts` (+`/recent`, `/tags`, `/:slug`),
+and `POST /api/client-errors` — the only unauthenticated write, and the only `POST`.
 
 **The cart never stores a price.** `{slug, quantity}` only; line detail is re-read from the
 API. A cart holding its own price copy shows yesterday's price after a repricing, and it is
@@ -126,11 +127,11 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Verify before claiming done
 
 ```bash
-cd Frontend && npm run verify   # lint + 39 unit checks + build + budgets + SEO check
+cd Frontend && npm run verify   # lint + 56 unit checks + build + budgets + SEO check
 cd Frontend && npm run e2e      # 343 browser checks; starts both servers itself
-cd Backend  && npm test         # 52 unit checks
+cd Backend  && npm test         # 59 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
-cd Backend  && npm run smoke    # 72 API checks against a running server
+cd Backend  && npm run smoke    # 81 API checks against a running server
 ```
 
 All of these must pass. **A build that succeeds is not a page that renders** — the e2e suite

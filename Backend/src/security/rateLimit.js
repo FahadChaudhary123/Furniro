@@ -65,3 +65,22 @@ export const writeLimiter = createLimiter({
   windowMs: 60 * 60 * 1000,
   limit: config.rateLimit.writeMax,
 });
+
+/**
+ * Client error reports — `PLAT-04`.
+ *
+ * Deliberately NOT `writeLimiter`. That one allows five writes an hour, which is the right
+ * shape for a contact form — a human filling in a form six times in an hour is not a human.
+ * Error reports are not that: they arrive without anyone choosing to send them, and the
+ * limit is keyed on IP, so behind a corporate NAT or a mobile carrier's CGNAT one budget is
+ * shared by everyone on it. At five an hour, one broken page in an office silences the
+ * report for every colleague.
+ *
+ * More generous, still bounded, and the client is already capped independently: it
+ * deduplicates by message and stops after ten distinct errors per page load. This is the
+ * backstop against a hostile caller, not against a broken page.
+ */
+export const clientErrorLimiter = createLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: config.rateLimit.clientErrorMax,
+});

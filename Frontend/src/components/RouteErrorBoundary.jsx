@@ -1,5 +1,7 @@
 import { Component } from 'react';
 
+import { reportError } from '../shared/lib/reportError.js';
+
 /**
  * Catches errors thrown while rendering a route, including a lazy chunk that fails to load.
  *
@@ -22,7 +24,17 @@ class RouteErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
-    // Goes to an error-tracking service once one exists; PLAT-04 is partial.
+    // PLAT-04. Without this the only record of a render crash is a console line in a
+    // browser nobody is looking at. `reportError` never throws — this is already the
+    // failure path, and an exception here would replace a recoverable crash with a blank
+    // page.
+    reportError({
+      kind: /Loading chunk|dynamically imported module/i.test(error?.message ?? '')
+        ? 'chunk-load'
+        : 'render',
+      error,
+      componentStack: info?.componentStack,
+    });
     console.error('Route failed to render', error, info?.componentStack);
   }
 

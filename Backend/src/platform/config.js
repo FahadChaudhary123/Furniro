@@ -52,6 +52,8 @@ export const config = {
     windowMs: int(process.env.RATE_LIMIT_WINDOW_MS, 60_000),
     max: int(process.env.RATE_LIMIT_MAX, 1200),
     writeMax: int(process.env.RATE_LIMIT_WRITE_MAX, 5),
+    // Client error reports are not form submissions — see security/rateLimit.js.
+    clientErrorMax: int(process.env.RATE_LIMIT_CLIENT_ERROR_MAX, 60),
   },
 
   /**

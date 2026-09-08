@@ -9,6 +9,7 @@ export { config, validateConfig } from './config.js';
 export { logger } from './logger.js';
 export { correlationMiddleware, getCorrelationId, withCorrelationId } from './correlation.js';
 export { healthRouter } from './health.js';
+export { clientErrorsRouter } from './clientErrors.js';
 export { getSupabase, resetSupabase } from './supabase.js';
 export {
   AppError, badRequest, validationFailed, unauthorized, forbidden, notFound, conflict,

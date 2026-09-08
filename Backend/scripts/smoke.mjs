@@ -269,6 +269,56 @@ async function main() {
   const badPostLimit = await fetch(`${BASE}/api/posts?limit=9999`);
   check('rejects a post limit above the cap', badPostLimit.status === 400, `got ${badPostLimit.status}`);
 
+  // --- client error reporting (PLAT-04) ---------------------------------------------------
+  const post = (body) =>
+    fetch(`${BASE}/api/client-errors`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+
+  const reported = await post(JSON.stringify({ kind: 'render', message: 'smoke test error' }));
+
+  // This section spends six of the endpoint's hourly budget. Running smoke repeatedly can
+  // exhaust it, and four cryptic failures are a worse diagnostic than one clear sentence.
+  if (reported.status === 429) {
+    console.error('\n  Client error reports are rate limited — this suite has run too often');
+    console.error('  in the last hour. Restart the server, or raise the limit:');
+    console.error('    RATE_LIMIT_CLIENT_ERROR_MAX=500 npm run dev\n');
+  }
+
+  check('accepts a client error report', reported.status === 204, `got ${reported.status}`);
+  check('returns no body — nothing submitted is ever echoed back', (await reported.text()) === '');
+
+  const noMessage = await post(JSON.stringify({ kind: 'render' }));
+  check('a report with no message is dropped, not rejected', noMessage.status === 204);
+
+  // A malformed body is the CLIENT's mistake. Returning 500 reports it as a server fault
+  // and poisons the very error signal this endpoint exists to produce — a scanner posting
+  // garbage would look like the API falling over.
+  const malformed = await post('{bad json');
+  check('malformed JSON is a 400, not a 500', malformed.status === 400, `got ${malformed.status}`);
+
+  const malformedBody = await malformed.json();
+  check(
+    'a malformed body returns the documented error shape',
+    malformedBody.error?.code === 'INVALID_BODY' && Boolean(malformedBody.error?.correlationId),
+  );
+  check(
+    'a malformed body does not echo the input back',
+    !JSON.stringify(malformedBody).includes('bad json'),
+  );
+
+  const oversized = await post(JSON.stringify({ message: 'A'.repeat(200_000) }));
+  check('an oversized body is a 413, not a 500', oversized.status === 413, `got ${oversized.status}`);
+
+  const wrongMethod = await fetch(`${BASE}/api/client-errors`);
+  check(
+    'GET is not accepted on the report endpoint',
+    wrongMethod.status === 404,
+    `got ${wrongMethod.status}`,
+  );
+
   console.log(`\n${passed} passed, ${failed} failed\n`);
   process.exit(failed === 0 ? 0 : 1);
 }

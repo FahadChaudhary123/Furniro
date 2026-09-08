@@ -63,7 +63,7 @@ contact) renders standalone.
 | `npm run seo` | SEO health check — duplicate titles, orphaned pages, sitemap coverage (`CONT-04`) |
 | `npm run seo:generate` | Write `dist/sitemap.xml` and `dist/robots.txt`; runs as part of `build` |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
-| `npm test` | Unit tests (39 checks, under a second) |
+| `npm test` | Unit tests (56 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
 | `npm run e2e` | Playwright end-to-end suite (343 checks; starts both servers) |
 
@@ -92,7 +92,7 @@ fails at the point of use rather than at boot.
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon reload |
 | `npm test` | Unit tests for the services (34 checks) |
-| `npm run smoke` | Smoke-test a running server (72 checks) |
+| `npm run smoke` | Smoke-test a running server (81 checks) |
 | `npm run completeness` | Catalogue data-quality report (`CAT-04`); non-zero if a product is blocked |
 | `npm run latency` | API latency benchmark (`NFR-04`); start the server with `RATE_LIMIT_MAX=3000` |
 

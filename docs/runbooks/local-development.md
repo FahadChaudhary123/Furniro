@@ -54,7 +54,7 @@ this runbook did before it was executed.
 `PORT` in `.env` and is **not** necessarily 3000. Then, in another shell:
 
 ```bash
-npm run smoke             # 72 checks; all should pass
+npm run smoke             # 81 checks; all should pass
 ```
 
 `npm run smoke` reads the same `.env`, so it follows the server wherever it binds — both
@@ -87,11 +87,11 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run lint` | `Frontend/` | ESLint over `**/*.{js,jsx}` |
 | `npm run budgets` | `Frontend/` | Performance budgets against `dist/` |
 | `npm run seo` | `Frontend/` | SEO health check; non-zero on a duplicate title or orphaned page |
-| `npm test` | either | Unit tests (39 front end, 52 back end) |
+| `npm test` | either | Unit tests (56 front end, 59 back end) |
 | `npm run verify` | `Frontend/` | lint + unit + build + budgets + seo |
 | `npm start` | `Backend/` | Run the API |
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
-| `npm run smoke` | `Backend/` | 72 checks against a running API |
+| `npm run smoke` | `Backend/` | 81 checks against a running API |
 | `npm run completeness` | `Backend/` | Catalogue data-quality report; non-zero if any product is blocked |
 | `npm run latency` | `Backend/` | API latency benchmark; needs `RATE_LIMIT_MAX` above ~2400 |
 | `npm run e2e` | `Frontend/` | 343 browser checks; starts both servers itself |

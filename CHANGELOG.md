@@ -35,6 +35,40 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Client error reporting** (`PLAT-04`) — `POST /api/client-errors`. A crash in a visitor's
+  browser was invisible: the API answered 200 and the bundle threw afterwards, so nothing
+  anywhere knew. The blank `/shop` page that prompted the whole e2e suite was this exact
+  shape and was found by a person opening the page.
+  Render crashes, unhandled rejections, window errors and failed chunk loads now reach the
+  same structured log as everything else, with the same correlation id.
+  It is the API's only unauthenticated write, so the input handling matters more than the
+  feature: every field is read from an allowlist and truncated, the response is `204` with no
+  body so nothing can be reflected at another visitor, `writeLimiter` applies because one log
+  line per request is an amplifier, and reports are logged at `warn` — a visitor's browser
+  extension throwing is not a server fault, and burying real 500s under extension noise is
+  how alerting gets muted.
+  The reporter never throws (it runs where the app is already broken), never reports a
+  failure that happened inside itself, deduplicates by message so a render loop cannot flood,
+  and caps distinct reports per page load. 17 unit tests cover those guarantees.
+  It gets its own rate limit (`RATE_LIMIT_CLIENT_ERROR_MAX`, 60/hour) rather than reusing the
+  write limit. That one allows five an hour, which is right for a contact form — a human
+  filling in a form six times an hour is not a human — and wrong here: reports arrive without
+  anyone choosing to send them, and the key is an IP, so behind a corporate NAT or mobile
+  CGNAT one budget is shared by everyone on it. At five an hour, one broken page in an office
+  silences the report for every colleague. Found by the smoke suite throttling itself.
+
+### Fixed
+
+- **A malformed request body returned `500` instead of `400`.** `body-parser` rejects bad
+  JSON with a 4xx `status` and a `type` like `entity.parse.failed`, but the error middleware
+  trusted only `AppError`, so every malformed request was reported as a server fault and
+  logged at `error` with a full stack. Latent until now — this is the API's first `POST`.
+  It is wrong twice over: the mistake is the client's, and it poisons exactly the error
+  signal `PLAT-04` exists to produce, since a scanner posting garbage would look like the API
+  falling over. Now `400` (or `413` for an oversized body) with code `INVALID_BODY`, logged
+  at `warn`, and the malformed input is never echoed back. The check is narrow on purpose: it
+  trusts `status` only on errors carrying body-parser's `type` marker, so a library that sets
+  `status = 400` on an internal failure is still a `500`.
 - **Discontinued products redirect instead of dying** (`CAT-08`). A product leaves the
   catalogue by failing the publish gate or by carrying `"discontinued": true`. Its slug is
   **retained** rather than dropped — a slug the server has forgotten can only 404, and Doc B
