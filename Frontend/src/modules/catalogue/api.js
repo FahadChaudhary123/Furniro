@@ -34,7 +34,15 @@ async function request(path, { signal } = {}) {
   } catch (cause) {
     // fetch rejects only on network failure — a 500 resolves normally.
     if (cause.name === 'AbortError') throw cause;
-    throw new ApiError('Could not reach the server. Is the API running?', { status: 0 });
+    // Name the URL in development: the common cause is the API listening on a different
+    // port than VITE_API_URL expects, and "could not reach the server" alone sends people
+    // looking for an outage instead of a mismatch.
+    throw new ApiError(
+      import.meta.env.DEV
+        ? `Could not reach the API at ${BASE}. Is it running on that port?`
+        : 'Could not reach the server. Please try again.',
+      { status: 0 },
+    );
   }
 
   let body = null;

@@ -168,10 +168,10 @@ Mostly satisfied. Two of Doc B's rules are worth adopting explicitly:
   [docs/decisions/](decisions/) holds ten records with context, decision, alternatives and
   consequences. Written retrospectively, which Doc B would not endorse; records from here on
   should ship with the change that makes them.
-- **Runbooks are tested** — one per month, executed as written by someone who did not write
-  it. None of the runbooks in [runbooks/](runbooks/) has ever been executed, because there
-  is no environment to execute them against. [local-development.md](runbooks/local-development.md)
-  is the one that can be tested today, and should be.
+- ~~**Runbooks are tested**~~ **Started.** `local-development.md` was executed as written on
+  2026-09-08 and produced four defects, including a setup that did not work at all. The
+  execution log lives in [runbooks/README.md](runbooks/README.md).
+  `secret-rotation.md` is the next one that can genuinely be run.
 
 Doc B's onboarding test — *a new engineer reaches a running local environment and a first
 merged change in under three days* — is currently untestable in its second half: there is

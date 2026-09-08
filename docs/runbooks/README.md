@@ -58,6 +58,15 @@ screenshotted and pasted into chat. Reference where a value lives; never reprodu
 - Correct the runbook the moment reality diverges from it. A wrong runbook is worse than no
   runbook, because it is followed with confidence.
 - **Test one runbook a month**, executed as written by someone who did not write it (Doc B
-  §18). If they cannot follow it, the runbook is wrong, not the person. Today only
-  [local-development.md](local-development.md) can actually be executed — the rest describe
-  environments that do not exist.
+  §18). If they cannot follow it, the runbook is wrong, not the person.
+
+  | Runbook | Last executed | Result |
+  |---|---|---|
+  | [local-development.md](local-development.md) | 2026-09-08 | 4 defects found and fixed |
+  | [deployment.md](deployment.md) | never | needs a host |
+  | [rollback.md](rollback.md) | never | needs a deployment |
+  | [secret-rotation.md](secret-rotation.md) | never | executable now — rotation is overdue |
+  | [incident-response.md](incident-response.md) | never | needs an incident, or a tabletop |
+
+  `secret-rotation.md` is the next one that can genuinely be run, and running it would also
+  clear an outstanding action.

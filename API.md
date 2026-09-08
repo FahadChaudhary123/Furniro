@@ -14,8 +14,10 @@ before the first route is written is the point of the document.
 
 ## Conventions
 
-**Base URL** — `http://localhost:3000/api` in development, `PORT` from `Backend/.env`.
-The front end must read this from `VITE_API_URL` and never hard-code a host.
+**Base URL** — `http://localhost:<PORT>/api`, where `PORT` comes from `Backend/.env` and
+falls back to 3000. It is genuinely configurable: this project's own `.env` sets 5000, which
+broke the documented setup until the front end and the smoke suite stopped assuming 3000.
+The front end reads `VITE_API_URL` and never hard-codes a host.
 
 **Version in the path** once anything external consumes it: `/api/v1/...`. Skip it while
 the only client is this repo's front end and both deploy together.

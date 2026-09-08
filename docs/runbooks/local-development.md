@@ -2,6 +2,11 @@
 
 Setting up a working environment, and fixing it when it misbehaves.
 
+> **Last executed as written:** 2026-09-08. Doing so found four defects, including that the
+> documented setup did not work: the API binds to `PORT` from `.env` while the front end and
+> the smoke test both assumed 3000. Doc B §18 asks for one runbook a month to be run by
+> someone who did not write it — if they cannot follow it, the runbook is wrong.
+
 ---
 
 ## Setup
@@ -22,8 +27,11 @@ npm install
 npm run dev
 ```
 
-**Verify:** the terminal prints a `Local: http://localhost:5173/` line, and the page loads.
-Navigate to `/shop`, `/about` and `/contact` — all four routes should render.
+**Verify:** the terminal prints a `Local:` line and the page loads. It is `5173` unless that
+port is taken, in which case Vite says which one it chose — that is normal, not a failure.
+
+Click through `/`, `/shop`, a product from the grid, `/about`, a blog post, `/cart` and
+`/contact`. An unknown path such as `/nope` should show a 404 page, not a blank one.
 
 **Start the API too.** The shop grid and the home-page product strip fetch from it. Without
 it you get an error panel with a retry, not products — which is correct behaviour, not a
@@ -33,16 +41,27 @@ setup failure. Everything else on the page renders standalone.
 
 ```bash
 cd Backend
-cp .env.example .env      # then fill in real values
 npm install
+[ -f .env ] || cp .env.example .env    # then fill in real values
 npm run dev
 ```
 
-**Verify:** the log prints `server listening`. Then, in another shell:
+**The guard matters.** A bare `cp .env.example .env` overwrites a populated `.env` with the
+empty template, destroying working credentials. It is written this way because that is what
+this runbook did before it was executed.
+
+**Verify:** the log prints `server listening` — check the `port` it reports. It comes from
+`PORT` in `.env` and is **not** necessarily 3000. Then, in another shell:
 
 ```bash
-npm run smoke             # 17 checks; all should pass
+npm run smoke             # 72 checks; all should pass
 ```
+
+`npm run smoke` reads the same `.env`, so it follows the server wherever it binds.
+
+**If you change `PORT`, set `VITE_API_URL` to match** in `Frontend/.env.local`, or the front
+end will keep asking `http://localhost:3000/api` and show an error panel instead of products.
+See [Products show an error](#products-show-could-not-reach-the-api).
 
 It starts without Supabase credentials — you get a warning, `/health` still works, and
 database access fails at the point of use rather than at boot.
@@ -67,10 +86,11 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run verify` | `Frontend/` | lint + build + budgets |
 | `npm start` | `Backend/` | Run the API |
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
-| `npm run smoke` | `Backend/` | 17 checks against a running API |
+| `npm run smoke` | `Backend/` | 72 checks against a running API |
+| `npm run e2e` | `Frontend/` | 275 browser checks; starts both servers itself |
 
-Run `npm run verify` (front end) and `npm run smoke` (back end) before opening a PR. There
-is no unit test suite yet.
+Run `npm run verify` and `npm run e2e` (front end) and `npm run smoke` (back end) before
+opening a PR. There is no unit test suite yet.
 
 ---
 
@@ -128,14 +148,18 @@ On Windows, killing the `npm` wrapper process does **not** kill the `vite` child
    npm run dev
    ```
 
-### Products show "Products could not be loaded"
+### Products show "Could not reach the API"
 
-The front end could not reach the API. In order:
+The front end could not reach the API. In development the error names the URL it tried —
+compare it with the `port` the API logged at startup. **A mismatch here is the most common
+cause, not an outage**, and it is exactly what happens with a `.env` that sets `PORT` to
+anything other than 3000.
 
 1. Is the API running? `cd Backend && npm run dev`.
-2. Is it on the port the front end expects? Default `http://localhost:3000/api`; override
-   with `VITE_API_URL` in `Frontend/.env.local`. **Restart Vite after changing it** — env
-   values are inlined at startup, not read per request.
+2. **Do the ports agree?** The API uses `PORT` from `Backend/.env`; the front end uses
+   `VITE_API_URL`, defaulting to `http://localhost:3000/api`. Set `VITE_API_URL` in
+   `Frontend/.env.local` to match. **Restart Vite after changing it** — env values are
+   inlined at startup, not read per request.
 3. Is the front end's origin in `ALLOWED_ORIGINS`? A CORS rejection looks identical to an
    outage from the browser's side. The API logs `CORS origin rejected` with the origin it
    saw — check the API's output.

@@ -168,6 +168,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **The documented local setup did not work.** Executing
+  `docs/runbooks/local-development.md` as written — Doc B §18's monthly runbook test, never
+  done before — found the API binds to `PORT` from `.env` (5000 here) while both the front
+  end and the smoke suite assumed 3000. `npm run smoke` failed outright and the storefront
+  showed an error panel instead of products. The smoke suite now reads `.env`, and an
+  unreachable API names the URL it tried rather than reporting a generic outage.
+- **The runbook told you to overwrite your own credentials.** `cp .env.example .env`, run
+  literally on a machine that already has a populated `.env`, replaces working values with
+  the empty template. Guarded with `[ -f .env ] ||`.
 - **The home page's featured products stopped loading** when image resolvers began returning
   `{src, webp}`: `ProductsSection` still passed the whole object to `<img src>`, so every
   featured image 404'd. The same class of bug as the category object that blanked `/shop` —

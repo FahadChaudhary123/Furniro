@@ -13,6 +13,11 @@
  * Override the target with BASE_URL.
  */
 
+// Load .env so this targets the port the server actually binds to. Without it the smoke
+// test defaulted to 3000 while a .env-configured server was on 5000, and the documented
+// setup steps failed for anyone who had ever set PORT.
+import 'dotenv/config';
+
 const BASE = process.env.BASE_URL ?? `http://localhost:${process.env.PORT ?? 3000}`;
 
 let passed = 0;

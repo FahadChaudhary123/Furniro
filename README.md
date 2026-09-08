@@ -72,14 +72,17 @@ into the bundle as a string literal. Never put a secret behind that prefix.
 
 ```bash
 cd Backend
-cp .env.example .env      # fill in values; see Environment variables below
+[ -f .env ] || cp .env.example .env   # guard: a bare cp overwrites working credentials
 npm install
 npm run dev               # or: npm start
 ```
 
-Serves on `http://localhost:3000` unless `PORT` says otherwise. It starts without Supabase
-credentials — `/health` works regardless, and database access fails at the point of use
-rather than at boot.
+**`PORT` comes from `Backend/.env`** and defaults to 3000 only when unset — check the port
+the server logs at startup. If it is not 3000, set `VITE_API_URL` in `Frontend/.env.local`
+to match, or the front end will show an error panel instead of products.
+
+It starts without Supabase credentials — `/health` works regardless, and database access
+fails at the point of use rather than at boot.
 
 | Script | Does |
 |---|---|
