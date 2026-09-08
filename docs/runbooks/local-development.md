@@ -86,13 +86,14 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run preview` | `Frontend/` | Serve the built `dist/` |
 | `npm run lint` | `Frontend/` | ESLint over `**/*.{js,jsx}` |
 | `npm run budgets` | `Frontend/` | Performance budgets against `dist/` |
+| `npm run seo` | `Frontend/` | SEO health check; non-zero on a duplicate title or orphaned page |
 | `npm test` | either | Unit tests (39 front end, 52 back end) |
-| `npm run verify` | `Frontend/` | lint + unit + build + budgets |
+| `npm run verify` | `Frontend/` | lint + unit + build + budgets + seo |
 | `npm start` | `Backend/` | Run the API |
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
 | `npm run smoke` | `Backend/` | 72 checks against a running API |
 | `npm run completeness` | `Backend/` | Catalogue data-quality report; non-zero if any product is blocked |
-| `npm run e2e` | `Frontend/` | 275 browser checks; starts both servers itself |
+| `npm run e2e` | `Frontend/` | 297 browser checks; starts both servers itself |
 
 Run `npm run verify` and `npm run e2e` (front end) and `npm test` + `npm run completeness`
 + `npm run smoke` (back end) before opening a PR.

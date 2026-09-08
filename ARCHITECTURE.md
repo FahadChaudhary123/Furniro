@@ -112,7 +112,8 @@ Two structural notes:
   copies of one decision — moving `Footer` up beside `Navbar` removes the duplication and
   guarantees consistency, at the cost of pages no longer controlling their own trailer.
 - **A `*` catch-all is in place**, rendering `NotFound`. Each route sets its own document
-  title through `shared/lib/useDocumentTitle`.
+  head — title, meta description, canonical and robots — through `shared/lib/usePageMeta`,
+  driven by the route manifest in `shared/lib/routes.js`.
 
 `BrowserRouter` uses the History API, so **any static host must rewrite unknown paths to
 `index.html`** or a hard refresh on `/shop` returns a 404 from the host. See

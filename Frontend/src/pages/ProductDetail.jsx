@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useProduct, badgeFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
-import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
@@ -21,7 +21,16 @@ const ProductDetail = () => {
   const { product, notFound, loading, error, retry } = useProduct(slug);
   const { add } = useCart();
 
-  useDocumentTitle(product?.name ?? (notFound ? 'Product not found' : 'Shop'));
+  // A product page that 404s must not stay indexed, and a page still loading has nothing
+  // worth indexing either — both emit noindex until there is a real product to describe.
+  usePageMeta({
+    title: product?.name ?? (notFound ? 'Product not found' : 'Shop'),
+    description: product
+      ? `${product.description} — ${product.name} from Furniro. ${product.category?.name ?? ''}`.trim()
+      : undefined,
+    path: `/shop/${slug}`,
+    index: Boolean(product),
+  });
 
   const badge = product ? badgeFor(product) : null;
 

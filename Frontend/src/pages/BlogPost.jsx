@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { User, Calendar, Tag } from 'lucide-react';
 import { usePost, formatPostDate } from '../modules/content';
-import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
@@ -20,7 +20,12 @@ const BlogPost = () => {
   const { slug } = useParams();
   const { post, notFound, loading, error, retry } = usePost(slug);
 
-  useDocumentTitle(post?.title ?? (notFound ? 'Post not found' : 'Blog'));
+  usePageMeta({
+    title: post?.title ?? (notFound ? 'Post not found' : 'Blog'),
+    description: post?.excerpt ?? post?.body?.slice(0, 150),
+    path: `/blog/${slug}`,
+    index: Boolean(post),
+  });
 
   const paragraphs = post?.body ? post.body.split(/\n\s*\n/).filter(Boolean) : [];
 

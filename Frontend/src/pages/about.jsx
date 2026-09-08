@@ -3,11 +3,11 @@ import BlogBanner from '../sections/BlogBanner'
 import BlogSection from '../sections/BlogSection'
 import FeaturesSection from '../sections/FeaturesSection'
 import Footer from '../components/Footer'
-import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 
 function About() {
-  useDocumentTitle('Blog');
+  usePageMeta('/about');
   return (
     <div>
       <BlogBanner />

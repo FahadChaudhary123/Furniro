@@ -39,7 +39,7 @@ decoded, WebP negotiation, `prefers-reduced-motion`.
   has already forced two real fixes: duplicate adjacent links to the same product, and the
   distinction between a missing `alt` and a deliberately empty one.
 - The two layers answer different questions and both are needed. 91 unit tests run in under
-  a second and cover arithmetic at its boundaries; 275 browser checks take 90 seconds and
+  a second and cover arithmetic at its boundaries; 297 browser checks take 90 seconds and
   cover composition, layout and real network behaviour.
 - It only tests what someone thought to assert. Running the suite after a change proves
   nothing broke; it says nothing about whether the new behaviour works. Coverage for

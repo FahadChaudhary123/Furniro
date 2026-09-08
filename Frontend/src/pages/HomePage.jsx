@@ -6,10 +6,10 @@ import ProductsSection from "../sections/ProductsSection";
 import RoomsInspiration from "../sections/RoomsInspiration";
 import ShareSetup from "../sections/ShareSetup";
 
-import { useDocumentTitle } from "../shared/lib/useDocumentTitle";
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 function HomePage() {
-  useDocumentTitle();
+  usePageMeta('/');
 
   return (
     <div className="animate-reveal-up">

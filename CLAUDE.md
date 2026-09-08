@@ -87,7 +87,9 @@ committing them. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-fi
 ### Structure
 
 Routes: `/`, `/shop`, `/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact`, and a
-`*` catch-all. Every page sets its title with `useDocumentTitle`.
+`*` catch-all. Every page sets its head — title, meta description, canonical, robots —
+with `usePageMeta`, and every static route is declared once in `shared/lib/routes.js`.
+Add a route there or the sitemap and the SEO check will not know it exists.
 
 ```
 modules/<name>/   Domain modules. Import ONLY via modules/<name>/index.js
@@ -119,8 +121,8 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Verify before claiming done
 
 ```bash
-cd Frontend && npm run verify   # lint + 39 unit checks + build + performance budgets
-cd Frontend && npm run e2e      # 275 browser checks; starts both servers itself
+cd Frontend && npm run verify   # lint + 39 unit checks + build + budgets + SEO check
+cd Frontend && npm run e2e      # 297 browser checks; starts both servers itself
 cd Backend  && npm test         # 52 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 72 API checks against a running server

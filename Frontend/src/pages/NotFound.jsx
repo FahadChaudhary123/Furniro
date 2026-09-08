@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import PageBanner from '../components/PageBanner';
 import Footer from '../components/Footer';
-import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 /**
  * Catch-all for unmatched routes.
@@ -11,7 +11,9 @@ import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
  * URL should never land on a bare 404, so this offers a route onward rather than a dead end.
  */
 const NotFound = () => {
-  useDocumentTitle('Page not found');
+  // noindex is the point: an SPA returns HTTP 200 for every path, so without it a crawler
+  // treats every typo, every dead link and every stale URL as a real page of thin content.
+  usePageMeta({ title: 'Page not found', index: false });
 
   return (
     <div>

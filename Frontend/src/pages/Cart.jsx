@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { useCart, MAX_LINE_QUANTITY } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
-import { useDocumentTitle } from '../shared/lib/useDocumentTitle';
+import { usePageMeta } from '../shared/lib/usePageMeta.js';
 import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
@@ -19,7 +19,7 @@ import Picture from '../shared/ui/Picture';
  */
 const Cart = () => {
   const { items, count, subtotal, hydrating, error, setQuantity, remove, clear } = useCart();
-  useDocumentTitle('Cart');
+  usePageMeta('/cart');
 
   return (
     <div>

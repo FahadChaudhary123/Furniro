@@ -35,6 +35,25 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Per-page SEO metadata, a generated sitemap, and an SEO health check** (`CONT-04`).
+  Every static route is now declared once in `Frontend/src/shared/lib/routes.js`, and the
+  page meta, the sitemap and the audit all read that one manifest instead of three lists
+  that drift.
+  `usePageMeta` replaces `useDocumentTitle` and sets the four things a crawler reads: title,
+  meta description, canonical URL and robots. It restores every tag on unmount — a `noindex`
+  left behind by the 404 page would have marked every subsequent route `noindex`, which
+  removes a site from search results and is invisible in development.
+  Canonical URLs drop the query string, so `/shop?category=dining&page=2` and
+  `/shop?page=2&category=dining` collapse into one page rather than reading as two pages of
+  duplicate content. `/cart`, unknown product slugs and the 404 page emit `noindex` — an SPA
+  answers HTTP 200 for every path, so without it every typo becomes an indexed page.
+  `dist/sitemap.xml` and `dist/robots.txt` are generated at build time from the same product
+  file the API serves, excluding products the publish gate blocks: a sitemap advertising URLs
+  the server 404s is a crawl error per page. Generated into `dist/` rather than committed to
+  `public/`, because a checked-in sitemap is stale the moment a product is added.
+  `npm run seo` audits the manifest against `App.jsx` and the sitemap and fails CI on a
+  duplicate title, an orphaned page, a phantom route, a `noindex` page in the sitemap or a
+  sitemap of localhost URLs. 22 browser checks assert the rendered head, not just the source.
 - **A catalogue publish gate and completeness report** (`CAT-03`, `CAT-04`) —
   `Backend/src/modules/catalogue/publishGate.js` is the single definition of what makes a
   product complete, applied by the repository at load so no read path can bypass it.

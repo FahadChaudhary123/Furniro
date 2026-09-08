@@ -60,10 +60,12 @@ contact) renders standalone.
 | `npm run preview` | Serve the built `dist/` locally |
 | `npm run lint` | ESLint across `**/*.{js,jsx}` |
 | `npm run budgets` | Enforce performance budgets against `dist/` (Doc B §12) |
+| `npm run seo` | SEO health check — duplicate titles, orphaned pages, sitemap coverage (`CONT-04`) |
+| `npm run seo:generate` | Write `dist/sitemap.xml` and `dist/robots.txt`; runs as part of `build` |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm test` | Unit tests (39 checks, under a second) |
-| `npm run verify` | lint + unit + build + budgets — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (251 checks; starts both servers) |
+| `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
+| `npm run e2e` | Playwright end-to-end suite (297 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined
@@ -91,6 +93,7 @@ fails at the point of use rather than at boot.
 | `npm run dev` | Run with nodemon reload |
 | `npm test` | Unit tests for the services (34 checks) |
 | `npm run smoke` | Smoke-test a running server (72 checks) |
+| `npm run completeness` | Catalogue data-quality report (`CAT-04`); non-zero if a product is blocked |
 
 | Endpoint | Purpose |
 |---|---|

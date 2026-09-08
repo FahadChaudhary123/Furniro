@@ -301,6 +301,24 @@ a durable append-only order event stream. It is not retrofittable.
 `CONT-01` is partial: a blog section exists, hardcoded in a component, with a display-string
 date that cannot be sorted.
 
+**`CONT-04` stays partial, deliberately.** Two of its four parts are built and enforced;
+two cannot be built yet, and marking the whole thing ✅ would be a lie of rounding.
+
+*Built:* duplicate titles and orphaned pages. Every static route is declared once in
+`Frontend/src/shared/lib/routes.js`; `npm run seo` audits that manifest against `App.jsx`
+and the generated sitemap and fails the build on a duplicate title, a page routed but
+undeclared, a declared page that is not routed, or a `noindex` page advertised for crawling.
+`usePageMeta` gives every route its own title, meta description, canonical URL and robots
+directive, and 22 browser checks assert what a crawler actually receives after React runs —
+including that `noindex` is cleaned up on unmount, a leak that would deindex the whole site.
+`sitemap.xml` and `robots.txt` are generated into `dist/` at build time from the catalogue
+the API serves, so they cannot drift from it.
+
+*Not built:* index coverage and crawl errors. Both are field measurements — they need a
+live domain, a verified Search Console property and real crawler traffic. None of the three
+exists. What is built removes the structural causes; it cannot report on crawls that have
+never happened.
+
 `NOTIF-05` is small, cheap, and prevents emailing real customers from staging. Build it with
 the first email, not after the first accident.
 

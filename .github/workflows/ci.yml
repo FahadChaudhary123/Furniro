@@ -64,6 +64,12 @@ jobs:
       - name: Enforce performance budgets
         run: node scripts/check-budgets.mjs
 
+      # CONT-04. Audits the route manifest against App.jsx and the generated sitemap:
+      # duplicate titles, orphaned pages, a noindex page advertised for crawling, a sitemap
+      # of localhost URLs. Errors fail the build; warnings are reported and do not.
+      - name: SEO health check
+        run: npm run seo
+
       # Real browser, real bundle, both servers. Catches what a build cannot: this suite
       # found a React error #31 crash that blanked /shop while lint, build, budgets and the
       # API smoke tests were all green.
