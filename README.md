@@ -20,6 +20,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [SECURITY.md](SECURITY.md) | Reporting vulnerabilities, secret handling, known exposure |
 | [CHANGELOG.md](CHANGELOG.md) | Release history |
 | [CLAUDE.md](CLAUDE.md) | Conventions for AI coding agents working in this repo |
+| [docs/decisions/](docs/decisions/) | Why things are the way they are — context, alternatives, consequences |
 | [docs/runbooks/](docs/runbooks/) | Operational procedures (deploy, rollback, secret rotation) |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Document A (derived) — 134 functional requirements with IDs, reconstructed from Document B |
 | [docs/MODULES.md](docs/MODULES.md) | The 134 requirements divided into 20 modules — boundaries, dependencies, build order |

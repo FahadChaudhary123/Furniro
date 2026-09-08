@@ -3,6 +3,10 @@
 Why the system is shaped the way it is, and where the seams are. For what exists today
 versus what is planned, see [README.md](README.md#current-state).
 
+Individual decisions — with the alternatives that were rejected and what each one costs —
+are recorded in [docs/decisions/](docs/decisions/). This document describes the resulting
+shape; those explain how it was arrived at.
+
 ---
 
 ## Shape

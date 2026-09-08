@@ -78,7 +78,7 @@ passing it.
 | §15 | Catalogue and content operations | ◐ | Oversized originals fixed. Alt text already correct. Modern formats (WebP/AVIF) still outstanding; the rest needs a PIM |
 | §16 | Third-party dependency register | ✅ | One real dependency (Supabase). Register created |
 | §17 | Support tiers and SLAs | ➖ | No customers, no tickets |
-| §18 | Documentation discipline | ✅ | Largely in place from the previous pass |
+| §18 | Documentation discipline | ✅ | Docs, runbooks and decision records all in place. Runbook testing is the remaining habit |
 | §19 | Deprecation and sunset | ➖ | Nothing to retire |
 | §20 | Handover pack | ◐ | A reasonable goal to hold; most artefacts do not exist yet |
 
@@ -164,9 +164,10 @@ there is one entry rather than fifteen.
 
 Mostly satisfied. Two of Doc B's rules are worth adopting explicitly:
 
-- **Architecture decisions recorded as short dated notes** — context, decision,
-  alternatives, consequences. [ARCHITECTURE.md](../ARCHITECTURE.md) records the decisions
-  but not their dates or the alternatives rejected.
+- ~~**Architecture decisions recorded as short dated notes**~~ **Done** —
+  [docs/decisions/](decisions/) holds ten records with context, decision, alternatives and
+  consequences. Written retrospectively, which Doc B would not endorse; records from here on
+  should ship with the change that makes them.
 - **Runbooks are tested** — one per month, executed as written by someone who did not write
   it. None of the runbooks in [runbooks/](runbooks/) has ever been executed, because there
   is no environment to execute them against. [local-development.md](runbooks/local-development.md)

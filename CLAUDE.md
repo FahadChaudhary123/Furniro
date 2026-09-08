@@ -35,7 +35,8 @@ Do not write code that assumes a database, a cart, or an authenticated user. Do 
 | Touching blog/category/room data | [DATA_MODEL.md](DATA_MODEL.md) — still inline arrays |
 | Adding a module | [docs/MODULES.md](docs/MODULES.md) — boundaries and dependency direction |
 | Adding an endpoint | [API.md](API.md) — conventions are binding |
-| Structural change | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Structural change | [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/decisions/](docs/decisions/) |
+| Reversing something that looks odd | [docs/decisions/](docs/decisions/) — it may already be settled |
 | Anything touching secrets or user input | [SECURITY.md](SECURITY.md) |
 
 ---

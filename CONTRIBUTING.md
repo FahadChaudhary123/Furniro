@@ -304,6 +304,12 @@ Update docs in the same PR as the change, not afterwards.
 | Any entity shape or schema | [DATA_MODEL.md](DATA_MODEL.md) |
 | Anything user-visible | [CHANGELOG.md](CHANGELOG.md) |
 | Deploy or operational procedure | [docs/runbooks/](docs/runbooks/) |
+| A choice a reasonable engineer could have made differently | [docs/decisions/](docs/decisions/) |
+
+**Record a decision with the change that makes it, not afterwards.** The existing records
+were written retrospectively and it shows: the measurements survived in the changelog, but
+the alternatives that were weighed and dropped had to be reconstructed. Those are the part a
+future reader actually wants.
 
 A doc that describes something that is not true is worse than no doc. If you find one, fix
 it — that is a welcome PR on its own.
