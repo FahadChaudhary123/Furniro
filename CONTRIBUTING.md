@@ -318,6 +318,10 @@ Playwright's whitespace normalisation had been hiding.
 ```bash
 cd Backend  && npm run completeness   # catalogue data quality (CAT-04)
 cd Frontend && npm run seo            # duplicate titles, orphaned pages (CONT-04)
+
+# Needs a server whose rate limit is above the run size, or it throttles itself:
+#   PORT=3101 RATE_LIMIT_MAX=3000 npm start
+BASE_URL=http://localhost:3101 npm run latency   # API latency (NFR-04)
 ```
 
 Each fails the build on an error and reports warnings without failing. When one of them

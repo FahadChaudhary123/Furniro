@@ -8,6 +8,7 @@
     "dev": "nodemon index.js",
     "smoke": "node scripts/smoke.mjs",
     "completeness": "node scripts/completeness.mjs",
+    "latency": "node scripts/latency.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

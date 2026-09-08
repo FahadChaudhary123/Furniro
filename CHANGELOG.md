@@ -35,6 +35,24 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **An API latency benchmark** (`NFR-04`) — `Backend/scripts/latency.mjs`, `npm run latency`.
+  Measures p50/p95/p99 across every catalogue and content endpoint and runs in CI on its own
+  port, so the smoke server's rate limits stay untouched and its `SEC-03` checks keep meaning
+  what they say.
+  **Local p95 is about 1.4 ms against Doc B's 400 ms, and that does not demonstrate the SLO.**
+  It is a loopback request to an in-memory array; production latency is dominated by a
+  database round trip that does not exist yet. The script prints that caveat on every run,
+  and the enforced budget is a local 50 ms rather than the SLO — a loopback request to an
+  in-memory store that takes 50 ms has a problem no infrastructure will fix.
+  What it actually buys now is an algorithmic regression guard: filtering, sorting and paging
+  run over every product on every request, so an accidental O(n²) is invisible at 40 products
+  and fatal at 40,000. The run compares a 100-item page against the default and fails above
+  10x. Currently 1.0x.
+  Two guards on the benchmark itself, both verified by triggering them: it aborts on a 429
+  rather than reporting a fast average of rejections (the run sends ~2400 requests and
+  throttles itself against the default limit), and it checks every URL returns 2xx before
+  timing anything — a mistyped `sort=price_desc` measured the validation error path and
+  passed its budget comfortably.
 - **Automated accessibility checks** (`NFR-10`) — `axe-core` over the purchase path at both
   the desktop and mobile viewports, failing CI on any WCAG 2.1 A/AA violation.
   See [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) for why a 3 MB

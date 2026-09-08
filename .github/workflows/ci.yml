@@ -154,6 +154,24 @@ jobs:
           PORT: 3000
           NODE_ENV: test
 
+      # NFR-04. Its own server on its own port, with the rate limit raised: the benchmark
+      # sends ~2400 requests and would otherwise throttle itself, and the smoke server's
+      # limits are left alone so its SEC-03 checks still mean what they say.
+      #
+      # The absolute budget is 50 ms against a measured ~1.4 ms, so runner noise has 35x of
+      # headroom. The scale check is the part that matters and it is a ratio between two
+      # measurements on the same machine, so it does not care how fast the runner is.
+      - name: API latency benchmark
+        run: |
+          PORT=3101 RATE_LIMIT_MAX=3000 npm start > /tmp/latency-boot.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3101/health > /dev/null && break
+            sleep 1
+          done
+          BASE_URL=http://localhost:3101 npm run latency
+        env:
+          NODE_ENV: test
+
   audit:
     name: Dependency vulnerability scan
     runs-on: ubuntu-latest

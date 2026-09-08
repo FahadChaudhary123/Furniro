@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **17 built, 7 partial, 110 not built.** Counted from the
+Of the 134 requirements below: **17 built, 8 partial, 109 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -411,7 +411,7 @@ stated numerically by the source rather than inferred.
 | `NFR-01` | Checkout success rate ≥ 98.5%, rolling 28 days | §5 | ⭕ |
 | `NFR-02` | Storefront availability ≥ 99.9% monthly (43 min budget) | §5 | ⭕ |
 | `NFR-03` | Checkout availability ≥ 99.95% monthly (22 min budget) | §5 | ⭕ |
-| `NFR-04` | Catalogue API latency p95 ≤ 400 ms | §5 | ⭕ |
+| `NFR-04` | Catalogue API latency p95 ≤ 400 ms | §5 | ◐ |
 | `NFR-05` | Order-to-warehouse release lag ≤ 15 min | §5 | ⭕ |
 | `NFR-06` | Bundle size, image weight and third-party script count gated in CI | §12 | ✅ |
 | `NFR-07` | Core Web Vitals field data tracked weekly by template and device class | §12 | ⭕ |
@@ -420,6 +420,24 @@ stated numerically by the source rather than inferred.
 | `NFR-10` | Accessibility: purchase path audited quarterly with assistive technology | §4 | ◐ |
 | `NFR-11` | Capacity model mapping orders/minute to connections, throughput and instances | §12 | ⭕ |
 | `NFR-12` | Error budget policy: >50% spent pauses non-essential feature work on that surface | §5 | ⭕ |
+
+**`NFR-04` is partial, and the honest answer is that it cannot be met yet.**
+`Backend/scripts/latency.mjs` measures p50/p95/p99 across every catalogue and content
+endpoint and runs in CI. Local p95 is about **1.4 ms** against Doc B's 400 ms.
+
+**That number does not demonstrate the SLO and must not be quoted as if it did.** It is a
+loopback request to an in-memory array. Production latency is dominated by a database round
+trip and a network hop, neither of which exists. The script prints this caveat every run.
+
+What it genuinely buys, at 40 products:
+
+- **An algorithmic regression guard.** Filtering, sorting and paging run over every product
+  on every request. An accidental O(n²) is invisible at 40 products and fatal at 40,000, so
+  the run compares a 100-item page against the default page and fails above 10x. Currently
+  1.0x — linear.
+- **A local budget of 50 ms**, far tighter than the SLO, because a loopback request to an
+  in-memory store that takes 50 ms has a problem no infrastructure will fix.
+- **The harness.** When a database lands, the same script measures the real thing.
 
 **`NFR-10` is partial.** `Frontend/e2e/accessibility.spec.js` runs `axe-core` over the
 purchase path at both viewports on every CI run, failing on any WCAG 2.1 A/AA violation. The
