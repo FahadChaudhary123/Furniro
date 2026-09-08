@@ -78,7 +78,7 @@ const ProductDetail = () => {
               {badge && (
                 <span
                   className={`absolute top-4 right-4 z-10 text-white text-sm px-3 py-1 rounded-full
-                  ${badge.kind === 'new' ? 'bg-teal-400' : 'bg-red-400'}`}
+                  ${badge.kind === 'new' ? 'bg-teal-700' : 'bg-red-600'}`}
                 >
                   {badge.label}
                 </span>
@@ -100,7 +100,7 @@ const ProductDetail = () => {
                   {formatPrice(product.price)}
                 </span>
                 {product.old_price && (
-                  <span className="text-lg text-gray-400 line-through">
+                  <span className="text-lg text-gray-600 line-through">
                     {formatPrice(product.old_price)}
                   </span>
                 )}
@@ -110,7 +110,7 @@ const ProductDetail = () => {
 
               <dl className="mt-8 space-y-2 text-sm">
                 <div className="flex gap-3">
-                  <dt className="text-gray-400 w-24">Category</dt>
+                  <dt className="text-gray-600 w-24">Category</dt>
                   <dd>
                     <Link
                       to={`/shop?category=${product.category?.slug}`}
@@ -121,7 +121,7 @@ const ProductDetail = () => {
                   </dd>
                 </div>
                 <div className="flex gap-3">
-                  <dt className="text-gray-400 w-24">SKU</dt>
+                  <dt className="text-gray-600 w-24">SKU</dt>
                   <dd className="text-gray-700">{product.slug}</dd>
                 </div>
               </dl>

@@ -82,7 +82,7 @@ const ProductGrid = () => {
             placeholder="Search products…"
             className="w-full border border-gray-300 rounded-lg py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-[#B88E2F]"
           />
-          <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600" />
         </div>
         <button
           type="submit"

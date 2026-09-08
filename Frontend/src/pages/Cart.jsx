@@ -85,7 +85,7 @@ const Cart = () => {
                         </div>
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4 text-gray-500">
-                        <span className="md:hidden text-xs text-gray-400 mr-2">Price</span>
+                        <span className="md:hidden text-xs text-gray-600 mr-2">Price</span>
                         {formatPrice(product.price)}
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4">
@@ -103,7 +103,7 @@ const Cart = () => {
                         />
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4 font-medium">
-                        <span className="md:hidden text-xs text-gray-400 font-normal mr-2">
+                        <span className="md:hidden text-xs text-gray-600 font-normal mr-2">
                           Subtotal
                         </span>
                         {formatPrice(lineTotal)}
@@ -112,7 +112,7 @@ const Cart = () => {
                         <button
                           onClick={() => remove(slug)}
                           aria-label={`Remove ${product.name} from cart`}
-                          className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition"
+                          className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition"
                         >
                           <Trash2 size={18} />
                           <span className="md:hidden text-sm">Remove</span>
@@ -156,7 +156,7 @@ const Cart = () => {
               <button
                 disabled
                 title="Checkout is not available yet"
-                className="w-full border border-gray-300 text-gray-400 px-8 py-3 font-semibold rounded cursor-not-allowed"
+                className="w-full border border-gray-300 text-gray-600 px-8 py-3 font-semibold rounded cursor-not-allowed"
               >
                 Checkout — coming soon
               </button>

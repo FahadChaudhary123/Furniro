@@ -14,7 +14,7 @@ const ProductCard = ({ product }) => {
       {badge && (
         <span
           className={`absolute top-3 left-3 z-10 text-xs px-2 py-1 rounded-full text-white
-          ${badge.kind === 'new' ? 'bg-emerald-500' : 'bg-red-500'}`}
+          ${badge.kind === 'new' ? 'bg-emerald-700' : 'bg-red-600'}`}
         >
           {badge.label}
         </span>
@@ -68,14 +68,14 @@ const ProductCard = ({ product }) => {
         {/* The API embeds category as an object ({id, slug, name}), not a string — see
             docs/API.md. Rendering the object itself throws React error #31 and takes the
             whole page down, which is exactly what happened. */}
-        <p className="text-sm text-gray-500">{product.category?.name}</p>
+        <p className="text-sm text-gray-600">{product.category?.name}</p>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="font-semibold text-gray-900">
             {formatPrice(product.price)}
           </span>
           {product.old_price && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-sm text-gray-600 line-through">
               {formatPrice(product.old_price)}
             </span>
           )}

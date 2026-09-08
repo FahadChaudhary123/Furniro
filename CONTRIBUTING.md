@@ -252,13 +252,20 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 311 checks across
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 343 checks across
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
 
-Two of those specs are checkers rather than feature tests: `seo.spec.js` asserts the head
-tags a crawler receives, and `links.spec.js` crawls the site and follows every internal
-link. Both must run in a browser — the links and the head only exist after React renders.
+Three of those specs are checkers rather than feature tests: `seo.spec.js` asserts the head
+tags a crawler receives, `links.spec.js` crawls the site and follows every internal link, and
+`accessibility.spec.js` runs `axe-core` over the purchase path at both viewports. All three
+must run in a browser — the links, the head and the rendered colours only exist after React
+runs, and the mobile menu button is `md:hidden`, so a desktop-only scan cannot see it.
+
+When an accessibility check fails, fix the markup. The brand-gold contrast exception in
+`accessibility.spec.js` is capped on purpose: raising the cap is not a fix, it is the signal
+that the colour decision can no longer be deferred. See
+[ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
 
 **API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 72 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and

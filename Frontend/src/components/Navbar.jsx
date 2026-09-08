@@ -66,9 +66,16 @@ const Navbar = () => {
           </Link>
 
           {/* Hamburger - Mobile */}
+          {/* The icon is the only content, so without a label a screen reader announces
+              this as "button" — on mobile, where it is the ONLY way to reach any other
+              page. `focus:outline-none` removes the focus ring, so a visible replacement
+              is required, not optional. */}
           <button
-            className="md:hidden focus:outline-none"
+            className="md:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-[#B88E2F] focus-visible:ring-offset-2 rounded"
             onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isOpen}
+            aria-controls="mobile-menu"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -77,7 +84,10 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <ul className="md:hidden flex flex-col gap-4 px-6 pb-4 text-sm font-medium text-black bg-white shadow">
+        <ul
+          id="mobile-menu"
+          className="md:hidden flex flex-col gap-4 px-6 pb-4 text-sm font-medium text-black bg-white shadow"
+        >
           <li>
             <Link
               to="/"

@@ -108,6 +108,11 @@ const RoomsInspiration = () => {
               <button
                 key={index}
                 onClick={() => goToSlide(index)}
+                // A dot with no text is announced as just "button" by a screen reader, and
+                // three of them in a row are indistinguishable. The label says which slide
+                // it goes to; aria-current says which one you are on.
+                aria-label={`Show ${rooms[index].title ?? `slide ${index + 1}`}`}
+                aria-current={current === index ? 'true' : undefined}
                 className={`w-3 h-3 rounded-full ${
                   current === index
                     ? "bg-[#B88E2F]"

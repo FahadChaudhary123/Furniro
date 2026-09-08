@@ -35,6 +35,32 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Automated accessibility checks** (`NFR-10`) — `axe-core` over the purchase path at both
+  the desktop and mobile viewports, failing CI on any WCAG 2.1 A/AA violation.
+  See [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) for why a 3 MB
+  devDependency was accepted in a project that has removed four dependencies for less.
+
+### Fixed
+
+- **83 accessibility violations found; 75 fixed.** None of these were visible by eye:
+  - **The mobile menu button had no accessible name** — announced as just "button", on the
+    one control that reaches every other page on a phone. It is `md:hidden`, so a
+    desktop-only scan never sees it. It now has a label, `aria-expanded`, `aria-controls`,
+    and a visible focus ring to replace the `focus:outline-none` that removed it.
+  - **Every page had two `<h1>`s.** The footer brand mark was one, so "jump to main heading"
+    landed in the footer half the time. It is a `<p>` now, styled identically.
+  - **Three carousel dots were unlabelled**, announced as "button, button, button". They now
+    name the slide they select and mark the current one with `aria-current`.
+  - **Body text below the contrast minimum** — `text-gray-400` at 2.53:1 on white, and
+    `text-gray-500` at 4.43:1 on the grey card background against a 4.5:1 requirement.
+  - **Five badge and button fills too light for white text** — `red-400` (2.76:1),
+    `teal-400` (1.86:1), `emerald-500` (2.53:1), `red-500` (3.76:1), `yellow-600` (2.93:1).
+
+  The 8 remaining are all the brand gold `#B88E2F` at **3.02:1 on white** — passing AA for
+  large text, failing it for normal text, on primary buttons sitewide. Left alone
+  deliberately: changing a brand colour is a design decision, not a defect fix. The suite
+  caps the count so the gold cannot spread further while the decision is open; raising that
+  cap is not the remedy.
 - **Broken-link and link-quality checks** (`CONT-03`) — `Frontend/e2e/links.spec.js`. The
   suite crawls every page, collects every link instance, and follows each internal one,
   failing if it lands on the 404 page. It also rejects a link to a product the publish gate

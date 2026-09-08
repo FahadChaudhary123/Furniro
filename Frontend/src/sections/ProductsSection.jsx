@@ -34,7 +34,7 @@ const ProductsSection = () => {
               {badge && (
                 <span
                   className={`absolute top-4 right-4 z-10 text-white text-sm px-3 py-1 rounded-full
-                  ${badge.kind === "new" ? "bg-teal-400" : "bg-red-400"}`}
+                  ${badge.kind === "new" ? "bg-teal-700" : "bg-red-600"}`}
                 >
                   {badge.label}
                 </span>
@@ -75,12 +75,12 @@ const ProductsSection = () => {
               {/* Content */}
               <div className="p-4 bg-[#F4F5F7]">
                 <h3 className="text-lg font-semibold">{item.name}</h3>
-                <p className="text-sm text-gray-500 mb-2">{item.description}</p>
+                <p className="text-sm text-gray-600 mb-2">{item.description}</p>
 
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{formatPrice(item.price)}</span>
                   {item.old_price && (
-                    <span className="text-sm text-gray-400 line-through">
+                    <span className="text-sm text-gray-600 line-through">
                       {formatPrice(item.old_price)}
                     </span>
                   )}

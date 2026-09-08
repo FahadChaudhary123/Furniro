@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **17 built, 6 partial, 111 not built.** Counted from the
+Of the 134 requirements below: **17 built, 7 partial, 110 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -417,9 +417,20 @@ stated numerically by the source rather than inferred.
 | `NFR-07` | Core Web Vitals field data tracked weekly by template and device class | §12 | ⭕ |
 | `NFR-08` | Every release revertible in under 10 minutes | §3 | ◐ |
 | `NFR-09` | Database RPO 5 min / RTO 60 min; product media RPO < 1 h / RTO 2 h | §8 | ⭕ |
-| `NFR-10` | Accessibility: purchase path audited quarterly with assistive technology | §4 | ⭕ |
+| `NFR-10` | Accessibility: purchase path audited quarterly with assistive technology | §4 | ◐ |
 | `NFR-11` | Capacity model mapping orders/minute to connections, throughput and instances | §12 | ⭕ |
 | `NFR-12` | Error budget policy: >50% spent pauses non-essential feature work on that surface | §5 | ⭕ |
+
+**`NFR-10` is partial.** `Frontend/e2e/accessibility.spec.js` runs `axe-core` over the
+purchase path at both viewports on every CI run, failing on any WCAG 2.1 A/AA violation. The
+first scan found 83 failing nodes; 75 were fixed and the remaining 8 are the brand gold at
+3.02:1 on white — recorded as a capped exception because changing a brand colour is a design
+decision. See [ADR 0011](decisions/0011-automated-accessibility-checks.md).
+
+An automated scan catches roughly a third of WCAG failures. It says nothing about whether
+the site is usable with a screen reader, whether focus order makes sense, or whether errors
+are announced. The quarterly audit with assistive technology that this requirement actually
+asks for has still never happened.
 
 `NFR-06` is met — enforced by `Frontend/scripts/check-budgets.mjs`.
 `NFR-08` is partial: a static build is trivially revertible, but there is no deployment to

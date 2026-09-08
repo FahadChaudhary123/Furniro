@@ -110,7 +110,7 @@ const BlogSection = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold mb-6">Categories</h3>
             {tags.length === 0 ? (
-              <p className="text-sm text-gray-400">No categories yet.</p>
+              <p className="text-sm text-gray-600">No categories yet.</p>
             ) : (
               <ul className="space-y-4 text-gray-600">
                 {tags.map((tag) => (
@@ -127,7 +127,7 @@ const BlogSection = () => {
           <div className="bg-white p-6 rounded-xl shadow-sm">
             <h3 className="text-lg font-semibold mb-6">Recent Posts</h3>
             {recent.length === 0 ? (
-              <p className="text-sm text-gray-400">Nothing published yet.</p>
+              <p className="text-sm text-gray-600">Nothing published yet.</p>
             ) : (
               <ul className="space-y-6">
                 {recent.map((post) => (
@@ -144,7 +144,7 @@ const BlogSection = () => {
                         <p className="text-sm font-medium leading-snug group-hover:text-[#B88E2F] transition">
                           {post.title}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-600 mt-1">
                           <time dateTime={post.published_at}>
                             {formatPostDate(post.published_at)}
                           </time>

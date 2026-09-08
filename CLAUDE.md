@@ -70,6 +70,11 @@ controller or a component creates a second definition that will drift from the f
 `npm run completeness` blocks a product, fix the data — never loosen the rule to make the
 build green.
 
+**Accessibility failures are fixed, not suppressed.** `npm run e2e` runs `axe-core` over the
+purchase path at both viewports. The brand-gold contrast exception in
+`e2e/accessibility.spec.js` is capped; raising the cap to make a build pass is the one thing
+not to do. Adding an axe rule exclusion is likewise not a fix.
+
 **Never use `dangerouslySetInnerHTML`.** It is not used anywhere in this codebase and it is
 the most common route to stored XSS in React. Keep it that way.
 
@@ -122,7 +127,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 
 ```bash
 cd Frontend && npm run verify   # lint + 39 unit checks + build + budgets + SEO check
-cd Frontend && npm run e2e      # 311 browser checks; starts both servers itself
+cd Frontend && npm run e2e      # 343 browser checks; starts both servers itself
 cd Backend  && npm test         # 52 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 72 API checks against a running server

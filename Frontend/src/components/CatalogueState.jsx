@@ -45,7 +45,7 @@ export const CatalogueError = ({ error, onRetry }) => (
 
     {/* Ties the failure to a server log line — the first thing to quote in a bug report. */}
     {error?.correlationId && (
-      <p className="mt-4 text-xs text-gray-400">Reference: {error.correlationId}</p>
+      <p className="mt-4 text-xs text-gray-600">Reference: {error.correlationId}</p>
     )}
   </div>
 );
