@@ -267,7 +267,7 @@ When an accessibility check fails, fix the markup. The brand-gold contrast excep
 that the colour decision can no longer be deferred. See
 [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
 
-**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 84 checks against a
+**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 85 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and
 content contracts.
 

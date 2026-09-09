@@ -79,9 +79,15 @@ reason.
 
 ### API returns 500 on everything
 
-🔴 No API yet. When there is: check the process is running, then environment variables
-(missing `SUPABASE_URL` yields `undefined` and confusing downstream failures), then whether
-`dotenv.config()` runs before the Supabase client is constructed, then Supabase itself.
+Check the process is running (`curl /health`), then the boot log — a misconfigured
+middleware can log a `ValidationError` and keep serving, so a healthy-looking process is not
+proof. Then environment variables: a missing `SUPABASE_URL` yields `undefined` and confusing
+downstream failures, and `dotenv` must load before anything reads `process.env` (it does, at
+the top of `platform/config.js`). Then Supabase itself.
+
+**Check whether they are real 500s first.** Two conditions used to be reported as server
+faults and were not: a malformed request body, and a request from a disallowed CORS origin.
+Both are fixed, and both are the shape to watch for — a 500 whose cause is the caller.
 
 ### Database unreachable
 
@@ -92,6 +98,19 @@ exhaust the pool and present as an outage under load.
 ### CORS errors in the browser console
 
 `ALLOWED_ORIGINS` does not include the front-end origin, or `cors` is misconfigured.
+
+**What you will see**, verified by inducing it on 2026-09-09:
+
+- Browser console: `Access to fetch at … has been blocked by CORS policy`.
+- The page shows "Products could not be loaded — Could not reach the API at …", not a blank
+  screen and not an empty catalogue.
+- API log: a single `WARN  CORS origin rejected {"origin":"…"}` line naming the origin. The
+  request itself returns **200 with no `Access-Control-Allow-Origin` header** — the browser
+  refuses the response, which is where CORS is enforced. It is not a 5xx, and there is no
+  stack trace to chase.
+
+The fix is to add the origin to `ALLOWED_ORIGINS` and restart.
+
 **Do not "fix" this by allowing every origin.** `cors()` with no arguments reflects any
 origin and is a security fault, not a workaround — see [API.md](../../API.md#cors).
 
@@ -127,13 +146,17 @@ Honest inventory, because knowing this in advance is cheaper than discovering it
 
 | Missing | Consequence |
 |---|---|
-| Error tracking | A user tells you, hours later |
+| **Alerting** | Errors are collected (`PLAT-04`) but nothing tells anyone. A user tells you, hours later |
 | Uptime monitoring | Nobody knows until someone looks |
-| Tests and CI | Nothing stops a regression reaching production |
 | Staging environment | Production is the first place anything runs |
-| Structured logging | No way to reconstruct what happened |
 | Backups, and a tested restore | Data loss is permanent. **An untested backup is not a backup** |
 | Documented escalation path | Nobody knows who to wake |
 
-Fixing even the first two before launch changes the character of every incident that
-follows.
+*Two rows were removed on 2026-09-09 because they had stopped being true: **tests and CI**
+(385 browser checks, 85 API checks, 118 unit tests, all gated in CI) and **structured
+logging** (JSON lines with correlation ids since the platform module). "Error tracking" was
+narrowed to **alerting** — client and server errors do reach the log now; nothing raises a
+hand about them.*
+
+Alerting and uptime monitoring are the two that change the character of every incident that
+follows, and neither needs the storefront to be finished.

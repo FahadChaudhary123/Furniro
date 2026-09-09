@@ -66,7 +66,14 @@ screenshotted and pasted into chat. Reference where a value lives; never reprodu
   | [deployment.md](deployment.md) | never | needs a host |
   | [rollback.md](rollback.md) | never | needs a deployment |
   | [secret-rotation.md](secret-rotation.md) | never | executable now — rotation is overdue |
-  | [incident-response.md](incident-response.md) | never | needs an incident, or a tabletop |
+  | [incident-response.md](incident-response.md) | 2026-09-09 | tabletop; 1 defect found and fixed, 5 stale claims corrected |
+
+  The incident tabletop induced a real CORS failure and followed the runbook against it.
+  It found that a disallowed origin was being reported as a `500` with a stack trace — a
+  caller's condition logged as a server fault — and that three of the runbook's seven listed
+  "gaps" had stopped being true. A runbook that describes a system that no longer exists is
+  followed with confidence, which is the dangerous kind of wrong.
 
   `secret-rotation.md` is the next one that can genuinely be run, and running it would also
-  clear an outstanding action.
+  clear an outstanding action. **It needs someone with Supabase dashboard access** — new keys
+  cannot be generated from the repository.

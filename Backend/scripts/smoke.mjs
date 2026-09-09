@@ -91,6 +91,15 @@ async function main() {
     badOrigin.headers.get('access-control-allow-origin') !== 'https://evil.example',
   );
 
+  // A disallowed origin must not be a server fault. Returning 500 for it meant every bot
+  // that sent an Origin header produced an ERROR log line and a stack trace, burying real
+  // 500s. The browser enforces CORS from the ABSENCE of the header, which is checked above.
+  check(
+    'a disallowed CORS origin is not a 5xx',
+    badOrigin.status < 500,
+    `got ${badOrigin.status} — a rejected origin is a client condition, not a server failure`,
+  );
+
   const goodOrigin = await fetch(`${BASE}/health`, { headers: { Origin: ALLOWED_ORIGIN } });
   check(
     'allowed CORS origin is reflected',

@@ -44,6 +44,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Changed
 
+- **The incident runbook described a system that no longer exists**, corrected after the
+  tabletop above. It claimed there was "no API yet"; three of its seven listed gaps had
+  stopped being true (tests and CI exist, structured logging exists, and error *tracking*
+  now exists — what is missing is alerting). Its CORS section now records what an operator
+  will actually see, verified by inducing it: the console message, the page's error state,
+  the single WARN line, and the fact that the request is a 200 without a header rather than a
+  5xx. `API.md` likewise still said `cors` was "currently unconfigured".
+  A runbook that is wrong is followed with confidence, which is the dangerous kind of wrong.
+
 - **The Document B conformance assessment was materially wrong in two places** and is now
   corrected against the code, in [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md):
   - **§11 Privacy** claimed "nothing is collected" and that the section would apply "from the
@@ -91,6 +100,21 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   so a check is worth more than four fixes.
 
 ### Fixed
+
+- **A request from a disallowed CORS origin was reported as a server fault.** The allowlist
+  callback threw a plain `Error`, which is not an `AppError`, so the error middleware treated
+  it as unexpected: every such request produced a `500`, an `ERROR` log line and a full stack
+  trace. A disallowed origin is a caller or configuration condition, and treating it as a
+  server failure buries real 500s under noise from every bot that sends an `Origin` header —
+  exactly the same shape as the malformed-body `500` fixed earlier.
+  The callback now returns `false`, so the response carries no `Access-Control-Allow-Origin`
+  and the browser refuses it, which is where CORS is actually enforced. **The protection is
+  unchanged**, verified in a real browser: the response is still blocked, no product data
+  reaches the page, and the visitor still sees an honest error. A single
+  `WARN  CORS origin rejected` names the origin, and a smoke check asserts the status is not
+  5xx.
+  Found by running [incident-response.md](docs/runbooks/incident-response.md) as a tabletop
+  exercise against an induced fault, per Doc B §18.
 
 - **Four controls promised something they could not do** — the same defect class as the two
   forms, and just as invisible in a code review:

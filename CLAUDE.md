@@ -140,7 +140,7 @@ cd Frontend && npm run verify   # lint + 56 unit checks + build + budgets + SEO 
 cd Frontend && npm run e2e      # 385 browser checks; starts both servers itself
 cd Backend  && npm test         # 62 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
-cd Backend  && npm run smoke    # 84 API checks against a running server
+cd Backend  && npm run smoke    # 85 API checks against a running server
 ```
 
 All of these must pass. **A build that succeeds is not a page that renders** — the e2e suite

@@ -49,8 +49,28 @@ export function createApp() {
     cors({
       origin(origin, callback) {
         if (!origin || config.allowedOrigins.includes(origin)) return callback(null, true);
+
         logger.warn('CORS origin rejected', { origin });
-        return callback(new Error('Origin not allowed by CORS'));
+
+        /**
+         * `callback(null, false)` — omit the CORS headers — NOT `callback(new Error(...))`.
+         *
+         * A plain Error here is not an AppError, so the error middleware treats it as an
+         * unexpected fault: every request from a disallowed origin produced a 500, an
+         * `ERROR` log line and a full stack trace. That is wrong on all three counts. A
+         * disallowed origin is a browser or configuration condition, not a server failure,
+         * and treating it as one buries real 500s under noise from every bot and scanner
+         * that sends an Origin header.
+         *
+         * Omitting the header is also the correct mechanism. CORS is enforced by the
+         * browser, not by the server — it is not access control, and the catalogue it
+         * guards is public. Without `Access-Control-Allow-Origin` the browser refuses to
+         * hand the response to the page, which is exactly the intended outcome, and the
+         * WARN line above is the record.
+         *
+         * Found by running docs/runbooks/incident-response.md as a tabletop exercise.
+         */
+        return callback(null, false);
       },
       credentials: true,
     }),

@@ -54,7 +54,7 @@ this runbook did before it was executed.
 `PORT` in `.env` and is **not** necessarily 3000. Then, in another shell:
 
 ```bash
-npm run smoke             # 84 checks; all should pass
+npm run smoke             # 85 checks; all should pass
 ```
 
 `npm run smoke` reads the same `.env`, so it follows the server wherever it binds — both
@@ -91,7 +91,7 @@ git check-ignore -v Backend/.env    # must print the matching rule
 | `npm run verify` | `Frontend/` | lint + unit + build + budgets + seo |
 | `npm start` | `Backend/` | Run the API |
 | `npm run dev` | `Backend/` | Run the API with nodemon reload |
-| `npm run smoke` | `Backend/` | 84 checks against a running API |
+| `npm run smoke` | `Backend/` | 85 checks against a running API |
 | `npm run completeness` | `Backend/` | Catalogue data-quality report; non-zero if any product is blocked |
 | `npm run latency` | `Backend/` | API latency benchmark; needs `RATE_LIMIT_MAX` above ~2400 |
 | `npm run e2e` | `Frontend/` | 385 browser checks; starts both servers itself |

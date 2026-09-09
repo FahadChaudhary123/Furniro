@@ -412,9 +412,19 @@ When added:
 
 ## CORS
 
-`cors` is a dependency and currently unconfigured. **Do not ship `cors()` with no
-arguments** — the default reflects any origin, which means any website can call the API
-with a user's credentials.
+> ✅ **Configured.** `Backend/src/app.js`, from `ALLOWED_ORIGINS`.
+
+**Do not ship `cors()` with no arguments** — the default reflects any origin, which means
+any website can call the API with a user's credentials.
+
+**A disallowed origin is not an error.** The allowlist callback returns `false` rather than
+throwing: the response is sent without an `Access-Control-Allow-Origin` header and the
+browser refuses to hand it to the page, which is where CORS is enforced. Throwing instead
+produced a `500` with a stack trace for every bot that sent an `Origin` header, burying real
+server faults. A single `WARN  CORS origin rejected` line names the origin.
+
+CORS is a browser mechanism, not access control. It stops another site reading this API in a
+visitor's browser; it does not stop `curl`, and it is not what makes an endpoint private.
 
 Allowlist the known front-end origins, and read them from the environment so production
 does not inherit `localhost`:
