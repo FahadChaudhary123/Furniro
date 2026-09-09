@@ -26,6 +26,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [docs/MODULES.md](docs/MODULES.md) | The 134 requirements divided into 20 modules — boundaries, dependencies, build order |
 | [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md) | Document B (ops standard) mapped against reality, plus the staged roadmap |
 | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | External services, criticality, credentials location, fallbacks |
+| [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md) | What personal data the system processes, why, and for how long (`PRIV-06`) |
 | [LICENSE](LICENSE) | Proprietary — all rights reserved |
 
 ---
@@ -65,7 +66,7 @@ contact) renders standalone.
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm test` | Unit tests (56 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (343 checks; starts both servers) |
+| `npm run e2e` | Playwright end-to-end suite (359 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined

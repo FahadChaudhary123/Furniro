@@ -38,6 +38,7 @@ Do not write code that assumes a database, a cart, or an authenticated user. Do 
 | Structural change | [ARCHITECTURE.md](ARCHITECTURE.md) and [docs/decisions/](docs/decisions/) |
 | Reversing something that looks odd | [docs/decisions/](docs/decisions/) — it may already be settled |
 | Anything touching secrets or user input | [SECURITY.md](SECURITY.md) |
+| Anything that collects or logs personal data | [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md) — update it in the same change |
 
 ---
 
@@ -75,6 +76,13 @@ build green.
 purchase path at both viewports. The brand-gold contrast exception in
 `e2e/accessibility.spec.js` is capped; raising the cap to make a build pass is the one thing
 not to do. Adding an axe rule exclusion is likewise not a fix.
+
+**Never ship a form that discards what it collects.** A contact form with no submit handler
+and a newsletter input with no request both did exactly that, and a customer typing out a
+complaint had no way to know it went nowhere. If the endpoint does not exist, disable the
+control and say so. And a form with `name` attributes and no `onSubmit` serialises its fields
+into the URL on submit — an email address in browser history, host logs and the `Referer`
+header. Block native submission.
 
 **Never use `dangerouslySetInnerHTML`.** It is not used anywhere in this codebase and it is
 the most common route to stored XSS in React. Keep it that way.
@@ -128,7 +136,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 
 ```bash
 cd Frontend && npm run verify   # lint + 56 unit checks + build + budgets + SEO check
-cd Frontend && npm run e2e      # 343 browser checks; starts both servers itself
+cd Frontend && npm run e2e      # 359 browser checks; starts both servers itself
 cd Backend  && npm test         # 62 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 81 API checks against a running server

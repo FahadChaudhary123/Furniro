@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **17 built, 9 partial, 108 not built.** Counted from the
+Of the 134 requirements below: **18 built, 8 partial, 108 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -382,7 +382,7 @@ not checkout.
 | `PRIV-03` | Deletion = anonymisation where financial records must be kept — "the order survives, the person does not" | §11 | 3 | ⭕ |
 | `PRIV-04` | Consent state enforced **server-side**, not by tag manager | §11 | 2 | ⭕ |
 | `PRIV-05` | Retention periods enforced by monitored purge jobs, per the §11 schedule | §9, §11 | 2 | ⭕ |
-| `PRIV-06` | Processing register and sub-processor list, updated as part of adding a third party | §11 | 1 | ◐ |
+| `PRIV-06` | Processing register and sub-processor list, updated as part of adding a third party | §11 | 1 | ✅ |
 | `PRIV-07` | Privacy notice; refreshed annually | §4 | 1 | ⭕ |
 | `PRIV-08` | Staging refresh scrubs names, emails, phones, addresses and payment tokens **as part of the copy job** | §2 | 2 | ⭕ |
 
@@ -391,6 +391,23 @@ sub-processor list in embryo.
 
 `PRIV-08`'s phrasing matters: scrubbing must be inside the copy job, not a follow-up step
 someone might skip.
+
+**`PRIV-06` is met.** [PROCESSING_REGISTER.md](PROCESSING_REGISTER.md) records every
+processing activity, verified against the source rather than inferred from intent, alongside
+the existing [THIRD_PARTY_REGISTER.md](THIRD_PARTY_REGISTER.md) sub-processor list. The
+"lawful basis" column is marked `NEEDS SIGN-OFF` throughout: choosing a basis is a legal
+judgement about a specific business in a specific jurisdiction, and there is no identified
+controller, place of business or target market to judge against.
+
+Writing it found two forms that solicited a name, an email address and a message and
+discarded all three. They are disabled with a visible explanation rather than quietly
+collecting data nothing could deliver — see the `CONT` notes.
+
+The rest of `privacy` is not built and mostly cannot be yet: `PRIV-05` retention needs the
+job framework (`PLAT-05`), and `PRIV-01`–`03` need somewhere for personal data to exist
+before a subject request has anything to act on. `PRIV-07`, the privacy notice, is the one
+that is genuinely overdue — everything in the register is currently undisclosed to the people
+it concerns — and it needs legal copy this project will not invent.
 
 ## 18. Platform, observability and security — `PLAT` `SEC`
 

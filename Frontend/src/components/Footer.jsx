@@ -39,14 +39,31 @@ const Footer = () => {
         {/* Right Section: Newsletter */}
         <div className="md:w-1/3 md:pl-8">
           <h3 className="text-gray-600 text-sm mb-4">Newsletter</h3>
-          <div className="flex border-b border-gray-300">
+          {/*
+            Disabled on purpose. This input and button did nothing at all — no handler, no
+            request, no feedback. Someone typing their email address and pressing SUBSCRIBE
+            had no way to know they had not subscribed.
+
+            A signup needs somewhere to store the address, a consent record, and a way to
+            unsubscribe (docs/REQUIREMENTS.md PRIV-04, NOTIF-03). None exist. Collecting
+            email addresses into nothing is the version of this with legal consequences.
+          */}
+          <div className="flex border-b border-gray-300 opacity-60">
             <input
               type="email"
+              disabled
+              aria-label="Email address for the newsletter"
+              aria-describedby="newsletter-unavailable"
               placeholder="Enter Your Email Address"
-              className="flex-1 px-4 py-1 outline-none text-sm text-gray-700"
+              className="flex-1 px-4 py-1 outline-none text-sm text-gray-700 bg-transparent"
             />
-            <button className="text-sm font-bold px-4">SUBSCRIBE</button>
+            <button disabled className="text-sm font-bold px-4">
+              SUBSCRIBE
+            </button>
           </div>
+          <p id="newsletter-unavailable" className="mt-2 text-xs text-gray-600">
+            Sign-up is not available yet.
+          </p>
         </div>
       </div>
 

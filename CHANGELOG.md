@@ -35,6 +35,19 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **A processing register** (`PRIV-06`) — [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md).
+  Every processing activity the system performs, verified against the source rather than
+  inferred from intent: request logs (no IP, no query string), rate limiting (IP as an
+  in-memory counter key, never logged), client error reports (user-agent, never stored beside
+  an IP), and the cart in `localStorage`.
+  The "lawful basis" column is marked `NEEDS SIGN-OFF` throughout. Choosing a basis is a legal
+  judgement about a specific business in a specific jurisdiction, and there is no identified
+  controller, place of business or target market to judge against — so the register gives a
+  lawyer a factual starting point instead of pretending to be the answer.
+  Writing it corrected one claim of its own: the cart key is `furniro.cart.v1`, not
+  `furniro.cart`. A register that is wrong once is never trusted again, so the storage claims
+  are now asserted by browser tests rather than described.
+
 - **Client error reporting** (`PLAT-04`) — `POST /api/client-errors`. A crash in a visitor's
   browser was invisible: the API answered 200 and the bundle threw afterwards, so nothing
   anywhere knew. The blank `/shop` page that prompted the whole e2e suite was this exact
@@ -58,6 +71,25 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   silences the report for every colleague. Found by the smoke suite throttling itself.
 
 ### Fixed
+
+- **Two forms collected personal data and threw it away.** The contact form had no submit
+  handler, so pressing Submit triggered a native GET, reloaded the page and discarded the
+  name, email and message. A customer writing about a problem watched the fields empty and
+  had every reason to believe it had been sent; nobody was ever going to read it. The
+  newsletter input did nothing at all — no request, no feedback.
+  Both are now disabled with a visible explanation, pointing at the phone number and address
+  that do reach someone. Making them work needs `POST /api/contact`, somewhere to store a
+  message and something to deliver it — none of which exist. Soliciting an email address
+  under a false premise is worse than not asking.
+
+- **A latent PII leak in the contact form, introduced while fixing it and caught by a test.**
+  Disabling the form meant adding `name` attributes, which is what makes a native GET
+  serialise fields into the URL:
+  `/contact?email=visitor%40example.com&message=…` — landing in browser history, in whatever
+  access log the host keeps, and in the `Referer` header sent to third parties. Removing
+  `disabled`, the single most likely future edit to that file, would have been enough to start
+  leaking. The form now blocks native submission outright, so it cannot leak whatever state
+  its fields are in. Confirmed by removing the guard and watching the test fail.
 
 - **CI's front-end Build step failed with `ERR_MODULE_NOT_FOUND: dotenv`.** `generate-seo.mjs`
   imported the catalogue *service* to build the redirect map, and that reaches
@@ -132,7 +164,6 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   See [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) for why a 3 MB
   devDependency was accepted in a project that has removed four dependencies for less.
 
-### Fixed
 
 - **83 accessibility violations found; 75 fixed.** None of these were visible by eye:
   - **The mobile menu button had no accessible name** — announced as just "button", on the
@@ -165,7 +196,6 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   Verified by injecting three faults into the footer (a dead route, an unlabelled link, an
   unprotected new tab) and confirming each was caught and located, then reverting.
 
-### Fixed
 
 - **Placeholder blog posts were excluded from the sitemap but still indexable.** The
   generated sitemap leaves them out as thin content, but three pages link to each one, so a
@@ -293,54 +323,6 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   architectural decision to build a modular monolith rather than ~20 services, and
   identifies the eight-module minimum path to taking a first order.
 
-### Security
-
-- Added `.gitignore` at the repository root and in `Backend/` and `Frontend/`, covering
-  `.env` and its variants. `Backend/.gitignore` previously existed but was **empty**, and
-  `Backend/.env` holds live Supabase and Postgres credentials — including a `DATABASE_URL`
-  that embeds the database password and bypasses row-level security. Nothing had leaked
-  only because the project was not a git repository at the time. It is now, so whether
-  `.env` reached the history needs verifying — see SECURITY.md.
-- **23 dependency vulnerabilities resolved** — 15 in `Frontend/` (10 high) and 8 in
-  `Backend/` (5 high), all via non-breaking `npm audit fix`. Both packages now report zero.
-  Surfaced by the new CI audit gate, which was red on arrival. Most were dev-only, but
-  `react-router-dom` (7.13.0 -> 7.18.3) is a runtime dependency that shipped to users.
-  Doc B §10 requires high severity patched within 7 days.
-- **Action still outstanding: rotate `SUPABASE_ANON_KEY` and `DATABASE_URL`** before the
-  first commit. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) and
-  [docs/runbooks/secret-rotation.md](docs/runbooks/secret-rotation.md).
-
-### Changed
-
-- `shop.jsx` and `about.jsx` exported lowercase-named functions (`function shop()`), which
-  React's rules-of-hooks does not recognise as components — adding a hook to them was a lint
-  error. Renamed to `Shop` and `About`. The **filenames** are still lowercase: a case-only
-  rename with no version control is risky, so that is left as separate cleanup.
-- **Catalogue reconciled into one module.** `Frontend/src/modules/catalogue/` is now the
-  single source of product data: 40 products in one canonical shape, consumed by both the
-  shop grid and the home-page strip. Replaces two incompatible inline arrays (`title` vs
-  `name`, numeric vs formatted prices, disjoint product sets). Exposed through
-  `modules/catalogue/index.js` only, per docs/MODULES.md#boundary-rules.
-- **Prices are integer minor units**, formatted at the render boundary by
-  `Frontend/src/shared/lib/money.js`. No formatted price strings remain in data.
-- **Badges are derived, not stored** (`modules/catalogue/lib/badge.js`).
-- Shop sort and page-size controls are now functional. They could not have worked before:
-  prices were formatted strings, which cannot be sorted.
-- Home-page "Show More" is now a link to `/shop`; it was an inert `<button>`.
-- Product images carry `loading="lazy"`.
-- **Images optimised: 24.0 MB -> 2.51 MB of shipped assets (90% smaller).** Source images
-  were camera-resolution originals (one 6000x6000, one 5616x3744) served verbatim. Resized
-  to a 1600px max edge and re-encoded via `Frontend/scripts/optimise-images.mjs`. Originals
-  preserved in `Frontend/.image-originals/` (gitignored); the script always re-encodes from
-  those, so repeat runs do not compound JPEG loss.
-- `hero-bg.png` -> `hero-bg.jpg`: a photograph with no alpha channel stored as PNG.
-  **1.27 MB -> 69 kB** for one changed import in `Hero.jsx`. The PNG was removed; its
-  original is in `.image-originals/`.
-- Incident severity model in `docs/runbooks/incident-response.md` aligned to Document B §6
-  (Sev 1–4, acknowledgement targets, communication expectations), with the caveat that no
-  on-call rota exists to meet them.
-
-### Fixed
 
 - **The smoke suite reported a CORS defect that was really a test defect.** The check
   hardcoded `http://localhost:5173` as the allowed origin, so it failed against any server
@@ -436,6 +418,53 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   changes, so build output is unaffected.
 
 ---
+
+### Security
+
+- Added `.gitignore` at the repository root and in `Backend/` and `Frontend/`, covering
+  `.env` and its variants. `Backend/.gitignore` previously existed but was **empty**, and
+  `Backend/.env` holds live Supabase and Postgres credentials — including a `DATABASE_URL`
+  that embeds the database password and bypasses row-level security. Nothing had leaked
+  only because the project was not a git repository at the time. It is now, so whether
+  `.env` reached the history needs verifying — see SECURITY.md.
+- **23 dependency vulnerabilities resolved** — 15 in `Frontend/` (10 high) and 8 in
+  `Backend/` (5 high), all via non-breaking `npm audit fix`. Both packages now report zero.
+  Surfaced by the new CI audit gate, which was red on arrival. Most were dev-only, but
+  `react-router-dom` (7.13.0 -> 7.18.3) is a runtime dependency that shipped to users.
+  Doc B §10 requires high severity patched within 7 days.
+- **Action still outstanding: rotate `SUPABASE_ANON_KEY` and `DATABASE_URL`** before the
+  first commit. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) and
+  [docs/runbooks/secret-rotation.md](docs/runbooks/secret-rotation.md).
+
+### Changed
+
+- `shop.jsx` and `about.jsx` exported lowercase-named functions (`function shop()`), which
+  React's rules-of-hooks does not recognise as components — adding a hook to them was a lint
+  error. Renamed to `Shop` and `About`. The **filenames** are still lowercase: a case-only
+  rename with no version control is risky, so that is left as separate cleanup.
+- **Catalogue reconciled into one module.** `Frontend/src/modules/catalogue/` is now the
+  single source of product data: 40 products in one canonical shape, consumed by both the
+  shop grid and the home-page strip. Replaces two incompatible inline arrays (`title` vs
+  `name`, numeric vs formatted prices, disjoint product sets). Exposed through
+  `modules/catalogue/index.js` only, per docs/MODULES.md#boundary-rules.
+- **Prices are integer minor units**, formatted at the render boundary by
+  `Frontend/src/shared/lib/money.js`. No formatted price strings remain in data.
+- **Badges are derived, not stored** (`modules/catalogue/lib/badge.js`).
+- Shop sort and page-size controls are now functional. They could not have worked before:
+  prices were formatted strings, which cannot be sorted.
+- Home-page "Show More" is now a link to `/shop`; it was an inert `<button>`.
+- Product images carry `loading="lazy"`.
+- **Images optimised: 24.0 MB -> 2.51 MB of shipped assets (90% smaller).** Source images
+  were camera-resolution originals (one 6000x6000, one 5616x3744) served verbatim. Resized
+  to a 1600px max edge and re-encoded via `Frontend/scripts/optimise-images.mjs`. Originals
+  preserved in `Frontend/.image-originals/` (gitignored); the script always re-encodes from
+  those, so repeat runs do not compound JPEG loss.
+- `hero-bg.png` -> `hero-bg.jpg`: a photograph with no alpha channel stored as PNG.
+  **1.27 MB -> 69 kB** for one changed import in `Hero.jsx`. The PNG was removed; its
+  original is in `.image-originals/`.
+- Incident severity model in `docs/runbooks/incident-response.md` aligned to Document B §6
+  (Sev 1–4, acknowledgement targets, communication expectations), with the caveat that no
+  on-call rota exists to meet them.
 
 ## Known issues
 
