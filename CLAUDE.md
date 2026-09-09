@@ -198,7 +198,22 @@ Specific things that have already caused, or will cause, wrong work:
 4. **Express 5, not 4.** Async handler rejections forward to error middleware
    automatically; the `try/catch`-and-`next(err)` wrapper is obsolete.
 5. **`cors()` with no arguments reflects any origin.** Always pass an explicit allowlist.
-6. **Browserslist warning after a data update** persists in any already-running dev server
+6. **A case-only rename does not reach git on Windows.** `core.ignorecase` defaults to
+   `true` here, so `mv shop.jsx Shop.jsx` succeeds on disk while git keeps tracking
+   `shop.jsx`. Lint, unit tests, the build and all 385 browser checks pass locally; the
+   Linux CI runner checks out the old name and the build fails with
+   `[UNRESOLVED_IMPORT] Could not resolve './pages/Shop'`. Record it explicitly, in two
+   steps, because git considers the destination to already exist:
+
+   ```bash
+   git mv path/name.jsx path/name.jsx.tmp
+   git mv path/name.jsx.tmp path/Name.jsx
+   ```
+
+   `node scripts/check-filename-case.mjs` compares git against the filesystem exactly and
+   runs as the first CI step.
+
+7. **Browserslist warning after a data update** persists in any already-running dev server
    — the check runs once at process startup. Restart it rather than re-running the update.
 
 ---

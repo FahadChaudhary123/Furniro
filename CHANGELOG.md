@@ -126,6 +126,19 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **CI's front-end Build failed with `Could not resolve './pages/Shop'`** after the PascalCase
+  page rename. The rename happened on Windows, where `core.ignorecase` defaults to `true`:
+  the files moved on disk and git carried on tracking `shop.jsx`, `about.jsx` and
+  `contact.jsx`. Every local check passed — lint, 56 unit tests, the build, 385 browser
+  checks — because on a case-insensitive filesystem there was nothing to notice. The Linux
+  runner checked out the old names and the imports pointed at files that were not there.
+  The renames are now recorded with `git mv` (two steps, since git treats the destination as
+  already existing), and `scripts/check-filename-case.mjs` compares git's index against the
+  filesystem exactly. It runs as the **first** CI step, before install, because it needs only
+  the checkout — and because naming both spellings in two seconds beats a module-resolution
+  error that reads like a broken import path. Verified by reproducing the fault and watching
+  it fail.
+
 - **A request from a disallowed CORS origin was reported as a server fault.** The allowlist
   callback threw a plain `Error`, which is not an `AppError`, so the error middleware treated
   it as unexpected: every such request produced a `500`, an `ERROR` log line and a full stack

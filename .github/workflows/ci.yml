@@ -44,6 +44,15 @@ jobs:
             Frontend/package-lock.json
             Backend/package-lock.json
 
+      # Runs before anything installs: it needs only git and the checkout, and it catches a
+      # class of failure that is INVISIBLE on Windows and macOS. A case-only rename there
+      # succeeds on disk while git keeps tracking the old name, so every local check passes
+      # and this Linux runner is the first place the import breaks. Failing here names both
+      # spellings; failing in Build says "Could not resolve './pages/Shop'".
+      - name: Filename case matches git
+        working-directory: .
+        run: node scripts/check-filename-case.mjs
+
       # ci, not install — respects the lockfile exactly and fails if it is out of sync.
       - name: Install
         run: npm ci
