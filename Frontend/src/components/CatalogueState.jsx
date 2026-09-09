@@ -37,7 +37,7 @@ export const CatalogueError = ({ error, onRetry }) => (
     {onRetry && (
       <button
         onClick={onRetry}
-        className="mt-5 bg-[#B88E2F] text-white px-6 py-2 font-semibold hover:bg-[#a57924] transition"
+        className="mt-5 bg-[#B88E2F] text-white px-6 py-2 font-semibold hover:bg-[#a57f28] transition"
       >
         Try again
       </button>

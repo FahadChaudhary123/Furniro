@@ -3,7 +3,6 @@ import React from "react";
 import { MapPin, Phone, Clock } from "lucide-react"; // install lucide-react if not installed
 import contactBanner from "../assets/contactBanner.jpg";
 import FeaturesSection from "../sections/FeaturesSection";
-import Footer from "../components/Footer";
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 const Contact = () => {
@@ -155,7 +154,6 @@ const Contact = () => {
       </div>
     </div>
     <FeaturesSection />
-    <Footer />
     </>
   );
 };

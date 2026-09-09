@@ -55,7 +55,7 @@ class RouteErrorBoundary extends Component {
         <div className="mt-8 flex flex-wrap gap-4 justify-center">
           <button
             onClick={() => window.location.reload()}
-            className="bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57924] transition"
+            className="bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57f28] transition"
           >
             Reload the page
           </button>

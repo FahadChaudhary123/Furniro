@@ -126,9 +126,10 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
   the component body; do not replicate that.
 - Stable `key` on every mapped element, never the array index.
 - Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind cannot express.
-- Brand gold is `#B88E2F`. (`#B88A2B` appears twice in `Hero.jsx` — that is a bug, not a second brand colour.)
-- Icons come from `lucide-react`. There is no animation library; use CSS keyframes in `index.css`. (`#B88A2B` appears twice in `Hero.jsx` — that is a bug, not a second brand colour.)
-- The brand is spelled **Furniro**. `Funiro` in the footer and hashtag is a leftover to fix.
+- Brand gold is `#B88E2F`, hover `#a57f28`. There is exactly one of each — the `#B88A2B`
+  and `#a57924` near-duplicates were removed. Do not introduce a third.
+- Icons come from `lucide-react`. There is no animation library; use CSS keyframes in `index.css`.
+- The brand is spelled **Furniro**, everywhere. The `Funiro` misspelling is gone.
 - Relative imports — no path alias is configured.
 - Mobile-first: unprefixed utilities are small-screen, `sm:`/`md:`/`lg:` layer on top.
 
@@ -136,7 +137,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 
 ```bash
 cd Frontend && npm run verify   # lint + 56 unit checks + build + budgets + SEO check
-cd Frontend && npm run e2e      # 359 browser checks; starts both servers itself
+cd Frontend && npm run e2e      # 375 browser checks; starts both servers itself
 cd Backend  && npm test         # 62 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 81 API checks against a running server

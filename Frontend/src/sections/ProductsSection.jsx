@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Heart, Share2, Scale } from "lucide-react";
 import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
 import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
@@ -59,17 +58,8 @@ const ProductsSection = () => {
                   Add to cart
                 </button>
 
-                <div className="flex gap-6 text-white text-sm">
-                  <span className="flex items-center gap-1 cursor-pointer">
-                    <Share2 size={16} /> Share
-                  </span>
-                  <span className="flex items-center gap-1 cursor-pointer">
-                    <Scale size={16} /> Compare
-                  </span>
-                  <span className="flex items-center gap-1 cursor-pointer">
-                    <Heart size={16} /> Like
-                  </span>
-                </div>
+                {/* Removed: Share, Compare and Like were <span>s with `cursor-pointer` —
+                    they showed a hand cursor and did nothing. See ProductCard.jsx. */}
               </div>
 
               {/* Content */}

@@ -28,18 +28,20 @@ const PATHS = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/about'];
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 
 /**
- * Known, accepted contrast failures — the brand gold `#B88E2F` and the `#B88A2B` variant
- * that CLAUDE.md records as a bug rather than a second brand colour.
+ * Known, accepted contrast failures — the brand gold `#B88E2F`.
  *
- * Both sit at about 3.0:1 on white. That passes AA for large text and fails it for normal
- * text, so the fix is either a darker gold (`#927125` reaches 4.55:1 on the same hue) or
- * restricting the gold to headings and large controls. Either is a design decision.
+ * It sits at 3.02:1 on white. That passes AA for large text and fails it for normal text, so
+ * the fix is either a darker gold (`#927125` reaches 4.55:1 on the same hue) or restricting
+ * the gold to headings and large controls. Either is a design decision.
+ *
+ * The `#B88A2B` near-duplicate that CLAUDE.md recorded as a bug is gone — the codebase now
+ * has one gold and one hover shade, so there is one entry here rather than two.
  *
  * Listed by colour pair rather than by count of nodes, so moving an existing gold button
  * does not fail the suite — but using the gold somewhere new does not slip through either,
  * because MAX_KNOWN_NODES caps how far it can spread.
  */
-const KNOWN_CONTRAST_EXCEPTIONS = ['#b88e2f', '#b88a2b'];
+const KNOWN_CONTRAST_EXCEPTIONS = ['#b88e2f'];
 const MAX_KNOWN_NODES = 8;
 
 /** True when a violation node is one of the accepted brand-gold pairs. */

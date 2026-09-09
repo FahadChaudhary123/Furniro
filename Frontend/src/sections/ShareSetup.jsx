@@ -19,7 +19,7 @@ const ShareSetup = () => {
       <div className="text-center mb-12">
         <p className="text-gray-500 mb-2">Share your setup with</p>
         <h2 className="text-3xl md:text-4xl font-bold">
-          #FuniroFurniture
+          #FurniroFurniture
         </h2>
       </div>
 

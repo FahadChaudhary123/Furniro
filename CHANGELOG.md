@@ -35,6 +35,34 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **A guard against dead controls.** `e2e/privacy.spec.js` fails if any page renders a button
+  with no click handler, or an action label with no control behind it. Four shipped at once,
+  so a check is worth more than four fixes.
+
+### Fixed
+
+- **Four controls promised something they could not do** — the same defect class as the two
+  forms, and just as invisible in a code review:
+  - **`BUY NOW`**, the most prominent call to action on the site, was an inert `<button>`.
+    It is now a `<Link>` to `/shop` — a link rather than a button because it navigates, so
+    middle-click, ctrl-click and "open in new tab" have to work.
+  - **`Explore More`** on the room carousel, likewise inert. Also a `<Link>` now.
+  - **The navbar account and wishlist icons** carried `cursor-pointer` and a hover colour —
+    the visual vocabulary of a control — while being bare SVGs: unreachable by keyboard and
+    announced as unlabelled graphics. There are no accounts and no wishlist, so they are now
+    honestly decorative and `aria-hidden`.
+  - **`Share`, `Compare` and `Like`** were plain `<span>`s in the product hover overlays, one
+    set even with `cursor-pointer`. Three verbs for three features that do not exist. Removed
+    rather than disabled — "Share" as decoration means nothing.
+
+- **The brand was spelled two ways and painted two golds.** `Funiro` in the footer heading,
+  the copyright line and the `#FuniroFurniture` hashtag is now `Furniro` everywhere.
+  `#B88A2B` (2 occurrences, the Hero) is gone, and so is `#a57924` — a hover shade derived
+  from the wrong gold and used in 7 places alongside the right one. One gold, one hover.
+
+- **The `Footer` was imported and rendered by all eight page components.** Eight copies to
+  keep in step. It now renders once in `App.jsx`, outside the route error boundary so a route
+  that fails to load still offers a way out of the page.
 - **A processing register** (`PRIV-06`) — [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md).
   Every processing activity the system performs, verified against the source rather than
   inferred from intent: request logs (no IP, no query string), rate limiting (IP as an
@@ -70,7 +98,6 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   CGNAT one budget is shared by everyone on it. At five an hour, one broken page in an office
   silences the report for every colleague. Found by the smoke suite throttling itself.
 
-### Fixed
 
 - **Two forms collected personal data and threw it away.** The contact form had no submit
   handler, so pressing Submit triggered a native GET, reloaded the page and discarded the
@@ -470,36 +497,52 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 Carried forward until fixed. Each is a real defect, not a missing feature.
 
+**Audited 2026-09-09.** Entries that had been fixed were removed rather than left to rot — a
+known-issues list that lists things that are not issues gets skimmed and then ignored. Each
+removal was verified against the running app first: the Share/Compare/Like entry looked stale
+because the controls sit in a hover overlay and a text probe missed them. They were real, and
+are now fixed rather than dropped.
+
 ### Front end
 
 - **Cart is guest-only and client-side.** No reservation (`CART-03`), no server-side
   persistence or retention (`CART-04`), and it does not follow a customer across devices
-  (`CART-05`). Share, Compare and Like still have no handlers.
-- **Contact form discards input** — no `onSubmit`, so the page reloads and the message is
-  lost. — [contact.jsx](Frontend/src/pages/contact.jsx)
-- **Navbar user and wishlist icons are not interactive.** Search and cart now work.
-- **`Footer` duplicated** across all four pages instead of sitting in `App.jsx`.
-- **The brand name is spelled two ways.** `Furniro` in the navbar and repo; `Funiro` in the
-  footer heading, the copyright line and the `#FuniroFurniture` hashtag.
-- **Two brand golds in use** — `#B88E2F` (18 occurrences) and `#B88A2B` (2, in the Hero).
+  (`CART-05`).
+- **The contact and newsletter forms are disabled, not working.** They no longer discard what
+  is typed into them, but there is still no way for a customer to send a message from the
+  site. Needs `POST /api/contact`, somewhere to store a message and something to deliver it.
+- **The brand gold fails WCAG AA for normal text.** `#B88E2F` is 3.02:1 on white — enough for
+  large text, not for body text or button labels, on primary buttons across the whole site.
+  An open design decision, capped so it cannot spread: see
+  [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
+- **The blog lives at `/about`.** The nav says "About", the URL says `/about`, and the page's
+  heading, breadcrumb and title all say "Blog". `npm run seo` reports it as two warnings.
+  Fixing it means either routing the blog at `/blog` with a redirect, or writing About
+  content — a product decision, not a defect repair.
 
 ### Back end
 
-- **No domain endpoints yet.** Only `/health` and `/health/ready`. Products, cart, orders
-  and auth are unbuilt — see [docs/MODULES.md](docs/MODULES.md#build-order).
+- **No cart, orders, auth or payments.** The API serves the catalogue and the blog, plus a
+  client-error endpoint. See [docs/MODULES.md](docs/MODULES.md#build-order).
 - **Two overlapping data layers still installed** — `@supabase/supabase-js` and `pg`. Both
   reach the same Postgres; the choice is pending.
 - **Graceful shutdown is unverified on Windows.** The SIGTERM/SIGINT handlers are written,
   but `Stop-Process` is a hard terminate, so the path has only been exercised by
   inspection. It matters in a Linux container, not locally.
-- **No error-tracking or uptime monitoring integration** — `PLAT-04` is the middleware only.
+- **No alerting.** `PLAT-04` collects client and server errors into the structured log, but
+  a log is a record, not a page. Nothing tells anyone an error happened.
+- **No retention enforcement.** Doc B §11 sets 30 days hot / 12 months cold for logs.
+  Nothing purges anything — `PLAT-05`, the job framework, does not exist. See
+  [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md).
 
 ### Repository
 
-
-- **No deployment configuration** for either tier, and no host chosen.
+- **No deployment configuration** for either tier, and no host chosen. `dist/_redirects` is
+  generated for a host that understands it; none is selected.
 - **Whether `Backend/.env` ever reached git history is unverified.** Rotation is outstanding
   regardless — see [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
+- **No privacy notice** (`PRIV-07`). Everything in the processing register is undisclosed to
+  the people it concerns. Needs legal copy this project will not invent.
 
 ---
 

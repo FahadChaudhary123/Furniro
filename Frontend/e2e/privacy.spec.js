@@ -140,3 +140,57 @@ test.describe('nothing personal leaves the page', () => {
     expect(cookies.map((c) => c.name)).toEqual([]);
   });
 });
+
+test.describe('no control promises something it cannot do', () => {
+  /**
+   * The same defect class as the two forms: an element that signals interactivity and does
+   * nothing. Four shipped at once — a `BUY NOW` button that went nowhere, an `Explore More`
+   * button that went nowhere, navbar account and wishlist icons styled `cursor-pointer` for
+   * features that do not exist, and `Share`/`Compare`/`Like` as bare `<span>`s.
+   *
+   * A visitor cannot tell the difference between a control that is broken and one that was
+   * never wired up. Both read as "this site is broken".
+   */
+  const PAGES = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/about'];
+
+  for (const path of PAGES) {
+    test(`${path} has no button without a handler`, async ({ page }) => {
+      await page.goto(path, { waitUntil: 'networkidle' });
+
+      const dead = await page.$$eval('button, [role="button"]', (els) =>
+        els
+          .filter((el) => !el.disabled && el.getAttribute('type') !== 'submit')
+          .filter((el) => {
+            // React attaches handlers as props on the fiber, not as an inline onclick.
+            const entry = Object.entries(el).find(([k]) => k.startsWith('__reactProps'));
+            return !(entry?.[1] && typeof entry[1].onClick === 'function');
+          })
+          .map((el) => (el.textContent || '').trim() || el.getAttribute('aria-label') || '(unnamed)'),
+      );
+
+      expect(dead, `buttons that do nothing on ${path}:\n  ${dead.join('\n  ')}`).toEqual([]);
+    });
+  }
+
+  test('no action label exists without a control behind it', async ({ page }) => {
+    // Share, Compare and Like were <span>s inside a hover overlay — verbs promising three
+    // features that do not exist, unreachable by keyboard, announced as loose words.
+    await page.goto('/shop', { waitUntil: 'networkidle' });
+    const phantom = await page
+      .locator('span:text-is("Share"), span:text-is("Compare"), span:text-is("Like")')
+      .count();
+    expect(phantom).toBe(0);
+  });
+
+  test('decorative icons are hidden from assistive technology', async ({ page }) => {
+    // The account and wishlist icons stay for visual balance but do nothing, so they must
+    // not be announced — an unlabelled graphic is noise in a screen reader's output.
+    await page.goto('/');
+    const header = page.locator('header');
+    for (const cls of ['lucide-user', 'lucide-heart']) {
+      const icon = header.locator(`svg.${cls}`).first();
+      if ((await icon.count()) === 0) continue;
+      await expect(icon).toHaveAttribute('aria-hidden', 'true');
+    }
+  });
+});

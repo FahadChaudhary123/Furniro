@@ -86,7 +86,7 @@ const ProductGrid = () => {
         </div>
         <button
           type="submit"
-          className="bg-[#B88E2F] text-white px-6 py-2 rounded font-medium hover:bg-[#a57924] transition"
+          className="bg-[#B88E2F] text-white px-6 py-2 rounded font-medium hover:bg-[#a57f28] transition"
         >
           Search
         </button>

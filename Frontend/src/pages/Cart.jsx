@@ -6,7 +6,6 @@ import { usePageMeta } from '../shared/lib/usePageMeta.js';
 import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
-import Footer from '../components/Footer';
 import Picture from '../shared/ui/Picture';
 
 /**
@@ -34,7 +33,7 @@ const Cart = () => {
             <p className="mt-3 text-gray-600">Nothing here yet.</p>
             <Link
               to="/shop"
-              className="mt-8 inline-block bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57924] transition"
+              className="mt-8 inline-block bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57f28] transition"
             >
               Browse the shop
             </Link>
@@ -172,7 +171,6 @@ const Cart = () => {
       </section>
 
       <FeaturesSection />
-      <Footer />
     </div>
   );
 };

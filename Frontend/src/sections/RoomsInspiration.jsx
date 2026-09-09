@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
@@ -57,9 +58,13 @@ const RoomsInspiration = () => {
             inspire you.
           </p>
 
-          <button className="bg-[#B88E2F] text-white px-8 py-3 font-medium hover:bg-[#a57f28] transition">
+          {/* Went nowhere. A link, for the same reasons as the hero's. */}
+          <Link
+            to="/shop"
+            className="inline-block bg-[#B88E2F] text-white px-8 py-3 font-medium hover:bg-[#a57f28] transition"
+          >
             Explore More
-          </button>
+          </Link>
         </div>
 
         {/* RIGHT CAROUSEL */}

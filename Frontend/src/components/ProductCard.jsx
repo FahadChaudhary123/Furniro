@@ -50,11 +50,11 @@ const ProductCard = ({ product }) => {
           >
             Add to cart
           </button>
-          <div className="flex gap-3 text-white text-sm">
-            <span>Share</span>
-            <span>Compare</span>
-            <span>Like</span>
-          </div>
+          {/* Share, Compare and Like were here as plain <span>s: three action labels for
+              three features that do not exist. Not clickable, not focusable, and read out
+              by a screen reader as words with no control attached. Removed rather than
+              disabled — "Share" as decoration means nothing. They come back when there is a
+              wishlist and a comparison view to attach them to. */}
         </div>
       </div>
 

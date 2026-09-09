@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
@@ -32,7 +34,7 @@ const Hero = () => {
             New Era Collection
           </span>
 
-          <h1 className="mt-3 text-3xl md:text-4xl font-bold text-[#B88A2B] leading-tight">
+          <h1 className="mt-3 text-3xl md:text-4xl font-bold text-[#B88E2F] leading-tight">
             Where Tomorrow <br /> Feels Like Home
           </h1>
 
@@ -40,9 +42,16 @@ const Hero = () => {
           Thoughtfully crafted pieces inspired by the future—
 made to elevate your everyday life.</p>
 
-          <button className="mt-6 inline-block bg-[#B88A2B] text-white px-6 py-3 font-semibold hover:bg-[#a57924] transition">
+          {/* A <Link>, not a <button>: it navigates, so it has to be a link for
+              middle-click, ctrl-click, "open in new tab" and a screen reader to treat it
+              correctly. It did nothing at all before — the most prominent call to action on
+              the site was inert. */}
+          <Link
+            to="/shop"
+            className="mt-6 inline-block bg-[#B88E2F] text-white px-6 py-3 font-semibold hover:bg-[#a57f28] transition"
+          >
             BUY NOW
-          </button>
+          </Link>
         </div>
       </div>
     </section>

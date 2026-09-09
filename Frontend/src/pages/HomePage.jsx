@@ -1,5 +1,3 @@
-import Footer from "../components/Footer";
-
 import Hero from "../sections/Hero";
 import BrowseRange from "../sections/BrowseRange";
 import ProductsSection from "../sections/ProductsSection";
@@ -18,7 +16,6 @@ function HomePage() {
       <ProductsSection />
       <RoomsInspiration />
       <ShareSetup />
-      <Footer />
     </div>
   );
 }

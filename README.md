@@ -66,7 +66,7 @@ contact) renders standalone.
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm test` | Unit tests (56 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (359 checks; starts both servers) |
+| `npm run e2e` | Playwright end-to-end suite (375 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined
@@ -147,12 +147,11 @@ under *Unreleased*.
 | Gap | Where |
 |---|---|
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
-| Contact form has no `onSubmit` — submitting reloads the page and discards input | [contact.jsx](Frontend/src/pages/contact.jsx) |
-| Navbar user and wishlist icons are not interactive (search and cart now work) | [Navbar.jsx](Frontend/src/components/Navbar.jsx) |
 | Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
 | `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
+| Contact and newsletter forms are disabled — no endpoint exists to receive a message | [contact.jsx](Frontend/src/pages/contact.jsx) |
+| The brand gold `#B88E2F` is 3.02:1 on white — fails WCAG AA for normal text | [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) |
 | No deployment configuration, and no host chosen | repo-wide |
-| Brand name spelled two ways — `Furniro` in the navbar, `Funiro` in the footer and hashtag | [Footer.jsx](Frontend/src/components/Footer.jsx) |
 | `Backend/.env` rotation outstanding; whether it reached git history is unverified | [SECURITY.md](SECURITY.md) |
 
 ---

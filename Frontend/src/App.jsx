@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import RouteErrorBoundary from "./components/RouteErrorBoundary";
+import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
 
 /**
@@ -60,6 +61,13 @@ function App() {
           </Routes>
         </Suspense>
       </RouteErrorBoundary>
+      {/*
+        One Footer for the whole app. It was previously imported and rendered by all eight
+        page components — eight copies to keep in step, and the reason a footer change had to
+        be made eight times. It sits outside the error boundary deliberately: when a route
+        fails to load, the footer is still a way out of the page.
+      */}
+      <Footer />
     </>
   );
 }

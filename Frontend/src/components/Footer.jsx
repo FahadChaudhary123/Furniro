@@ -8,7 +8,7 @@ const Footer = () => {
           {/* Not an <h1>: a footer brand mark is not the page's main heading, and having
               one on every page gave every page two h1s. "Jump to main heading" then lands
               in the footer half the time. Styled the same, announced correctly. */}
-          <p className="text-xl font-bold mb-4">Funiro.</p>
+          <p className="text-xl font-bold mb-4">Furniro.</p>
           <p className="text-sm text-gray-600">
             400 University Drive Suite 200 Coral Gables,<br />
             FL 33134 USA
@@ -69,7 +69,7 @@ const Footer = () => {
 
       {/* Bottom Line */}
       <div className="border-t border-gray-200 text-gray-600 text-xs text-center py-4">
-        2023 Funiro. All rights reserved
+        2023 Furniro. All rights reserved
       </div>
     </footer>
   );

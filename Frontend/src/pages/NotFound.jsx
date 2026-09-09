@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import PageBanner from '../components/PageBanner';
-import Footer from '../components/Footer';
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 /**
@@ -28,7 +27,7 @@ const NotFound = () => {
         <div className="mt-10 flex flex-wrap gap-4 justify-center">
           <Link
             to="/"
-            className="bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57924] transition"
+            className="bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57f28] transition"
           >
             Back to home
           </Link>
@@ -41,7 +40,6 @@ const NotFound = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

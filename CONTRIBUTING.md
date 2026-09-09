@@ -252,7 +252,7 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 359 checks across
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 375 checks across
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
 
@@ -357,15 +357,15 @@ it — that is a welcome PR on its own.
 
 Small, self-contained, and each fixes something real:
 
-1. **Fix the shop product images** — every one 404s.
-   ([README](README.md#what-does-not-work-yet))
-2. **`Rs` → `Rp`** on the struck-through old price in `ProductCard.jsx`.
-3. **Add a `*` route** rendering a `NotFound` page.
-4. **Lift `Footer` into `App.jsx`** and delete the four per-page copies.
-5. **Fix the brand name.** `Furniro` in the navbar, `Funiro` in the footer and the
-   `#FuniroFurniture` hashtag. Pick one and make it consistent.
-6. **Fix the second brand gold.** `#B88A2B` appears twice in `Hero.jsx`; everywhere else is
-   `#B88E2F`.
-7. **Lift `Footer` into `App.jsx`** — every page renders its own copy.
-8. **Rename the lowercase page files** (`shop.jsx`, `about.jsx`) to match their now-PascalCase
-   components.
+*Reviewed 2026-09-09. Everything previously listed here had been fixed — broken shop images,
+`Rs` instead of `Rp`, the missing `*` route. A stale list of "good first issues" wastes the
+time of exactly the person it is meant to help, so they were removed rather than left.*
+
+1. **Rename the lowercase page files** — `shop.jsx`, `about.jsx` and `contact.jsx`, whose
+   components are already PascalCase.
+2. **Fold `ShopBanner` and `BlogBanner` into `PageBanner`.** Four pages already use
+   `PageBanner`; these two sections duplicate its markup with different spacing.
+3. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
+   "About", the URL says `/about`, and the heading, breadcrumb and title all say "Blog".
+   `npm run seo` reports it as two warnings. Needs a decision on whether About content
+   should exist too — ask before starting.

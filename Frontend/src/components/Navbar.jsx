@@ -44,11 +44,25 @@ const Navbar = () => {
 
         {/* Icons + Hamburger */}
         <div className="flex items-center gap-4 md:gap-6">
-          <User className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
+          {/*
+            Decorative, and marked as such. There are no accounts (`identity` is unbuilt), so
+            this icon has nothing to open.
+
+            It previously carried `cursor-pointer` and a hover colour, which is the visual
+            vocabulary of a control — a visitor moved the mouse over it, saw it respond, and
+            clicked on nothing. It is not a <button> or a <Link>, so keyboard users could
+            never reach it and a screen reader announced it as an unlabelled graphic.
+
+            `aria-hidden` because it conveys nothing a screen reader needs; no pointer
+            styling because it does nothing a mouse user can use. When accounts exist this
+            becomes a real <Link> and the styling comes back with it.
+          */}
+          <User aria-hidden="true" className="text-gray-400" size={20} />
           <Link to="/shop" aria-label="Search products" className="hover:text-[#B88E2F] transition">
             <Search size={20} />
           </Link>
-          <Heart className="cursor-pointer hover:text-[#B88E2F] transition" size={20} />
+          {/* Same: there is no wishlist. See the note on the account icon above. */}
+          <Heart aria-hidden="true" className="text-gray-400" size={20} />
           <Link
             to="/cart"
             className="relative hover:text-[#B88E2F] transition"
