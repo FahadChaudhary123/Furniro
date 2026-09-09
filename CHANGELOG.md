@@ -59,6 +59,22 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **CI's front-end Build step failed with `ERR_MODULE_NOT_FOUND: dotenv`.** `generate-seo.mjs`
+  imported the catalogue *service* to build the redirect map, and that reaches
+  `repository.js` → `logger.js` → `config.js` → `dotenv`. The front-end CI job installs only
+  the front end's dependencies at that point — the API's arrive later, for the e2e run — so
+  the build could not resolve it. Lint and unit tests passed first, because nothing else in
+  that job touches those files.
+  The ranking now lives in `redirects.js`, pure and dependency-free for the same reason
+  `publishGate.js` is, and both the API and the build import it. That keeps the single
+  definition — a redirect map with its own copy of the ranking would eventually disagree with
+  the API about where a discontinued product goes — without the build inheriting the API's
+  runtime.
+  Fixed by removing the dependency rather than by installing the API's packages earlier in
+  CI: building the front end should not require the back end's runtime. A unit test now
+  asserts both files import only relative paths and `node:` builtins, confirmed to fail when
+  a bare import is added.
+
 - **A malformed request body returned `500` instead of `400`.** `body-parser` rejects bad
   JSON with a 4xx `status` and a `type` like `entity.parse.failed`, but the error middleware
   trusted only `AppError`, so every malformed request was reported as a server fault and

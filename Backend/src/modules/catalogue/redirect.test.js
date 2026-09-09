@@ -112,3 +112,46 @@ describe('the ranking rule', () => {
     expect(empty, `categories with nothing live: ${empty.join(', ')}`).toEqual([]);
   });
 });
+
+describe('the modules the front-end build imports stay dependency-free', () => {
+  /**
+   * `Frontend/scripts/generate-seo.mjs` imports `publishGate.js` and `redirects.js` directly,
+   * so the sitemap and the redirect map come from the same rules the API uses rather than a
+   * second copy. That only works while those files import nothing from `node_modules`.
+   *
+   * This is not hypothetical tidiness. An earlier version of the build imported `service.js`,
+   * which reaches `repository.js` -> `logger.js` -> `config.js` -> `dotenv`. The CI job that
+   * installs only the front end's dependencies failed the Build step with
+   * `ERR_MODULE_NOT_FOUND: dotenv` — after lint and unit tests had both passed, because
+   * nothing else in that job touches these files.
+   */
+  const BUILD_IMPORTS = ['publishGate.js', 'redirects.js'];
+
+  for (const file of BUILD_IMPORTS) {
+    it(`${file} imports only relative paths and node: builtins`, () => {
+      const source = readFileSync(join(HERE, file), 'utf8');
+      const specifiers = [...source.matchAll(/^\s*import\s+[\s\S]*?from\s+'([^']+)'/gm)].map(
+        ([, spec]) => spec,
+      );
+
+      const bare = specifiers.filter((s) => !s.startsWith('.') && !s.startsWith('node:'));
+      expect(
+        bare,
+        `${file} must not import from node_modules — the front-end build loads it without ` +
+          `the back end's dependencies installed. Found: ${bare.join(', ')}`,
+      ).toEqual([]);
+    });
+  }
+
+  it('transitively, too — a relative import must not pull one in either', () => {
+    // One level is enough here: these two files import only each other. If that changes,
+    // this needs to walk the graph.
+    const graph = BUILD_IMPORTS.map((file) => readFileSync(join(HERE, file), 'utf8'))
+      .flatMap((src) => [...src.matchAll(/^\s*import\s+[\s\S]*?from\s+'(\.[^']+)'/gm)])
+      .map(([, spec]) => spec.replace(/^\.\//, ''));
+
+    for (const relative of new Set(graph)) {
+      expect(BUILD_IMPORTS, `${relative} is imported but not checked above`).toContain(relative);
+    }
+  });
+});

@@ -4,6 +4,7 @@
  */
 
 import * as repo from './repository.js';
+import { resolveRedirect as resolve, listRedirects as list } from './redirects.js';
 
 export const DEFAULT_LIMIT = 16; // matches the shop grid's page size
 export const MAX_LIMIT = 100; // an uncapped limit is a one-request denial of service
@@ -90,53 +91,15 @@ export const categoryExists = (slug) => repo.findCategoryBySlug(slug) !== null;
 /**
  * Where to send someone who asked for a product that is no longer sold — `CAT-08`.
  *
- * Doc B §15 asks for "a 301 to the nearest live alternative". "Nearest" is doing the work
- * in that sentence, and the ranking below is a judgement, not a fact:
+ * The ranking lives in `redirects.js`, which is pure and dependency-free so the front-end
+ * build can generate `dist/_redirects` from the same rule the API answers 410 with. This
+ * only supplies the data. See that file for why "nearest" is a judgement.
  *
- *   1. The newest live product in the same category. Someone looking at a discontinued
- *      dining chair wants a dining chair, and recency is the best proxy available for
- *      "the thing that replaced it" without a real successor field in the data.
- *   2. The category listing, if the category exists but has nothing live in it. A listing
- *      is a worse landing page than a product, and much better than a 404.
- *   3. `/shop`. Always exists, always renders.
- *
- * Never returns null: a redirect target that might be missing is a 404 with extra steps.
- *
- * @param {string} slug the discontinued or blocked slug
  * @returns {{to: string, kind: 'product'|'category'|'shop', reason: string}|null}
  *          null when the slug was never a product at all — that is a real 404.
  */
-export function resolveRedirect(slug) {
-  const gone = repo.findUnpublished(slug);
-  if (!gone) return null;
+export const resolveRedirect = (slug) =>
+  resolve(slug, repo.findRawProducts(), repo.findRawCategories());
 
-  const inCategory = repo
-    .findAll()
-    .filter((p) => p.category?.name === gone.category)
-    .sort(SORT['created_at:desc']);
-
-  if (inCategory.length > 0) {
-    return { to: `/shop/${inCategory[0].slug}`, kind: 'product', reason: gone.reason };
-  }
-
-  const category = gone.category
-    ? repo.findCategoryBySlug(gone.category.toLowerCase().replaceAll(' ', '-'))
-    : null;
-
-  if (category) {
-    return { to: `/shop?category=${category.slug}`, kind: 'category', reason: gone.reason };
-  }
-
-  return { to: '/shop', kind: 'shop', reason: gone.reason };
-}
-
-/**
- * The whole redirect map, for generating host configuration that serves real 301s.
- * A client-side redirect is a fallback, not an equivalent: it costs a round trip and
- * search engines treat it less reliably than an HTTP 301.
- */
-export const listRedirects = () =>
-  repo
-    .findAllUnpublished()
-    .map(({ slug }) => ({ from: `/shop/${slug}`, ...resolveRedirect(slug) }))
-    .filter((r) => r.to);
+/** The whole redirect map, for host configuration that serves real 301s. */
+export const listRedirects = () => list(repo.findRawProducts(), repo.findRawCategories());

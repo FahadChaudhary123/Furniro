@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 
 import { logger } from '../../platform/logger.js';
 import { evaluateAll } from './publishGate.js';
+import { findUnpublished as computeUnpublished } from './redirects.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
@@ -47,26 +48,12 @@ const gate = evaluateAll(raw.products, { categoryNames: new Set(raw.categories) 
 /**
  * CAT-08 — slugs that exist in the data but are not served.
  *
- * Two ways a product gets here: it failed a blocking publish-gate rule, or it carries
- * `discontinued: true`. Both are "this URL was real and is not any more", which is a
- * different thing from a URL that never existed, and it deserves a different answer.
- *
- * Keeping the row rather than dropping it is the whole point. A slug the server has
- * forgotten can only 404, and Doc B §15 is explicit that an indexed URL should never land
- * on a bare 404. Retaining the slug and its category is what makes a redirect to the
- * nearest live alternative possible at all.
+ * Computed by `redirects.js`, which is pure and dependency-free so the front-end build can
+ * import the same ranking without dragging this file's imports (and therefore dotenv) with
+ * it. Keeping the row rather than dropping it is the point: a slug the server has forgotten
+ * can only 404, and Doc B §15 is explicit that an indexed URL should never land on one.
  */
-const unpublished = new Map(
-  [
-    ...gate.blocked.map((b) => ({ row: b.product, reason: 'failed the publish gate' })),
-    ...raw.products
-      .filter((p) => p.discontinued === true)
-      .map((row) => ({ row, reason: 'discontinued' })),
-  ]
-    .filter(({ row }) => typeof row?.slug === 'string' && row.slug)
-    // A discontinued product that ALSO fails the gate appears twice; the Map keeps one.
-    .map(({ row, reason }) => [row.slug, { slug: row.slug, category: row.category, reason }]),
-);
+const unpublished = computeUnpublished(raw.products, raw.categories);
 
 if (gate.blocked.length > 0) {
   logger.warn('publish gate blocked products', {
@@ -111,3 +98,11 @@ export const findUnpublished = (slug) => unpublished.get(slug) ?? null;
 
 /** Every unpublished slug, for the redirect map the host serves as real 301s. */
 export const findAllUnpublished = () => [...unpublished.values()];
+
+/**
+ * Raw catalogue rows, exactly as the data file holds them — `category` as a string, no
+ * embedded object. The redirect ranking works on this shape because the front-end build has
+ * the same file and no hydration step.
+ */
+export const findRawProducts = () => raw.products;
+export const findRawCategories = () => raw.categories;

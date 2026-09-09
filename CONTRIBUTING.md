@@ -297,7 +297,7 @@ entirely, while lint, build, performance budgets and all 46 API smoke checks wer
 Known gaps are recorded as `test.fail()` cases, so the suite documents them and tells you
 when one closes rather than sitting quietly red.
 
-**Unit tests, with Vitest.** `npm test` in either package — 56 checks in `Frontend/`, 59 in
+**Unit tests, with Vitest.** `npm test` in either package — 56 checks in `Frontend/`, 62 in
 `Backend/`, all in under a second.
 
 ```bash
