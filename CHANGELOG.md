@@ -126,6 +126,22 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Fixed
 
+- **CI failed installing the Playwright browser.** `npx playwright install --with-deps
+  chromium` switches to root and runs `apt-get` against the Ubuntu and Google Chrome
+  mirrors — eight seconds of apt output, a non-zero exit, and the browser download never
+  reached. That apt pass is the flakiest thing in the workflow and buys nothing on a GitHub
+  runner, whose image already ships the shared libraries Chromium needs.
+  It is now a **fallback rather than the default**: install the browser, check it actually
+  launches, and only run `playwright install-deps` if it does not — failing for real on the
+  second attempt. "The runner image already has the libraries" is a judgement about someone
+  else's image, so it is checked rather than assumed.
+  The launch check also earns its place on its own: without it a genuinely missing library
+  surfaces as ~190 failing tests later in the job, which reads like the application broke.
+  Verified by extracting the step exactly as YAML hands it to bash and running it — which
+  caught a second bug in the fix itself: the check was being written to `/tmp`, and node
+  resolves `require` from the script's own directory, so it could not find
+  `@playwright/test` in `Frontend/node_modules`. That would have failed on Linux too.
+
 - **CI's front-end Build failed with `Could not resolve './pages/Shop'`** after the PascalCase
   page rename. The rename happened on Windows, where `core.ignorecase` defaults to `true`:
   the files moved on disk and git carried on tracking `shop.jsx`, `about.jsx` and

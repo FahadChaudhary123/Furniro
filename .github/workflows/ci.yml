@@ -82,8 +82,38 @@ jobs:
       # Real browser, real bundle, both servers. Catches what a build cannot: this suite
       # found a React error #31 crash that blanked /shop while lint, build, budgets and the
       # API smoke tests were all green.
+      # `--with-deps` switches to root and runs apt-get against the Ubuntu and Google Chrome
+      # mirrors. That is the flakiest thing in this workflow and is what failed here: eight
+      # seconds of apt output, a non-zero exit, and the browser download never reached.
+      #
+      # So the apt pass is now a FALLBACK rather than the default. The GitHub Ubuntu runner
+      # image already ships the shared libraries Chromium needs — but that is a judgement
+      # about someone else's image, so it is checked rather than assumed: if the browser
+      # cannot start, the dependencies are installed and it is checked again, failing for
+      # real the second time.
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: |
+          # Written HERE, not in /tmp: node resolves `require` from the script's own
+          # directory, so a check outside this package cannot find @playwright/test.
+          cat > launch-check.cjs <<'CHECK'
+          require('@playwright/test').chromium.launch()
+            .then((b) => b.close())
+            .then(() => console.log('chromium launches'))
+            .catch((e) => {
+              console.error('chromium could not launch:', e.message);
+              process.exit(1);
+            });
+          CHECK
+
+          npx playwright install chromium
+
+          if ! node ./launch-check.cjs; then
+            echo "::warning::Chromium needs system libraries; falling back to apt."
+            npx playwright install-deps chromium
+            node ./launch-check.cjs
+          fi
+
+          rm -f launch-check.cjs
 
       # The e2e config starts the API itself (playwright.config.js webServer), so this job
       # needs the API's dependencies as well as the front end's. Without them the run fails
