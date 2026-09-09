@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Furniro API \u2014 Express 5 + Supabase. See ../docs/MODULES.md",
+  "description": "Furniro API — Express 5 + Supabase. See ../docs/MODULES.md",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -21,8 +21,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
-    "helmet": "^8.3.0",
-    "pg": "^8.18.0"
+    "helmet": "^8.3.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.11",

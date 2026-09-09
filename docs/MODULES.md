@@ -293,8 +293,8 @@ Backend/src/
 └── app.js                    ← composition root: mounts routes, wires events
 ```
 
-This replaces the current empty `controllers/`, `models/`, `routes/`, `middlewares/`,
-`utils/` directories. **That layout groups by technical role; this groups by domain.** The
+This replaced the `controllers/`, `models/`, `routes/`, `middlewares/` and `utils/`
+directories, which were removed on 2026-09-09 having never held a file. **That layout groups by technical role; this groups by domain.** The
 difference matters at 20 modules: a change to inventory touches one directory instead of
 five, and a boundary violation is visible in the import path.
 

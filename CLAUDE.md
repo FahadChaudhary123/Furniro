@@ -163,10 +163,15 @@ of a task, say which part and why. Never report success you have not verified â€
 running the check over reasoning about whether it would pass.
 
 **Prefer the smallest change that works.** Ask whether twenty lines would do before adding
-a dependency. This project has removed four for exactly that reason: `gsap` (imported by
+a dependency. This project has removed five for exactly that reason: `gsap` (imported by
 one component nothing imported), `mongoose` (a MongoDB driver in a Postgres project),
-`react-icons` (83 MB, one file, three icons) and `framer-motion` (38.5 kB gzipped for a
-single fade). Measure before assuming a dependency earns its weight.
+`react-icons` (83 MB, one file, three icons), `framer-motion` (38.5 kB gzipped for a single
+fade) and `pg` (declared, imported by nothing). Measure before assuming a dependency earns
+its weight.
+
+The one dependency added against that instinct is `axe-core`, 3 MB as a devDependency â€”
+justified in [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) because a
+half-implemented accessibility checker is worse than none.
 
 **Say when a request rests on a wrong premise.** A task that assumes a working API or a
 cart is a task built on something that is not there. Flag it, then do what can actually be

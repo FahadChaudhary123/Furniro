@@ -187,9 +187,13 @@ for the whole system. The front end fetches it; it holds no catalogue of its own
 Further modules mount into `src/app.js` as they are built. The layout, boundary rules and
 build order are in [docs/MODULES.md](docs/MODULES.md).
 
-**One data-layer decision remains.** `@supabase/supabase-js` and `pg` are both installed.
-They are two routes to the same Postgres; `pg` is kept for now pending the question of
-whether raw SQL is needed — see
+**The data-layer decision is settled by removal.** `pg` was uninstalled on 2026-09-09: it
+was declared as a dependency and imported by nothing, so it was 604 kB of `node_modules` and
+a standing question rather than a choice anyone had made. `@supabase/supabase-js` is the one
+in use, in `src/platform/supabase.js`.
+
+This does not foreclose raw SQL — `npm install pg` restores it in one command, and the
+repository layer is the only file that would change. See
 [ARCHITECTURE.md](ARCHITECTURE.md#three-data-layers-pick-one).
 
 ## Environment variables
@@ -225,18 +229,25 @@ bundle.** Never put a secret behind a `VITE_` prefix.
 Furniro/
 ├── Frontend/
 │   ├── src/
-│   │   ├── components/     Navbar, Footer, ProductCard, ProductGrid
-│   │   ├── pages/          Route targets: HomePage, shop, about, contact
+│   │   ├── modules/        Domain modules: catalogue, content, cart
+│   │   ├── shared/         Cross-cutting helpers: money, routes, page meta
+│   │   ├── components/     Navbar, Footer, ProductCard, ProductGrid, PageBanner
+│   │   ├── pages/          Route targets: HomePage, Shop, About, Contact, ...
 │   │   ├── sections/       Page-level blocks composed by pages
 │   │   ├── assets/         Images imported by the bundler
 │   │   ├── App.jsx         Route table
 │   │   └── main.jsx        Entry point, mounts BrowserRouter
+│   ├── e2e/                Playwright specs
+│   ├── scripts/            Budgets, SEO artefacts, image optimisation
 │   ├── public/             Served verbatim at the web root
 │   └── vite.config.js
 ├── Backend/
-│   ├── config/supabase.js  The only back-end file with code
-│   ├── index.js            Empty
-│   └── controllers/ models/ routes/ middlewares/ utils/   All empty
+│   ├── index.js            Starts the server
+│   ├── src/app.js          Composition root: middleware order, route mounting
+│   ├── src/platform/       Config, logging, correlation ids, errors, health
+│   ├── src/security/       Security headers, rate limiting
+│   ├── src/modules/        catalogue, content — each with its own repository
+│   └── scripts/            Smoke, completeness, latency
 └── docs/runbooks/
 ```
 

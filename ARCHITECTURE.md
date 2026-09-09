@@ -185,21 +185,28 @@ absolute path. The broken shop images are exactly this distinction going wrong �
 > tables and exposing a single `index.js`. The layering below still describes what exists
 > in the repository today.
 
-The directory skeleton — `config/`, `controllers/`, `models/`, `routes/`, `middlewares/`,
-`utils/` — declares a conventional layered Express app:
+**That skeleton is gone.** `config/`, `controllers/`, `models/`, `routes/`, `middlewares/`
+and `utils/` declared a conventional layered Express app and then stayed **empty** while the
+real code was written in `src/`. Five directories describing a structure nothing used were
+removed on 2026-09-09; an empty directory that a document calls the architecture is worse
+than no directory, because it is where the next person looks first.
+
+What replaced them, per file rather than per layer:
 
 ```
-routes/       URL to controller binding, one router per resource
-controllers/  HTTP concerns: parse request, call model, shape response
-models/       Data access; the only layer that touches Supabase
-middlewares/  Cross-cutting: CORS, auth, validation, error handling
-utils/        Pure helpers, no I/O
-config/       Client construction from environment
+src/app.js                    Composition root; middleware order and route mounting
+src/platform/                 Config, logging, correlation ids, errors, health
+src/modules/<name>/
+  routes.js                   URL to controller binding
+  controller.js               HTTP concerns: validate, call service, shape response
+  service.js                  Business rules; no req, no res, no status codes
+  repository.js               The ONLY file that touches a data store
+  index.js                    The module's entire public surface
 ```
 
-The rule that makes the layering worth having: **a controller never imports the Supabase
-client directly.** It goes through `models/`. That is what keeps the data layer swappable
-and the controllers testable.
+The rule that makes the layering worth having is unchanged, only relocated: **nothing above
+`repository.js` touches the data store.** That is what keeps the data layer swappable and
+the services testable without a server.
 
 **Built.** `Backend/src/platform/` implements the Layer 0 module — config, logging,
 correlation ids, error handling, health — and `src/app.js` is the composition root domain
@@ -208,18 +215,24 @@ package not declared as ESM, and a client constructed before dotenv had run) are
 construction. See [README.md](README.md#back-end-structure) and
 [docs/MODULES.md](docs/MODULES.md).
 
-### Three data layers, pick one
+### Three data layers, resolved to one
 
-`@supabase/supabase-js`, `mongoose` and `pg` are all dependencies.
+The back end once declared three ways to reach a database. Two of them reached nothing.
 
-| Package | Talks to | Verdict |
+| Package | Talks to | Outcome |
 |---|---|---|
-| `@supabase/supabase-js` | Supabase Postgres, over HTTP | **Keep.** Matches the existing config, and brings Auth, Storage and row-level security. |
-| `pg` | Postgres, over the wire protocol | Drop unless raw SQL is needed. Redundant with the above. |
-| `mongoose` | MongoDB | **Drop.** Cannot connect to Postgres at all; it is in the tree by accident. |
+| `@supabase/supabase-js` | Supabase Postgres, over HTTP | **Kept.** In use at `src/platform/supabase.js`; brings Auth, Storage and row-level security |
+| `pg` | Postgres, over the wire protocol | **Removed 2026-09-09.** Declared as a dependency, imported by nothing — 604 kB of `node_modules` and a standing question rather than a decision |
+| `mongoose` | MongoDB | **Removed earlier.** Cannot connect to Postgres at all; it was in the tree by accident |
+
+Removing `pg` does not foreclose raw SQL. `npm install pg` restores it in one command, and
+`repository.js` is the only file that would change — that is the point of confining data
+access to it. What it does remove is a dependency nobody could justify and a "decision"
+nobody was going to make.
 
 Every unused dependency is install time, lockfile churn and vulnerability surface for
-nothing.
+nothing. Four have now been removed for exactly that: `gsap`, `mongoose`, `react-icons`,
+`framer-motion` — and `pg` makes five.
 
 ### Error handling
 

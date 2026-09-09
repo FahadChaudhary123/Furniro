@@ -42,6 +42,22 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   folding the banners together, an import was replaced and one `<ShopBanner/>` left behind,
   and both `npm run lint` and `npm run build` passed on a page that could only throw.
 
+### Removed
+
+- **`pg`, 604 kB of `node_modules` imported by nothing.** It was framed in three documents as
+  "a data-layer decision pending" — `@supabase/supabase-js` and `pg` both installed, two
+  routes to the same Postgres. It was not a decision: one is used at
+  `src/platform/supabase.js` and the other appeared in no file in the repository. Removing it
+  does not foreclose raw SQL, since `npm install pg` restores it in one command and
+  `repository.js` is the only file that would change.
+
+- **Five empty directories.** `controllers/`, `models/`, `routes/`, `middlewares/` and
+  `utils/` declared a conventional layered Express app and then never held a file, while the
+  real code was written in `src/`. `ARCHITECTURE.md` still documented them as the structure
+  and `README.md`'s tree still described the back end as "`config/supabase.js` — the only
+  back-end file with code". An empty directory that a document calls the architecture is
+  worse than no directory: it is where the next person looks first.
+
 ### Changed
 
 - **Page filenames are `PascalCase` without exception.** `shop.jsx`, `about.jsx` and
@@ -608,8 +624,6 @@ are now fixed rather than dropped.
 
 - **No cart, orders, auth or payments.** The API serves the catalogue and the blog, plus a
   client-error endpoint. See [docs/MODULES.md](docs/MODULES.md#build-order).
-- **Two overlapping data layers still installed** — `@supabase/supabase-js` and `pg`. Both
-  reach the same Postgres; the choice is pending.
 - **Graceful shutdown is unverified on Windows.** The SIGTERM/SIGINT handlers are written,
   but `Stop-Process` is a hard terminate, so the path has only been exercised by
   inspection. It matters in a Linux container, not locally.
