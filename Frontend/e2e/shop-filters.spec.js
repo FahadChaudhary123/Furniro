@@ -164,3 +164,62 @@ test.describe('navbar search', () => {
     await expect(page.getByRole('searchbox', { name: 'Search products' })).toHaveCount(1);
   });
 });
+
+test.describe('a search that finds nothing offers a way out', () => {
+  /**
+   * `SRCH-06`. Doc B §7 R7 asks for a fall back to category browse rather than an empty
+   * result. This used to be one line of grey text: a customer searching for something the
+   * shop does not stock reached a dead end whose only exit was the back button.
+   */
+  test('offers to clear the search, and every stocked room', async ({ page }) => {
+    await page.goto('/shop?q=trampoline');
+
+    await expect(page.getByText(/No products match/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Clear search' })).toBeVisible();
+    await expect(page.getByText(/browse by room/i)).toBeVisible();
+  });
+
+  test('drops the narrower filter first when searching inside a category', async ({ page }) => {
+    // Someone searching within Bedroom most likely wants the search, not the room — so
+    // "search everywhere" is offered before "clear the search".
+    await page.goto('/shop?q=trampoline&category=bedroom');
+
+    await expect(page.getByText(/No products match .* in Bedroom/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Search all products' })).toBeVisible();
+  });
+
+  test('a suggested room actually recovers the page', async ({ page }) => {
+    // The offer has to work, not just appear. This clicks it and checks products arrive.
+    await page.goto('/shop?q=trampoline');
+    await expect(page.getByText(/No products match/)).toBeVisible();
+
+    await page.getByRole('button', { name: /^Bedroom/ }).last().click();
+
+    await expect(page).toHaveURL(/category=bedroom/);
+    await expect(page).not.toHaveURL(/q=trampoline/);
+    await expect(page.locator('a[href^="/shop/"]').first()).toBeVisible();
+  });
+
+  test('does not silently widen the search on its own', async ({ page }) => {
+    // Quietly dropping a filter and showing different products is worse than showing none:
+    // the results read as an answer to the question the customer actually asked.
+    await page.goto('/shop?q=trampoline');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveURL(/q=trampoline/);
+    await expect(page.locator('a[href^="/shop/"]')).toHaveCount(0);
+  });
+
+  test('the current category is not offered as an escape from itself', async ({ page }) => {
+    await page.goto('/shop?q=trampoline&category=bedroom');
+    await expect(page.getByText(/No products match/)).toBeVisible();
+
+    const rooms = page.locator('button', { hasText: /^Bedroom/ });
+    // The filter chip at the top stays; the suggestion list below must not repeat it.
+    const suggestion = page.locator('p:has-text("browse by room") ~ div button', {
+      hasText: /^Bedroom/,
+    });
+    await expect(suggestion).toHaveCount(0);
+    expect(await rooms.count()).toBeGreaterThan(0);
+  });
+});

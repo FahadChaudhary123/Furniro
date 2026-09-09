@@ -252,7 +252,7 @@ will keep printing the warning.
 
 ## Testing
 
-**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 375 checks across
+**End-to-end, with Playwright.** `npm run e2e` in `Frontend/` — currently 385 checks across
 a desktop and a Pixel 5 viewport, run against the production build. The config starts both
 servers itself, so it is the whole command.
 
@@ -267,7 +267,7 @@ When an accessibility check fails, fix the markup. The brand-gold contrast excep
 that the colour decision can no longer be deferred. See
 [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
 
-**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 81 checks against a
+**API-level, with the smoke suite.** `npm run smoke` in `Backend/` — 84 checks against a
 running server: health, correlation ids, error shape, CORS, and the full catalogue and
 content contracts.
 

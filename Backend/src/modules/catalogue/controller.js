@@ -10,7 +10,7 @@
  */
 
 import * as service from './service.js';
-import { validationFailed, notFound, getCorrelationId } from '../../platform/index.js';
+import { validationFailed, notFound, getCorrelationId, logger } from '../../platform/index.js';
 
 /** Parse a bounded positive integer, collecting a problem rather than throwing per-field. */
 function intParam(raw, { field, min = 1, max = Number.MAX_SAFE_INTEGER, fallback }, problems) {
@@ -75,9 +75,46 @@ export function listProducts(req, res) {
 
   if (problems.length) throw validationFailed(problems);
 
-  res.json(
-    service.listProducts({ page, limit, category, sort, search, minPrice, maxPrice, slugs }),
-  );
+  const result = service.listProducts({
+    page,
+    limit,
+    category,
+    sort,
+    search,
+    minPrice,
+    maxPrice,
+    slugs,
+  });
+
+  /**
+   * SRCH-05 — zero-result searches, logged for review.
+   *
+   * This is the one place the API records something a visitor typed, and it is a deliberate
+   * exception to a rule stated elsewhere: the request logger strips query strings precisely
+   * because `?q=…` carries whatever someone searched for.
+   *
+   * The exception is worth making because a search that returns nothing is the clearest
+   * signal a catalogue can give — it is customers telling you, in their own words, what they
+   * came for and did not find. Doc B §4 and §15 both ask for it.
+   *
+   * Minimised to match:
+   *   - **only zero-result searches.** A search that worked teaches nothing and is not logged.
+   *   - **the term alone**, capped at 100 characters, with the category that was in effect
+   *     because "nothing in Bedroom" and "nothing at all" are different problems.
+   *   - **no IP, no user agent, nothing that ties it to a person.**
+   *
+   * It is a distinct log message so it can be filtered, exported for the weekly review, and
+   * purged on its own schedule. Recorded as activity 6 in docs/PROCESSING_REGISTER.md — that
+   * update is part of this change, not a follow-up.
+   */
+  if (search && result.meta.total === 0) {
+    logger.info('search returned nothing', {
+      query: search.slice(0, 100),
+      category: category ?? null,
+    });
+  }
+
+  res.json(result);
 }
 
 export function listFeatured(req, res) {

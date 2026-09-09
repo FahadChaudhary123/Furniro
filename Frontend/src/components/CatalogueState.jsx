@@ -50,6 +50,61 @@ export const CatalogueError = ({ error, onRetry }) => (
   </div>
 );
 
-export const CatalogueEmpty = ({ message = 'No products match that selection.' }) => (
-  <p className="text-center text-gray-500 py-16">{message}</p>
+/**
+ * The empty result — `SRCH-06`.
+ *
+ * Doc B §7 R7 asks for a fall back to category browse rather than an empty result. This was
+ * one line of grey text and nothing else: a customer who searched for something the shop
+ * does not stock reached a dead end and their only move was the back button.
+ *
+ * `actions` are the routes onward. They are offered rather than taken automatically —
+ * silently widening someone's search and showing them different products is worse than
+ * saying nothing, because the results then look like an answer to the question they asked.
+ *
+ * `categories` come last and always: even with no idea what to suggest, "here is everything
+ * we do sell, by room" beats a full stop.
+ */
+export const CatalogueEmpty = ({
+  message = 'No products match that selection.',
+  actions = [],
+  categories = [],
+  onCategory,
+}) => (
+  <div className="py-16 text-center">
+    <p className="text-gray-600">{message}</p>
+
+    {actions.length > 0 && (
+      <div className="mt-6 flex flex-wrap justify-center gap-3">
+        {actions.map((action) => (
+          <button
+            key={action.label}
+            onClick={action.onClick}
+            className="border border-[#B88E2F] text-[#B88E2F] px-5 py-2 text-sm font-medium hover:bg-[#B88E2F] hover:text-white transition"
+          >
+            {action.label}
+          </button>
+        ))}
+      </div>
+    )}
+
+    {categories.length > 0 && (
+      <div className="mt-10">
+        <p className="text-sm text-gray-600">Or browse by room:</p>
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {categories.map((category) => (
+            <button
+              key={category.slug}
+              onClick={() => onCategory?.(category.slug)}
+              className="border border-gray-300 px-4 py-1.5 text-sm text-gray-700 hover:border-[#B88E2F] hover:text-[#B88E2F] transition"
+            >
+              {category.name}
+              {typeof category.product_count === 'number' && (
+                <span className="ml-1.5 text-gray-500">({category.product_count})</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
 );

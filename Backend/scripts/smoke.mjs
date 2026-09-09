@@ -269,6 +269,19 @@ async function main() {
   const badPostLimit = await fetch(`${BASE}/api/posts?limit=9999`);
   check('rejects a post limit above the cap', badPostLimit.status === 400, `got ${badPostLimit.status}`);
 
+  // --- search (SRCH-05, SRCH-06) ------------------------------------------------------------
+  const noResults = await fetch(`${BASE}/api/products?q=zzzznotathing`);
+  const noResultsBody = await noResults.json();
+  check('a search with no matches is a 200, not a 404', noResults.status === 200);
+  check(
+    'it returns an empty list with a total of 0, not an error',
+    Array.isArray(noResultsBody.data) &&
+      noResultsBody.data.length === 0 &&
+      noResultsBody.meta?.total === 0,
+  );
+  // The client needs total_pages >= 1 to render "page 1 of 1" rather than "page 1 of 0".
+  check('total_pages stays at least 1', noResultsBody.meta?.total_pages === 1);
+
   // --- client error reporting (PLAT-04) ---------------------------------------------------
   const post = (body) =>
     fetch(`${BASE}/api/client-errors`, {

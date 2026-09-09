@@ -184,6 +184,22 @@ const ProductGrid = () => {
                   ? `Nothing in ${activeCategory.name} right now.`
                   : 'No products match that selection.'
           }
+          /*
+           * SRCH-06. The narrowest filter is dropped first: someone searching inside a
+           * category most likely wants the search, not the category, so "search everywhere"
+           * comes before "clear the search". Both are offered — neither is applied for them.
+           */
+          actions={[
+            ...(q && activeCategory
+              ? [{ label: 'Search all products', onClick: () => update({ category: null }) }]
+              : []),
+            ...(q ? [{ label: 'Clear search', onClick: () => update({ q: null }) }] : []),
+            ...(!q && activeCategory
+              ? [{ label: 'Show all products', onClick: () => update({ category: null }) }]
+              : []),
+          ]}
+          categories={categories.filter((c) => c.product_count > 0 && c.slug !== category)}
+          onCategory={(slug) => update({ category: slug, q: null })}
         />
       ) : (
         <div

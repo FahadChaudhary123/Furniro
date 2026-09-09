@@ -116,7 +116,39 @@ Under the ePrivacy rules this is browser storage requiring disclosure, and it is
 most likely to qualify as strictly necessary — a cart is the service the visitor asked for.
 That still requires disclosure in a privacy notice, which does not exist.
 
-### 5. Contact and newsletter forms — **no longer processing**
+### 5. Zero-result search terms
+
+| | |
+|---|---|
+| **Data** | The search term, capped at 100 characters, plus the category filter in effect |
+| **Not collected** | Anything identifying. No IP, no user-agent, no session |
+| **Subject** | Visitor who searched |
+| **Purpose** | `SRCH-05`. Doc B §4 and §15: finding what customers ask for and cannot find |
+| **Lawful basis** | Legitimate interest — understanding demand `NEEDS SIGN-OFF` |
+| **Retention** | As request logs. **Not enforced** — see gaps |
+| **Where** | `Backend/src/modules/catalogue/controller.js`, message `search returned nothing` |
+
+**This is a deliberate exception to activity 1**, which strips query strings from the request
+log precisely because `?q=…` carries whatever someone typed. It is worth making because a
+search that returns nothing is customers describing, in their own words, what the shop does
+not stock — the clearest demand signal a catalogue can produce.
+
+Minimised to match the exception:
+
+- **Only zero-result searches are logged.** A search that worked teaches nothing, and is not
+  recorded — verified by searching for a term that matches and confirming it appears nowhere
+  in the log.
+- **The term alone**, with the category, because "nothing in Bedroom" and "nothing at all"
+  are different problems.
+- **A distinct log message**, so it can be filtered for the weekly review and purged on its
+  own schedule without touching anything else.
+
+A search term can still be unexpectedly personal — someone types a room, a condition, a
+name. Nothing here ties one to a person, and the 100-character cap bounds how much of a
+sentence can arrive, but the field is free text and that residual risk is real rather than
+eliminated.
+
+### 6. Contact and newsletter forms — **no longer processing**
 
 Both forms solicited a name, an email address and a message, and **discarded everything**.
 The contact form had no submit handler, so pressing Submit triggered a native GET, reloaded

@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **18 built, 8 partial, 108 not built.** Counted from the
+Of the 134 requirements below: **18 built, 10 partial, 106 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -176,9 +176,28 @@ and one of the largest unknowns — see [Open decisions](#open-decisions).
 | `SRCH-02` | Search index rebuilt into a new index and alias-swapped, never rebuilt in place | §7 R7 | 4 | ⭕ |
 | `SRCH-03` | Index staleness ≤ 60 s | §5 SLO | 4 | ⭕ |
 | `SRCH-04` | Configurable synonyms and ranking rules, with expiry dates | §15 | 4 | ⭕ |
-| `SRCH-05` | Zero-result and low-conversion queries logged for weekly review | §4, §15 | 4 | ⭕ |
-| `SRCH-06` | Graceful degradation: hide the search box and fall back to category browse rather than return empty results | §7 R7 | 4 | ⭕ |
+| `SRCH-05` | Zero-result and low-conversion queries logged for weekly review | §4, §15 | 4 | ◐ |
+| `SRCH-06` | Graceful degradation: hide the search box and fall back to category browse rather than return empty results | §7 R7 | 4 | ◐ |
 | `SRCH-07`ⁱ | Faceted filtering and sorting on listing pages | — | 1 | ✅ |
+
+**`SRCH-05` is partial.** A search returning nothing is logged with the term and the active
+category (`search returned nothing`), so the weekly review has data. Only zero-result
+searches are recorded — a search that worked teaches nothing — and nothing identifying goes
+with them. It is a deliberate exception to the rule that query strings stay out of logs, and
+it is [activity 5 in the processing register](PROCESSING_REGISTER.md). **Low-conversion**
+queries are not covered: that needs conversion, which needs orders.
+
+**`SRCH-06` is partial.** A search with no matches now offers routes onward — drop the
+category, clear the search, or browse any stocked room — instead of one line of grey text
+with the back button as the only exit. The narrower filter is offered first, and nothing is
+applied automatically: silently widening someone's search and showing different products is
+worse than showing none, because the results then read as an answer to the question they
+asked.
+
+The other half of `SRCH-06` — "hide the search box" during a search outage — is not built
+and is not currently meaningful. Search is an in-process filter over an array with no
+separate service to fail; if it is unavailable the whole catalogue is unavailable, which the
+error state already handles. That half becomes real when `SRCH-01`'s index exists.
 
 `SRCH-07` is met. Category, search term, sort, page and page size all live in the URL and
 map onto parameters the API already validates, so a filtered view is shareable and the back

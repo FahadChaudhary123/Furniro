@@ -35,6 +35,26 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **A search that finds nothing now offers a way out** (`SRCH-06`). It was one line of grey
+  text: a customer searching for something the shop does not stock hit a dead end whose only
+  exit was the back button. They are now offered the routes onward — drop the category, clear
+  the search, or browse any stocked room, with counts.
+  The narrower filter is offered first: someone searching inside Bedroom most likely wants
+  the search, not the room. **Nothing is applied automatically.** Silently widening a search
+  and showing different products is worse than showing none, because the results then read as
+  an answer to the question the customer actually asked — there is a test asserting the page
+  does not do it.
+
+- **Zero-result searches are logged for review** (`SRCH-05`) — message
+  `search returned nothing`, with the term and the active category.
+  This is a **deliberate exception** to the rule that query strings stay out of logs, and it
+  is recorded as [activity 5 in the processing register](docs/PROCESSING_REGISTER.md) as part
+  of this change rather than after it. It earns the exception because a search returning
+  nothing is customers describing, in their own words, what the shop does not stock.
+  Minimised to match: only zero-result searches are recorded (a search that worked teaches
+  nothing, and was verified to appear nowhere in the log), the term is capped at 100
+  characters, nothing identifying goes with it, and it is a distinct message so it can be
+  filtered and purged on its own schedule.
 - **A guard against dead controls.** `e2e/privacy.spec.js` fails if any page renders a button
   with no click handler, or an action label with no control behind it. Four shipped at once,
   so a check is worth more than four fixes.
