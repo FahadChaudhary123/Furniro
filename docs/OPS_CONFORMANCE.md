@@ -64,14 +64,14 @@ passing it.
 | §1 | Purpose and ownership | ◐ | Ten accountable roles collapse to one person. The register is still worth writing — Doc B's own rule is that "the team" is not an owner |
 | §2 | Environments and configuration | ◐ | Config is env-driven and validated; the health endpoint reports build SHA, config version and flag state as §2 requires. Only `local` exists as an environment |
 | §3 | Release management | ◐ | CI gates now defined in `.github/workflows/ci.yml`; they activate on `git init` + push. The migration discipline (expand → backfill → switch → drop) is already recorded in [rollback.md](runbooks/rollback.md#when-a-migration-is-involved) |
-| §4 | Maintenance calendar | ◐ | 5 of 26 items are meaningful today; the rest reference orders, payments, carriers, stock or search |
-| §5 | Monitoring, SLOs, alerting | ⏳ | Structured logs and correlation ids now exist to build on, but every SLO is defined over checkout, orders or traffic. None measurable |
+| §4 | Maintenance calendar | ◐ | 7 of 26 items are meaningful today — the catalogue completeness sweep (`CAT-04`) and the zero-result query review (`SRCH-05`) both have data to review now. The rest reference orders, payments, carriers or stock |
+| §5 | Monitoring, SLOs, alerting | ◐ | Client and server errors are collected (`PLAT-04`) and catalogue latency is measured (`npm run latency`). **No alerting** — a log is a record, not a page. SLOs over checkout and orders stay unmeasurable |
 | §6 | Incident management | ◐ | Severity model and post-incident review are adoptable now. Now aligned in [incident-response.md](runbooks/incident-response.md) |
 | §7 | Runbooks R1–R12 | ⏳ | R4's correlation-id diagnosis is now possible. Still 2 of 12 applicable: R4 and R12. The other ten need payments, stock, queues, search, carriers or email |
 | §8 | Backup and disaster recovery | ⏳ | No data to back up. Supabase supplies snapshots and PITR once there is a schema |
 | §9 | Database and storage upkeep | ⏳ | No database |
 | §10 | Security maintenance | ✅ | **The most applicable section, and the one with an open breach.** See below |
-| §11 | Privacy and data retention | ⏳ | Nothing is collected. Applies from the commit that gives the contact form an `onSubmit` — design it before then, not after |
+| §11 | Privacy and data retention | ◐ | **It applies now.** Five processing activities exist, recorded in [PROCESSING_REGISTER.md](PROCESSING_REGISTER.md) (`PRIV-06`). No privacy notice, no retention enforcement, no subject-request route |
 | §12 | Performance and capacity | ✅ | Budgets now enforced in CI and met. Capacity planning still needs traffic |
 | §13 | Peak event readiness | ➖ | No peak, no traffic |
 | §14 | Cost management | ➖ | No infrastructure spend |
@@ -82,11 +82,18 @@ passing it.
 | §19 | Deprecation and sunset | ➖ | Nothing to retire |
 | §20 | Handover pack | ◐ | A reasonable goal to hold; most artefacts do not exist yet |
 
-✅ adoptable now (4) · ◐ partially adoptable (7) · ⏳ blocked on something that does not
-exist (5) · ➖ not applicable at this scope (4)
+✅ adoptable now (4) · ◐ partially adoptable (9) · ⏳ blocked on something that does not
+exist (3) · ➖ not applicable at this scope (4)
+
+Counted from the table above, not from memory. Two sections moved out of *blocked* since the
+last pass: §5 because errors are now collected and latency measured, and §11 because the
+system genuinely processes personal data — that row previously said "nothing is collected",
+which stopped being true and is the kind of stale assurance a conformance document exists to
+prevent.
 
 *Updated after the Stage 0 pass of 2026-09-07: §12 met, §3 and §15 advanced.*
 *Updated 2026-09-08: §15 advanced again — publish gate (`CAT-03`) and completeness report (`CAT-04`) built.*
+*Updated 2026-09-09: §5 and §11 moved from blocked to partial; §4 and §12 figures corrected.*
 
 ---
 
@@ -131,12 +138,16 @@ locally as `npm run budgets`.
 
 | Metric | Before | Now | Budget |
 |---|---|---|---|
-| Total assets | 24.0 MB | **2.51 MB** | 3.5 MB |
-| Largest single asset | 4.0 MB (`bedroom.jpg`) | **389 kB** (the JS bundle) | 450 kB |
+| Total assets (one visitor) | 24.0 MB | **1.62 MB** | 1.90 MB |
+| Largest single asset | 4.0 MB (`bedroom.jpg`) | **270 kB** (the JS bundle) | 300 kB |
 | Images over 1 MB | 10 | **0** | — |
-| JS gzipped | 123 kB | 129 kB | 150 kB |
-| CSS gzipped | 4 kB | 4 kB | 25 kB |
+| JS gzipped | 123 kB | 104 kB | 115 kB |
+| CSS gzipped | 4 kB | 4.7 kB | 25 kB |
 | Third-party scripts | 0 | 0 | 0 |
+
+*Figures from `npm run budgets` on 2026-09-09, not from memory. The budgets have been
+ratcheted twice as the numbers came down — a budget left at the original headroom stops
+being a gate.*
 
 **A 90% reduction in shipped bytes.** The source images were camera originals — one was
 6000x6000, another 5616x3744 — served verbatim to browsers that render them at a few

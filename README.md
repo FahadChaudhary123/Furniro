@@ -148,7 +148,6 @@ under *Unreleased*.
 |---|---|
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
 | Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
-| `ShopBanner`, `BlogBanner` and the contact banner duplicate `PageBanner`'s markup | [Frontend/src/sections/](Frontend/src/sections/) |
 | Contact and newsletter forms are disabled — no endpoint exists to receive a message | [contact.jsx](Frontend/src/pages/contact.jsx) |
 | The brand gold `#B88E2F` is 3.02:1 on white — fails WCAG AA for normal text | [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) |
 | No deployment configuration, and no host chosen | repo-wide |

@@ -363,9 +363,7 @@ time of exactly the person it is meant to help, so they were removed rather than
 
 1. **Rename the lowercase page files** — `shop.jsx`, `about.jsx` and `contact.jsx`, whose
    components are already PascalCase.
-2. **Fold `ShopBanner` and `BlogBanner` into `PageBanner`.** Four pages already use
-   `PageBanner`; these two sections duplicate its markup with different spacing.
-3. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
+2. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
    "About", the URL says `/about`, and the heading, breadcrumb and title all say "Blog".
    `npm run seo` reports it as two warnings. Needs a decision on whether About content
    should exist too — ask before starting.

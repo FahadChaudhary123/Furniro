@@ -1,7 +1,7 @@
 // Contact.jsx
 import React from "react";
-import { MapPin, Phone, Clock } from "lucide-react"; // install lucide-react if not installed
-import contactBanner from "../assets/contactBanner.jpg";
+import { MapPin, Phone, Clock } from "lucide-react";
+import PageBanner from "../components/PageBanner";
 import FeaturesSection from "../sections/FeaturesSection";
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
@@ -10,16 +10,7 @@ const Contact = () => {
   return (
     <>
     <div className="w-full">
-      {/* Banner Section */}
-      <div
-        className="w-full h-64 bg-cover bg-center flex flex-col justify-center items-center"
-        style={{ backgroundImage: `url(${contactBanner})` }}
-      >
-        <h1 className="text-3xl font-bold text-black">Contact</h1>
-        <p className="text-gray-700 mt-2 text-sm">
-          Home <span className="mx-2">{">"}</span> Contact
-        </p>
-      </div>
+      <PageBanner title="Contact" trail={[{ label: 'Home', to: '/' }, { label: 'Contact' }]} />
 
       {/* Contact Form Section */}
       <div className="max-w-6xl mx-auto px-6 py-16 flex flex-col lg:flex-row gap-16">

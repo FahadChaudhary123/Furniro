@@ -1,14 +1,14 @@
 import React from 'react'
 import ProductGrid from '../components/ProductGrid'
 import FeaturesSection from '../sections/FeaturesSection'
-import ShopBanner from '../sections/ShopBanner'
+import PageBanner from '../components/PageBanner';
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 function Shop() {
   usePageMeta('/shop');
   return (
     <div>
-      <ShopBanner/>
+      <PageBanner title="Shop" trail={[{ label: "Home", to: "/" }, { label: "Shop" }]} />
       <ProductGrid />
       <FeaturesSection />
     </div>

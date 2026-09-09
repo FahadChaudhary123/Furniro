@@ -5,9 +5,14 @@ import bannerImg from '../assets/contactBanner.jpg';
 /**
  * The banner strip with a title and breadcrumb trail.
  *
- * `ShopBanner`, `BlogBanner` and the contact page each hand-roll this same markup with a
- * different string. Those are left alone for now — changing them is a separate cleanup with
- * its own review — but new pages use this rather than adding a fourth copy.
+ * The single banner. `ShopBanner`, `BlogBanner` and an inline block on the contact page each
+ * hand-rolled this same markup with a different string; all three are gone.
+ *
+ * Folding them in was an accessibility fix as much as a deduplication. Each copy rendered its
+ * breadcrumb as a plain `<p>` — "Home > Shop" as text, with no link back and nothing marking
+ * the current page — and labelled the decorative logo `alt="icon"`, which a screen reader
+ * reads aloud. This renders a real `<nav aria-label="Breadcrumb">` with working links and
+ * `aria-current="page"`, and hides the logo from assistive technology.
  *
  * @param {string} title
  * @param {{label: string, to?: string}[]} trail - breadcrumb, last item is the current page
@@ -21,7 +26,11 @@ const PageBanner = ({ title, trail = [] }) => (
 
     <div className="relative z-10 text-center px-4">
       <div className="flex justify-center mb-3">
-        <img src={logoIcon} alt="" className="w-8 h-8" />
+        {/* Decorative. `alt=""` tells a screen reader to skip it; `aria-hidden` says the
+            same thing again, which is what quality.spec.js requires of a standalone image
+            with no alt text — an empty alt alone is indistinguishable from a forgotten one
+            when scanning a page automatically. */}
+        <img src={logoIcon} alt="" aria-hidden="true" className="w-8 h-8" />
       </div>
 
       <h1 className="text-3xl md:text-4xl font-semibold text-black">{title}</h1>

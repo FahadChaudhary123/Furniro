@@ -30,6 +30,17 @@ export default defineConfig([
       // `motion` in `<motion.section>` reads as unused and errors. Capitalised imports
       // escape it via varsIgnorePattern above; lowercase ones like `motion` do not.
       'react/jsx-uses-vars': 'error',
+      /**
+       * Catches `<Foo />` where `Foo` is not in scope — a removed or mistyped component
+       * import. Neither lint nor the build reported it before: `varsIgnorePattern: '^[A-Z_]'`
+       * silences core `no-unused-vars` for capitalised names, and esbuild does not resolve
+       * JSX identifiers, so the first sign was a blank page at runtime.
+       *
+       * That happened while folding `ShopBanner` into `PageBanner`: the import was replaced
+       * and one `<ShopBanner/>` was left behind. `npm run lint` and `npm run build` both
+       * passed on a page that could only throw.
+       */
+      'react/jsx-no-undef': 'error',
     },
   },
   {

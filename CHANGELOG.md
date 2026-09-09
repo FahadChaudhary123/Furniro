@@ -35,6 +35,37 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **`react/jsx-no-undef` is now an error.** `<Foo />` with `Foo` out of scope — a removed or
+  mistyped component import — was reported by nothing: `varsIgnorePattern: '^[A-Z_]'`
+  silences core `no-unused-vars` for capitalised names, and esbuild does not resolve JSX
+  identifiers, so the first sign was a blank page at runtime. Found the honest way: while
+  folding the banners together, an import was replaced and one `<ShopBanner/>` left behind,
+  and both `npm run lint` and `npm run build` passed on a page that could only throw.
+
+### Changed
+
+- **The Document B conformance assessment was materially wrong in two places** and is now
+  corrected against the code, in [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md):
+  - **§11 Privacy** claimed "nothing is collected" and that the section would apply "from the
+    commit that gives the contact form an `onSubmit`". Both are false: five processing
+    activities exist, and that form is now disabled rather than wired up. Moved from blocked
+    to partial. A conformance document exists to prevent exactly this kind of stale
+    assurance.
+  - **§5 Monitoring** claimed nothing was measurable. Client and server errors are collected
+    and catalogue latency is measured. Moved from blocked to partial — alerting is still
+    missing, and a log is a record rather than a page.
+  - §4's count of applicable calendar items and §12's budget figures were both out of date;
+    the §12 table now carries figures from an actual `npm run budgets` run and a note that
+    the budgets have been ratcheted twice.
+
+- **Three copies of the banner became one.** `ShopBanner`, `BlogBanner` and an inline block
+  on the contact page all hand-rolled `PageBanner`'s markup with a different string. Both
+  section components are deleted.
+  This was an accessibility fix as much as a deduplication: each copy rendered its breadcrumb
+  as a plain `<p>` — "Home > Shop" as text, with no link back and nothing marking the current
+  page — and labelled the decorative logo `alt="icon"`, which a screen reader reads aloud.
+  All three pages now have a real `<nav aria-label="Breadcrumb">` with a working Home link
+  and `aria-current="page"`.
 - **A search that finds nothing now offers a way out** (`SRCH-06`). It was one line of grey
   text: a customer searching for something the shop does not stock hit a dead end whose only
   exit was the back button. They are now offered the routes onward — drop the category, clear
