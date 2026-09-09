@@ -62,7 +62,7 @@ screenshotted and pasted into chat. Reference where a value lives; never reprodu
 
   | Runbook | Last executed | Result |
   |---|---|---|
-  | [local-development.md](local-development.md) | 2026-09-08 | 4 defects found and fixed |
+  | [local-development.md](local-development.md) | 2026-09-09 | works for a fresh setup; conditional `VITE_API_URL` step made unconditional |
   | [deployment.md](deployment.md) | never | needs a host |
   | [rollback.md](rollback.md) | never | needs a deployment |
   | [secret-rotation.md](secret-rotation.md) | never | executable now — rotation is overdue |

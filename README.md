@@ -147,8 +147,7 @@ under *Unreleased*.
 | Gap | Where |
 |---|---|
 | "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
-| Page files are lowercase (`shop.jsx`, `about.jsx`) though their components are now PascalCase | [Frontend/src/pages/](Frontend/src/pages/) |
-| Contact and newsletter forms are disabled — no endpoint exists to receive a message | [contact.jsx](Frontend/src/pages/contact.jsx) |
+| Contact and newsletter forms are disabled — no endpoint exists to receive a message | [Contact.jsx](Frontend/src/pages/Contact.jsx) |
 | The brand gold `#B88E2F` is 3.02:1 on white — fails WCAG AA for normal text | [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) |
 | No deployment configuration, and no host chosen | repo-wide |
 | `Backend/.env` rotation outstanding; whether it reached git history is unverified | [SECURITY.md](SECURITY.md) |

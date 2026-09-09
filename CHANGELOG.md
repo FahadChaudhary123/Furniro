@@ -44,6 +44,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Changed
 
+- **Page filenames are `PascalCase` without exception.** `shop.jsx`, `about.jsx` and
+  `contact.jsx` are now `Shop.jsx`, `About.jsx` and `Contact.jsx`; the exported component
+  names were already correct, only the files were out of step. The caveat in `CLAUDE.md`
+  telling agents not to copy the inconsistency is gone with it.
+  This renamed the lazy-loaded chunks — Vite derives a chunk's name from its page component's
+  file — which broke five patterns in `performance.spec.js` that matched `/assets/shop-`.
+  The e2e suite caught it; the patterns are case-insensitive now, with a note that matching a
+  chunk by filename is a coupling worth avoiding if it bites again.
+
 - **The incident runbook described a system that no longer exists**, corrected after the
   tabletop above. It claimed there was "no API yet"; three of its seven listed gaps had
   stopped being true (tests and CI exist, structured logging exists, and error *tracking*

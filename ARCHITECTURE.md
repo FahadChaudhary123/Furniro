@@ -69,7 +69,7 @@ pages/  ──imports──▶  sections/  ──imports──▶  components/
 ```
 
 - **`pages/`** — one file per route. Each is a thin list of sections in order, holding no
-  logic of its own. [shop.jsx](Frontend/src/pages/shop.jsx) is representative: four
+  logic of its own. [Shop.jsx](Frontend/src/pages/Shop.jsx) is representative: four
   children, no state.
 - **`sections/`** — a full-width band of the page (Hero, BrowseRange, BlogSection). Owns
   its own content array and its own local state.

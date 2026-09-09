@@ -2,10 +2,17 @@
 
 Setting up a working environment, and fixing it when it misbehaves.
 
-> **Last executed as written:** 2026-09-08. Doing so found four defects, including that the
-> documented setup did not work: the API binds to `PORT` from `.env` while the front end and
-> the smoke test both assumed 3000. Doc B §18 asks for one runbook a month to be run by
-> someone who did not write it — if they cannot follow it, the runbook is wrong.
+> **Last executed as written:** 2026-09-09. The documented path works for a first-time setup
+> — a `.env` copied from `.env.example` leaves `PORT` empty, which reads as 3000 and matches
+> the front end. It does *not* work against a `.env` that sets another port, which is how
+> this working copy is configured; the `VITE_API_URL` step was conditional on "if you change
+> `PORT`" and is now phrased as something to check. The error panel named the wrong URL
+> clearly enough to diagnose it in seconds, which is what that message exists for.
+>
+> The 2026-09-08 run found four defects, including that the API binds to `PORT` from `.env`
+> while the front end and the smoke test both assumed 3000. Doc B §18 asks for one runbook a
+> month to be run by someone who did not write it — if they cannot follow it, the runbook is
+> wrong.
 
 ---
 
@@ -62,8 +69,25 @@ the port and the CORS allowlist. Start the API with an `ALLOWED_ORIGINS` that `.
 not have and the CORS check will fail: it is asserting the configuration it can see, not
 the one that shell happens to hold.
 
-**If you change `PORT`, set `VITE_API_URL` to match** in `Frontend/.env.local`, or the front
-end will keep asking `http://localhost:3000/api` and show an error panel instead of products.
+**Read the port the API reported, and if it is not 3000, set `VITE_API_URL` to match** in
+`Frontend/.env.local`:
+
+```bash
+echo "VITE_API_URL=http://localhost:<the port it printed>/api" >> Frontend/.env.local
+```
+
+**Restart Vite afterwards** — `VITE_` values are inlined at startup, not read per request.
+
+This is phrased as something to *check*, not something to do *if you changed PORT*. A
+populated `.env` inherited from a colleague or left over from earlier work can set a
+non-default port without you having changed anything, and then the front end keeps asking
+`http://localhost:3000/api` and shows an error panel instead of products. Executing this
+runbook on 2026-09-09 reproduced exactly that: the working copy's `.env` had `PORT=5000`,
+the conditional did not fire in the reader's mind, and `/shop` showed
+"Could not reach the API at http://localhost:3000/api".
+
+A `.env` freshly copied from `.env.example` leaves `PORT` empty, which the config reads as
+3000 — so a genuine first-time setup matches the front end and works.
 See [Products show an error](#products-show-could-not-reach-the-api).
 
 It starts without Supabase credentials — you get a warning, `/health` still works, and

@@ -148,10 +148,10 @@ page.
 
 ### Naming
 
-Components are `PascalCase`, and so are their files: `ProductCard.jsx`. Some existing page
-files are lowercase (`shop.jsx`, `about.jsx`) and export lowercase function names — that
-is inconsistent with the rest of the codebase and worth fixing opportunistically, in its
-own commit.
+Components are `PascalCase`, and so are their files: `ProductCard.jsx`. That now holds
+without exception — `shop.jsx`, `about.jsx` and `contact.jsx` were renamed on 2026-09-09.
+The exported function names were already `Shop`, `About` and `Contact`; only the filenames
+were out of step.
 
 Hooks are `useThing`. Utilities and variables are `camelCase`; module-level constants are
 `SCREAMING_SNAKE_CASE`, as `PRODUCTS_PER_PAGE` already is.
@@ -361,9 +361,7 @@ Small, self-contained, and each fixes something real:
 `Rs` instead of `Rp`, the missing `*` route. A stale list of "good first issues" wastes the
 time of exactly the person it is meant to help, so they were removed rather than left.*
 
-1. **Rename the lowercase page files** — `shop.jsx`, `about.jsx` and `contact.jsx`, whose
-   components are already PascalCase.
-2. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
+1. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
    "About", the URL says `/about`, and the heading, breadcrumb and title all say "Blog".
    `npm run seo` reports it as two warnings. Needs a decision on whether About content
    should exist too — ask before starting.

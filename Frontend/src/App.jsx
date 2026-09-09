@@ -16,12 +16,12 @@ import HomePage from "./pages/HomePage";
  * lazy-loading the route you have just landed on costs an extra round trip before anything
  * renders. Splitting the page you are already on optimises the wrong thing.
  */
-const Shop = lazy(() => import("./pages/shop"));
+const Shop = lazy(() => import("./pages/Shop"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const About = lazy(() => import("./pages/about"));
+const About = lazy(() => import("./pages/About"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Cart = lazy(() => import("./pages/Cart"));
-const Contact = lazy(() => import("./pages/contact"));
+const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 /** Shown only while a route chunk is in flight — usually a few milliseconds. */

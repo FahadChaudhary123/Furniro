@@ -339,7 +339,7 @@ gets ignored.
 
 > 🔴 **Not implemented.**
 
-Backs the form in [contact.jsx](Frontend/src/pages/contact.jsx), which currently has no
+Backs the form in [Contact.jsx](Frontend/src/pages/Contact.jsx), which currently has no
 `onSubmit` handler at all — submitting it reloads the page and drops the message.
 
 ```json

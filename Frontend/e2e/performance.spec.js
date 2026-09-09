@@ -12,6 +12,12 @@ import { test, expect } from '@playwright/test';
  * see.
  */
 
+/**
+ * These match the lazy chunk for `/shop` by filename. Vite derives that name from the page
+ * component's file, so renaming `shop.jsx` to `Shop.jsx` renamed the chunk and broke five
+ * patterns at once — hence the `i` flag rather than a hardcoded case. If the coupling
+ * becomes a problem again, match on the route being loaded instead of the asset name.
+ */
 test.describe('code splitting', () => {
   test('the landing page loads without fetching a route chunk', async ({ page }) => {
     // HomePage is eagerly imported on purpose — lazy-loading the page you have just landed
@@ -31,7 +37,7 @@ test.describe('code splitting', () => {
     await expect(page.getByText('New Era Collection')).toBeVisible();
 
     const chunk = page.waitForRequest(
-      (r) => r.resourceType() === 'script' && /\/assets\/shop-/.test(r.url()),
+      (r) => r.resourceType() === 'script' && /\/assets\/shop-/i.test(r.url()),
       { timeout: 15_000 },
     );
     await page.getByRole('link', { name: 'Shop', exact: true }).first().click();
@@ -55,7 +61,7 @@ test.describe('code splitting', () => {
 
   test('a slow chunk shows the fallback on a direct load', async ({ page }) => {
     // Chunks normally arrive in milliseconds, so the fallback needs help to be observable.
-    await page.route(/\/assets\/shop-.*\.js$/, async (route) => {
+    await page.route(/\/assets\/shop-.*\.js$/i, async (route) => {
       await new Promise((r) => setTimeout(r, 2000));
       await route.continue();
     });
@@ -81,7 +87,7 @@ test.describe('code splitting', () => {
      * therefore only reachable on a direct load — worth pinning, because it is easy to
      * assume otherwise and write a fallback that never renders.
      */
-    await page.route(/\/assets\/shop-.*\.js$/, async (route) => {
+    await page.route(/\/assets\/shop-.*\.js$/i, async (route) => {
       await new Promise((r) => setTimeout(r, 1500));
       await route.continue();
     });
@@ -109,7 +115,7 @@ test.describe('code splitting', () => {
      * chunk filename that no longer exists and gets a 404. Without an error boundary the
      * rejected import unmounted the entire tree — navbar included — to a white page.
      */
-    await page.route(/\/assets\/shop-.*\.js$/, (route) => route.abort('failed'));
+    await page.route(/\/assets\/shop-.*\.js$/i, (route) => route.abort('failed'));
 
     await page.goto('/');
     await page.getByRole('link', { name: 'Shop', exact: true }).first().click();
@@ -122,7 +128,7 @@ test.describe('code splitting', () => {
   });
 
   test('a direct load of a broken chunk also recovers', async ({ page }) => {
-    await page.route(/\/assets\/shop-.*\.js$/, (route) => route.abort('failed'));
+    await page.route(/\/assets\/shop-.*\.js$/i, (route) => route.abort('failed'));
     await page.goto('/shop');
 
     await expect(page.getByText('This page could not be loaded')).toBeVisible({ timeout: 15_000 });

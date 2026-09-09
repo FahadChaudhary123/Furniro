@@ -120,8 +120,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Code
 
 - Function components with hooks, no classes.
-- `PascalCase` components and filenames. Some page files are lowercase (`shop.jsx`) — that
-  is pre-existing inconsistency, not a pattern to copy.
+- `PascalCase` components and filenames, without exception.
 - Hoist static data to module scope. `blogPosts` in `BlogSection.jsx` is declared inside
   the component body; do not replicate that.
 - Stable `key` on every mapped element, never the array index.
