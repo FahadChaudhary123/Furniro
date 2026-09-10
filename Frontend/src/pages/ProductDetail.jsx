@@ -100,6 +100,7 @@ const ProductDetail = () => {
               <Picture
                 src={product.image.src}
                 webp={product.image.webp}
+                avif={product.image.avif}
                 alt={product.name}
                 className="w-full h-96 object-cover"
               />

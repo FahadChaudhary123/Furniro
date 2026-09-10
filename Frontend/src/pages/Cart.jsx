@@ -72,6 +72,7 @@ const Cart = () => {
                           <Picture
                             src={product.image.src}
                             webp={product.image.webp}
+                            avif={product.image.avif}
                             alt=""
                             className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                           />

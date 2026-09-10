@@ -2,7 +2,7 @@ import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
 const pairs = buildAssetPairs(
-  import.meta.glob("../assets/setup/*.{jpg,webp}", {
+  import.meta.glob("../assets/setup/*.{jpg,webp,avif}", {
     eager: true,
     query: "?url",
     import: "default",
@@ -32,6 +32,7 @@ const ShareSetup = () => {
       key={index}
       src={img.src}
       webp={img.webp}
+      avif={img.avif}
       alt="setup"
       loading="lazy"
       className="w-[280px] h-[280px] object-cover rounded-md"
@@ -44,6 +45,7 @@ const ShareSetup = () => {
       key={`dup-${index}`}
       src={img.src}
       webp={img.webp}
+      avif={img.avif}
       alt=""
       aria-hidden="true"
       loading="lazy"

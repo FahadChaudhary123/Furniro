@@ -36,6 +36,7 @@ const ProductCard = ({ product }) => {
           <Picture
             src={product.image.src}
             webp={product.image.webp}
+            avif={product.image.avif}
             alt={product.name}
             loading="lazy"
             className="h-full w-full object-cover"

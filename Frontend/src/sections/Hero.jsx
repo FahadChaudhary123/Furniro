@@ -4,7 +4,7 @@ import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
 const hero = buildAssetPairs(
-  import.meta.glob("../assets/hero-bg.{jpg,webp}", {
+  import.meta.glob("../assets/hero-bg.{jpg,webp,avif}", {
     eager: true,
     query: "?url",
     import: "default",
@@ -19,6 +19,7 @@ const Hero = () => {
       <Picture
         src={hero.src}
         webp={hero.webp}
+        avif={hero.avif}
         alt="Hero Background"
         fetchPriority="high"
         className="absolute inset-0 w-full h-full object-cover"

@@ -65,6 +65,7 @@ const BlogSection = () => {
                 <Picture
                   src={post.image.src}
                   webp={post.image.webp}
+                  avif={post.image.avif}
                   alt={post.title}
                   loading="lazy"
                   className="w-full rounded-xl object-cover"
@@ -136,6 +137,7 @@ const BlogSection = () => {
                       <Picture
                         src={post.image.src}
                         webp={post.image.webp}
+                  avif={post.image.avif}
                         alt=""
                         loading="lazy"
                         className="w-20 h-20 object-cover rounded-lg flex-shrink-0"

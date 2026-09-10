@@ -136,7 +136,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 
 ```bash
 cd Frontend && npm run verify   # lint + 67 unit checks + build + budgets + SEO check
-cd Frontend && npm run e2e      # 385 browser checks; starts both servers itself
+cd Frontend && npm run e2e      # 389 browser checks; starts both servers itself
 cd Backend  && npm test         # 72 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 85 API checks against a running server
@@ -198,9 +198,14 @@ Specific things that have already caused, or will cause, wrong work:
 4. **Express 5, not 4.** Async handler rejections forward to error middleware
    automatically; the `try/catch`-and-`next(err)` wrapper is obsolete.
 5. **`cors()` with no arguments reflects any origin.** Always pass an explicit allowlist.
-6. **A case-only rename does not reach git on Windows.** `core.ignorecase` defaults to
+6. **Never raise `assetsInlineLimit` above 0.** Vite inlines assets under 4 kB as base64 by
+   default. With `<picture>` serving three formats that is actively wrong: an inlined AVIF
+   sits in the JS bundle *every* browser downloads, so a browser that would have taken the
+   WebP pays for AVIF bytes it cannot use. It cost 18 kB of gzipped JS when AVIF landed.
+
+7. **A case-only rename does not reach git on Windows.** `core.ignorecase` defaults to
    `true` here, so `mv shop.jsx Shop.jsx` succeeds on disk while git keeps tracking
-   `shop.jsx`. Lint, unit tests, the build and all 385 browser checks pass locally; the
+   `shop.jsx`. Lint, unit tests, the build and all 389 browser checks pass locally; the
    Linux CI runner checks out the old name and the build fails with
    `[UNRESOLVED_IMPORT] Could not resolve './pages/Shop'`. Record it explicitly, in two
    steps, because git considers the destination to already exist:
@@ -213,7 +218,7 @@ Specific things that have already caused, or will cause, wrong work:
    `node scripts/check-filename-case.mjs` compares git against the filesystem exactly and
    runs as the first CI step.
 
-7. **Browserslist warning after a data update** persists in any already-running dev server
+8. **Browserslist warning after a data update** persists in any already-running dev server
    — the check runs once at process startup. Restart it rather than re-running the update.
 
 ---

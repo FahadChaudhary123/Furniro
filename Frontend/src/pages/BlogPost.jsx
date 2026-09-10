@@ -84,6 +84,7 @@ const BlogPost = () => {
             <Picture
               src={post.image.src}
               webp={post.image.webp}
+              avif={post.image.avif}
               alt={post.title}
               className="w-full rounded-xl object-cover mt-8"
             />

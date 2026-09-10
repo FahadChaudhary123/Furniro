@@ -63,13 +63,18 @@ let largest = { path: '', size: 0 };
 /**
  * Bytes ONE VISITOR downloads — not bytes on disk.
  *
- * With <picture>, every image ships as both a JPEG and a WebP, but a browser fetches
- * exactly one of them. Summing the directory counts both and makes adding a modern format
- * look like a regression, which would turn this gate against the improvement it should be
- * rewarding.
+ * With <picture>, every image ships as a JPEG, a WebP and usually an AVIF, but a browser
+ * fetches exactly one of them. Summing the directory counts all three and makes adding a
+ * modern format look like a regression, which would turn this gate against the improvement
+ * it should be rewarding.
  *
- * Each image is therefore counted once, at its LARGER variant: the worst case is an old
+ * Each image is therefore counted once, at its LARGEST variant: the worst case is an old
  * browser taking the JPEG.
+ *
+ * **The extension list below is load-bearing.** When AVIF was added it was missing here, so
+ * every `.avif` was treated as a non-image, keyed by its own path and added on top — the
+ * total jumped 0.5 MB and the gate failed a change that made every visitor's download
+ * smaller. A format the grouping does not recognise is counted twice.
  */
 const sizes = new Map();
 for (const f of files) {
@@ -81,8 +86,9 @@ for (const f of files) {
    * filename too — `bedroom-1-T6WbvKiL` collapsed to `bedroom`, merging four distinct
    * images into one group and under-reporting the total by ~25%.
    */
-  const key = rel.replace(/\.(jpe?g|png|webp)$/i, '').replace(/-[A-Za-z0-9_-]{8}$/, '');
-  const isImage = /\.(jpe?g|png|webp)$/i.test(rel);
+  const IMAGE_EXT = /\.(jpe?g|png|webp|avif)$/i;
+  const key = rel.replace(IMAGE_EXT, '').replace(/-[A-Za-z0-9_-]{8}$/, '');
+  const isImage = IMAGE_EXT.test(rel);
   const size = statSync(f).size;
 
   if (isImage) sizes.set(key, Math.max(sizes.get(key) ?? 0, size));

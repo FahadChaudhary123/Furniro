@@ -9,7 +9,7 @@
 import { buildAssetPairs } from '../../shared/lib/assetPairs.js';
 
 const pairs = buildAssetPairs(
-  import.meta.glob('../../assets/blog*.{jpg,webp}', {
+  import.meta.glob('../../assets/blog*.{jpg,webp,avif}', {
     eager: true,
     query: '?url',
     import: 'default',

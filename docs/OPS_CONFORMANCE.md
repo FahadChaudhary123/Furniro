@@ -75,7 +75,7 @@ passing it.
 | §12 | Performance and capacity | ✅ | Budgets now enforced in CI and met. Capacity planning still needs traffic |
 | §13 | Peak event readiness | ➖ | No peak, no traffic |
 | §14 | Cost management | ➖ | No infrastructure spend |
-| §15 | Catalogue and content operations | ◐ | Oversized originals fixed, alt text correct, WebP served via `<picture>` (39 derivatives), publish gate and completeness report built. AVIF and ERP/PIM ingestion outstanding |
+| §15 | Catalogue and content operations | ◐ | Oversized originals fixed, alt text correct, **AVIF and WebP** served via `<picture>`, publish gate and completeness report built. ERP/PIM ingestion outstanding |
 | §16 | Third-party dependency register | ✅ | One real dependency (Supabase). Register created |
 | §17 | Support tiers and SLAs | ➖ | No customers, no tickets |
 | §18 | Documentation discipline | ✅ | Docs, runbooks and decision records all in place. Runbook testing is the remaining habit |
@@ -138,10 +138,10 @@ locally as `npm run budgets`.
 
 | Metric | Before | Now | Budget |
 |---|---|---|---|
-| Total assets (one visitor) | 24.0 MB | **1.62 MB** | 1.90 MB |
+| Total assets (one visitor) | 24.0 MB | **1.61 MB** | 1.90 MB |
 | Largest single asset | 4.0 MB (`bedroom.jpg`) | **270 kB** (the JS bundle) | 300 kB |
 | Images over 1 MB | 10 | **0** | — |
-| JS gzipped | 123 kB | 104 kB | 115 kB |
+| JS gzipped | 123 kB | **97 kB** | 115 kB |
 | CSS gzipped | 4 kB | 4.7 kB | 25 kB |
 | Third-party scripts | 0 | 0 | 0 |
 
@@ -170,9 +170,14 @@ at the data boundary and `npm run completeness` reports the rest. Measured first
 intrinsic dimensions to the rendered box saved 42% of image weight against 25% for the format
 change, so sizing was done before format.
 
-**Still outstanding for §15:** AVIF, which needs another `<source>` and another derivative
-pass, and ERP/PIM ingestion of price and stock (`CAT-09`) — that one is an architectural
-decision, not a task.
+**AVIF landed 2026-09-10** and is 42.7% smaller than WebP across this project's images,
+measured before it was built rather than assumed. It is emitted **only where it actually
+wins** — it lost on a 0.8 kB thumbnail, where the format's own container overhead outweighs
+the payload — and it is listed first in `<picture>`, because a browser takes the first source
+it can decode and never looks further.
+
+**Still outstanding for §15:** ERP/PIM ingestion of price and stock (`CAT-09`), which is an
+architectural decision rather than a task.
 
 ### §16 Third-party register
 

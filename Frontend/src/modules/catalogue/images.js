@@ -17,7 +17,7 @@ import { buildAssetPairs } from '../../shared/lib/assetPairs.js';
 
 // Both formats: the JPEG is the fallback, the WebP is what most browsers will take.
 const pairs = buildAssetPairs(
-  import.meta.glob('../../assets/Products/*.{jpg,webp}', {
+  import.meta.glob('../../assets/Products/*.{jpg,webp,avif}', {
     eager: true,
     query: '?url',
     import: 'default',

@@ -4,7 +4,7 @@ import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
 const img = buildAssetPairs(
-  import.meta.glob("../assets/BrowseRange/*.{jpg,webp}", {
+  import.meta.glob("../assets/BrowseRange/*.{jpg,webp,avif}", {
     eager: true,
     query: "?url",
     import: "default",
@@ -76,18 +76,12 @@ const BrowseRange = () => {
               }}
             >
               <div className="overflow-hidden rounded-xl">
+                {/* Spread the whole image set rather than naming each format: a third copy
+                    of this ternary, once per format, is how the AVIF source would get
+                    forgotten on the next one. */}
                 <Picture
-                src={
-                    hoveredIndex === index
-                      ? cat.images[imageIndex]
-                      : cat.images[0]
-                  .src}
-                webp={
-                    hoveredIndex === index
-                      ? cat.images[imageIndex]
-                      : cat.images[0]
-                  .webp}
-                loading="lazy"
+                  {...(hoveredIndex === index ? cat.images[imageIndex] : cat.images[0])}
+                  loading="lazy"
                   alt={cat.title}
                   className="w-full h-[420px] object-cover transition-all duration-500 group-hover:scale-105"
                 />

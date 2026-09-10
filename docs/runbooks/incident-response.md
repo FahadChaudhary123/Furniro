@@ -153,7 +153,7 @@ Honest inventory, because knowing this in advance is cheaper than discovering it
 | Documented escalation path | Nobody knows who to wake |
 
 *Two rows were removed on 2026-09-09 because they had stopped being true: **tests and CI**
-(385 browser checks, 85 API checks, 118 unit tests, all gated in CI) and **structured
+(389 browser checks, 85 API checks, 139 unit tests, all gated in CI) and **structured
 logging** (JSON lines with correlation ids since the platform module). "Error tracking" was
 narrowed to **alerting** — client and server errors do reach the log now; nothing raises a
 hand about them.*

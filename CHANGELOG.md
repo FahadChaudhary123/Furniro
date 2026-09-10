@@ -35,6 +35,37 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **AVIF, served ahead of WebP** (`CAT-05`, Doc B §15's last outstanding image item). Measured
+  first, as this project's habit requires: **42.7% smaller than WebP** across a representative
+  sample of its images, so the home page now downloads 328 kB of AVIF where it previously
+  fetched WebP.
+  Emitted **only where it actually wins**. It lost on a 0.8 kB thumbnail, where the format's
+  own container overhead outweighs the payload, so 38 of 39 images have one and that one does
+  not. `<picture>` lists AVIF first because a browser takes the first source it can decode and
+  never looks at the rest — listed second it would never be chosen.
+  Verified in a browser: all 31 `<picture>` elements resolve AVIF → WebP → JPEG, zero broken
+  images.
+
+### Fixed
+
+- **Small images were being inlined into the JS bundle as base64, and AVIF made it worse.**
+  Vite inlines assets under 4 kB by default. Two WebP files were already going into the
+  bundle; AVIF shrank six more below the threshold, and gzipped JS jumped from 104 kB to
+  122 kB — over budget.
+  Inlining is not merely wasteful here, it is wrong: an inlined AVIF lives in the JS that
+  **every** browser downloads, so a browser that would have picked the WebP still pays for
+  AVIF bytes it will never decode. That defeats the entire purpose of offering formats.
+  `assetsInlineLimit: 0`, and gzipped JS is now **97 kB** — lower than before AVIF existed,
+  because those two WebP files had been quietly riding along all along. An e2e test asserts
+  no image is ever served as a data URI.
+
+- **The performance budget counted AVIF files twice.** The per-visitor metric already grouped
+  each image and counted its largest variant, precisely so that adding a modern format could
+  not look like a regression — but its extension list did not include `.avif`, so every AVIF
+  was treated as a separate asset and added on top. The total read 2.12 MB against a 1.90 MB
+  budget and failed a change that made every visitor's download smaller. With AVIF recognised
+  it reads **1.61 MB**. A format the grouping does not know about is counted twice.
+
 - **Promotions can now end** (`PROMO-05`) — `discount_expires_at`, optional, on a product.
   Doc B §15 requires a campaign to carry an expiry and forbids promoting an expired offer.
   Seven of the forty products carry a struck-through `old_price` — that *is* a promotional

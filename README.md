@@ -66,7 +66,7 @@ contact) renders standalone.
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
 | `npm test` | Unit tests (67 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (385 checks; starts both servers) |
+| `npm run e2e` | Playwright end-to-end suite (389 checks; starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined

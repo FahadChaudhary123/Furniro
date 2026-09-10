@@ -44,6 +44,7 @@ const ProductsSection = () => {
               <Picture
                 src={item.image.src}
                 webp={item.image.webp}
+                avif={item.image.avif}
                 alt={item.name}
                 loading="lazy"
                 className="w-full h-72 object-cover"

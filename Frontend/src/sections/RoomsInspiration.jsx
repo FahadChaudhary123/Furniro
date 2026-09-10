@@ -5,7 +5,7 @@ import Picture from "../shared/ui/Picture";
 
 // One glob rather than a JPEG and a WebP import per image.
 const img = buildAssetPairs(
-  import.meta.glob("../assets/rooms/*.{jpg,webp}", {
+  import.meta.glob("../assets/rooms/*.{jpg,webp,avif}", {
     eager: true,
     query: "?url",
     import: "default",
@@ -80,6 +80,7 @@ const RoomsInspiration = () => {
                   <Picture
                     src={room.image.src}
                     webp={room.image.webp}
+                    avif={room.image.avif}
                     alt={room.title}
                     loading="lazy"
                     className="w-full h-[480px] object-cover"
