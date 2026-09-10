@@ -35,6 +35,16 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **The graceful-shutdown path is tested** — `Backend/src/platform/shutdown.js`, extracted
+  from `index.js` so it can be, with 10 checks covering a clean close, an in-flight request
+  being waited for, an idle keep-alive connection not being waited for, the timeout backstop
+  exiting 1, and a second signal exiting immediately rather than closing the server twice.
+  It was recorded as "unverified" because the only way to exercise it inline was to send a
+  real signal, and Windows has no way to do that — a limitation confirmed rather than assumed
+  (`child.kill('SIGINT')` killed the process in 10 ms with no handler run). Extracting the
+  logic makes the behaviour checkable on any platform; **signal delivery remains an operating
+  system concern and is still untested here.**
+
 - **`react/jsx-no-undef` is now an error.** `<Foo />` with `Foo` out of scope — a removed or
   mistyped component import — was reported by nothing: `varsIgnorePattern: '^[A-Z_]'`
   silences core `no-unused-vars` for capitalised names, and esbuild does not resolve JSX
@@ -125,6 +135,16 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   so a check is worth more than four fixes.
 
 ### Fixed
+
+- **Graceful shutdown would have timed out and exited 1 after any deploy that had traffic.**
+  Idle keep-alive connections were swept **once**, at the moment shutdown began. A request
+  still in flight at that instant becomes idle a few milliseconds later, and nothing closed
+  it — so `server.close()` never completed, the 10-second backstop fired, and the process
+  exited `1`. To an orchestrator that is a failed shutdown on every rollout of a server
+  anybody was actually using.
+  The sweep now repeats until the server reports closed. Found by extracting the logic and
+  writing a test for it: the single call is the obvious implementation and it is wrong for
+  precisely the case that matters.
 
 - **CI failed installing the Playwright browser.** `npx playwright install --with-deps
   chromium` switches to root and runs `apt-get` against the Ubuntu and Google Chrome
@@ -653,9 +673,12 @@ are now fixed rather than dropped.
 
 - **No cart, orders, auth or payments.** The API serves the catalogue and the blog, plus a
   client-error endpoint. See [docs/MODULES.md](docs/MODULES.md#build-order).
-- **Graceful shutdown is unverified on Windows.** The SIGTERM/SIGINT handlers are written,
-  but `Stop-Process` is a hard terminate, so the path has only been exercised by
-  inspection. It matters in a Linux container, not locally.
+- **Signal delivery is still unverifiable on Windows.** The shutdown *logic* is now tested
+  on any platform (`src/platform/shutdown.test.js`, 10 checks) and exercised against the real
+  Express app. What cannot be tested here is the delivery itself: `Stop-Process` and
+  `child.kill()` are hard terminates on Windows and never run a handler — confirmed by trying
+  it, which killed the process in 10 ms with exit code `null` and no log line. It is Linux
+  where this matters, and the first real `SIGTERM` will be in a container.
 - **No alerting.** `PLAT-04` collects client and server errors into the structured log, but
   a log is a record, not a page. Nothing tells anyone an error happened.
 - **No retention enforcement.** Doc B §11 sets 30 days hot / 12 months cold for logs.

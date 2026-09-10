@@ -137,7 +137,7 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ```bash
 cd Frontend && npm run verify   # lint + 56 unit checks + build + budgets + SEO check
 cd Frontend && npm run e2e      # 385 browser checks; starts both servers itself
-cd Backend  && npm test         # 62 unit checks
+cd Backend  && npm test         # 72 unit checks
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # 85 API checks against a running server
 ```

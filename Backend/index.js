@@ -6,7 +6,7 @@
  * already sees a populated process.env.
  */
 
-import { config, validateConfig, logger } from './src/platform/index.js';
+import { config, validateConfig, logger, createShutdown } from './src/platform/index.js';
 import { createApp } from './src/app.js';
 
 function start() {
@@ -42,22 +42,17 @@ function start() {
   });
 
   /**
-   * Graceful shutdown: stop accepting connections, let in-flight requests finish, then
-   * exit. Without this a deploy can cut a request mid-response — and Doc B §3 expects every
-   * release to be revertible cleanly.
+   * Graceful shutdown: stop accepting connections, let in-flight requests finish, then exit.
+   * Without this a deploy can cut a request mid-response — and Doc B §3 expects every release
+   * to be revertible cleanly.
+   *
+   * The logic lives in `platform/shutdown.js` so it can be tested. Inline, the only way to
+   * exercise it was to send a real signal, which on Windows never runs the handler at all —
+   * so it had been read and never run. Moving it out found a defect: idle keep-alive
+   * connections were swept once, at shutdown start, which misses every connection that
+   * becomes idle a moment later.
    */
-  const shutdown = (signal) => {
-    logger.info(`${signal} received, shutting down`);
-    server.close(() => {
-      logger.info('server closed');
-      process.exit(0);
-    });
-    // Do not hang forever on a stuck connection.
-    setTimeout(() => {
-      logger.error('forced shutdown after timeout');
-      process.exit(1);
-    }, 10_000).unref();
-  };
+  const shutdown = createShutdown({ server, logger });
 
   process.on('SIGTERM', () => shutdown('SIGTERM'));
   process.on('SIGINT', () => shutdown('SIGINT'));
