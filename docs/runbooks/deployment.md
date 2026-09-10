@@ -130,11 +130,20 @@ modern format look like a regression.
 
 Remaining work, in order of payoff:
 
-- **`srcset` for images that serve more than one slot.** A product image is ~288px in the
-  featured strip and ~600px on its detail page; without `srcset` the single file has to
-  satisfy the larger, so the strip over-downloads by roughly 3x.
-- **AVIF** alongside WebP — another step down for photographic content, at more encode time.
+- **Higher-resolution product photography.** Seven of the eight product images are 285px
+  wide against a 600px detail slot — the detail page shows them at roughly a quarter of the
+  resolution it asks for, and the originals are 285px too. This is the largest remaining
+  image problem and no build step can fix it; it needs better source files.
+  `npm run audit:images` lists them.
 - **A CDN**, once there is a host — Doc B §12 wants a documented per-surface cache strategy.
+
+Two former entries here are done or dropped:
+
+- ~~**AVIF**~~ — landed 2026-09-10, 42.7% smaller than WebP, emitted only where it wins.
+- ~~**`srcset`**~~ — measured and dropped. The claim that the featured strip "over-downloads
+  by roughly 3x" predated per-image display-width sizing; the saving actually available is
+  4 kB across one image, against a derivative set per image and a `sizes` attribute per slot.
+  See [ADR 0009](../decisions/0009-size-images-before-format.md).
 
 If a budget legitimately needs raising, change it in `Frontend/scripts/check-budgets.mjs`
 in the same commit, with the reason in the commit message. A budget that drifts upward

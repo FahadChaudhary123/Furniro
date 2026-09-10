@@ -42,6 +42,18 @@ images matter more than they do at 0.97 MB.
 - The performance budget had to change with it. Shipping two formats doubles the directory,
   so the budget now counts each image **once at its larger variant** — bytes one visitor
   downloads, not bytes on disk. The old metric reported this improvement as a 60% regression.
-- Assets serving two slots are still over-downloaded in the smaller one: a product image is
-  ~288px in the featured strip and ~600px on its detail page. `srcset` is the fix and is on
-  the backlog.
+- **`srcset` was on the backlog for this and has been measured and dropped** (2026-09-10).
+  The reasoning above — one file must satisfy its largest slot, so smaller slots
+  over-download — is sound, but this codebase sizes each file to its own display box × 2, and
+  the waste that remains is 4 kB across one image on the home and detail pages combined.
+  `srcset` means a derivative set per image, a `sizes` attribute per slot and a longer build,
+  for that. Not worth it here; revisit if a layout appears where one file serves slots an
+  order of magnitude apart.
+
+- **Measuring it found the opposite problem.** Seven of the eight product source images are
+  **285px wide against a 600px detail slot** — about a quarter of the resolution that view
+  asks for — and the originals are 285px too, so they were never larger. No build step can
+  fix that: `withoutEnlargement` means the optimiser will not invent pixels, and it should
+  not. `npm run audit:images` now reports undersized files alongside oversized ones, because
+  the oversized ones waste bytes and still look right while these look soft and cost nothing,
+  which is why nobody had noticed.

@@ -17,7 +17,7 @@ export const DISPLAY_WIDTH = {
   'BrowseRange/': 384, // three-up carousel on the home page
   'rooms/': 600, // inspiration cards
   'setup/': 280, // marquee thumbnails
-  'Products/': 600, // ~300 in the grid, larger on the detail page
+  'Products/': 600, // ~300 in the grid, ~600 on the detail page — 7 of 8 sources fall short, see audit:images
   blog: 760, // article column
   post: 80, // sidebar thumbnails
   'hero-bg': 1440, // full-bleed background

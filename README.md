@@ -64,6 +64,7 @@ contact) renders standalone.
 | `npm run seo` | SEO health check — duplicate titles, orphaned pages, sitemap coverage (`CONT-04`) |
 | `npm run seo:generate` | Write `dist/sitemap.xml` and `dist/robots.txt`; runs as part of `build` |
 | `npm run optimise:images` | Re-encode `src/assets/` images; originals kept in `.image-originals/` |
+| `npm run audit:images` | Intrinsic width vs rendered box; flags oversized **and** undersized files |
 | `npm test` | Unit tests (67 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
 | `npm run e2e` | Playwright end-to-end suite (389 checks; starts both servers) |

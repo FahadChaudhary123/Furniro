@@ -117,6 +117,19 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Changed
 
+- **`srcset` measured and dropped from the backlog.** Two documents claimed the featured
+  strip "over-downloads by roughly 3x" because one file must satisfy its largest slot. That
+  predated per-image display-width sizing: measured against the built output, the saving
+  actually available is **4 kB across one image** on the home and detail pages combined, and
+  zero on mobile once device pixel ratio is accounted for. `srcset` would cost a derivative
+  set per image, a `sizes` attribute per slot and a longer build, for that. Recorded in
+  [ADR 0009](docs/decisions/0009-size-images-before-format.md) so it is not re-investigated.
+
+- **`npm run audit:images` now reports undersized images, not just oversized ones.** An
+  oversized image wastes bytes and still looks right; an undersized one looks soft, costs
+  nothing to ship, and no build step can fix it — which is why seven low-resolution product
+  images had gone unnoticed. It was looking for waste and this failure is the opposite shape.
+
 - **Page filenames are `PascalCase` without exception.** `shop.jsx`, `about.jsx` and
   `contact.jsx` are now `Shop.jsx`, `About.jsx` and `Contact.jsx`; the exported component
   names were already correct, only the files were out of step. The caveat in `CLAUDE.md`
@@ -700,6 +713,11 @@ because the controls sit in a hover overlay and a text probe missed them. They w
 are now fixed rather than dropped.
 
 ### Front end
+
+- **Seven of the eight product images are too low-resolution for the detail page.** They are
+  285px wide against a 600px slot — about a quarter of what that view asks for — and the
+  originals are 285px too, so nothing in the build can fix it. `npm run audit:images` lists
+  them. Needs better source photography.
 
 - **Cart is guest-only and client-side.** No reservation (`CART-03`), no server-side
   persistence or retention (`CART-04`), and it does not follow a customer across devices
