@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useFeaturedProducts, badgeFor } from "../modules/catalogue";
+import { useFeaturedProducts, badgeFor, discountFor } from "../modules/catalogue";
 import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
 import { ProductGridSkeleton, CatalogueError } from "../components/CatalogueState";
@@ -23,6 +23,7 @@ const ProductsSection = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {products.map((item) => {
           const badge = badgeFor(item);
+          const discount = discountFor(item);
 
           return (
             <div
@@ -69,9 +70,10 @@ const ProductsSection = () => {
 
                 <div className="flex items-center gap-2">
                   <span className="font-semibold">{formatPrice(item.price)}</span>
-                  {item.old_price && (
+                  {/* PROMO-05 — see ProductCard.jsx. */}
+                  {discount && (
                     <span className="text-sm text-gray-600 line-through">
-                      {formatPrice(item.old_price)}
+                      {formatPrice(discount.oldPrice)}
                     </span>
                   )}
                 </div>

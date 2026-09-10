@@ -11,7 +11,7 @@
 
 export { useProducts, useProduct, useFeaturedProducts, useCategories } from './hooks.js';
 export { fetchProduct, ApiError } from './api.js';
-export { badgeFor } from './lib/badge.js';
+export { badgeFor, discountFor } from './lib/badge.js';
 
 /**
  * Sort options for the shop control. Keys are the API's `sort` values verbatim, so the

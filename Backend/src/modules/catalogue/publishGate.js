@@ -72,6 +72,19 @@ const WARNING_RULES = [
     why: 'an old price at or below the current one renders a "discount" that raises the price',
   },
   {
+    id: 'discount_expires_at',
+    describe: 'a discount expiry that is either absent, in the future, or cleaned up',
+    // PROMO-05: "none may promote an expired offer". The front end stops showing an expired
+    // discount, which protects the customer — this is the other half: telling somebody the
+    // data still claims an offer that ended, so it gets removed rather than lingering.
+    test: (p) => {
+      if (!p.discount_expires_at) return true;
+      const at = new Date(p.discount_expires_at).getTime();
+      return !Number.isNaN(at) && at > Date.now();
+    },
+    why: 'the offer has ended or its expiry is unreadable; clear old_price and the expiry',
+  },
+  {
     id: 'created_at',
     describe: 'a parseable creation date',
     test: (p) => typeof p.created_at === 'string' && !Number.isNaN(Date.parse(p.created_at)),

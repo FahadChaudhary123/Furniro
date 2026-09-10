@@ -35,6 +35,22 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ### Added
 
+- **Promotions can now end** (`PROMO-05`) — `discount_expires_at`, optional, on a product.
+  Doc B §15 requires a campaign to carry an expiry and forbids promoting an expired offer.
+  Seven of the forty products carry a struck-through `old_price` — that *is* a promotional
+  claim — and every one ran forever, with no way to end it but a data edit.
+  Past the expiry, `discountFor()` returns null and **both the badge and the struck-through
+  price disappear together**. That is the substance of the change, not a detail: the two were
+  decided independently in four places, so hiding an expired badge would have left three
+  components still displaying "was Rp 3.500.000". They are two halves of one promise and now
+  come from one function.
+  An unparseable expiry counts as expired — continuing to advertise an offer whose end date
+  nobody can read is the failure the requirement names. Absent means no expiry, so nothing
+  currently on the site changed. The completeness report warns when the data still claims an
+  offer that has ended, so a stale `old_price` gets cleared rather than lingering.
+  Verified in a browser with a real expired discount alongside a live one: the expired
+  product showed neither badge nor old price, the live one still showed both.
+
 - **The graceful-shutdown path is tested** — `Backend/src/platform/shutdown.js`, extracted
   from `index.js` so it can be, with 10 checks covering a clean close, an in-flight request
   being waited for, an idle keep-alive connection not being waited for, the timeout backstop

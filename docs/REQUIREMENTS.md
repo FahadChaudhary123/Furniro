@@ -85,7 +85,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **18 built, 10 partial, 106 not built.** Counted from the
+Of the 134 requirements below: **19 built, 11 partial, 104 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -314,10 +314,27 @@ a durable append-only order event stream. It is not retrofittable.
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
 | `PROMO-01` | Discounts and promotions, rehearsable on staging before going live | §13 | 3 | ⭕ |
-| `PROMO-02` | Discount arithmetic verifiable, including interaction with refunds | §13 | 3 | ⭕ |
+| `PROMO-02` | Discount arithmetic verifiable, including interaction with refunds | §13 | 3 | ◐ |
 | `PROMO-03` | Coupon codes, rate-limited against brute force | §7 R11 | 3 | ⭕ |
 | `PROMO-04` | Pricing display rules compliant with local law, reviewed quarterly | §4 | 3 | ⭕ |
-| `PROMO-05` | Campaign banners carry expiry; none may promote an expired offer | §15 | 2 | ⭕ |
+| `PROMO-05` | Campaign banners carry expiry; none may promote an expired offer | §15 | 2 | ✅ |
+
+**`PROMO-05` is met, and it was not decorative.** Seven of the forty products carry a
+struck-through `old_price` — a promotional claim — and every one ran forever, with no way to
+end it but a data edit. `discount_expires_at` ends one; past it, `discountFor()` returns null
+and **both** the badge and the struck-through price disappear together. That mattered: the
+two were decided independently in four places, so hiding an expired badge would have left
+three components still displaying "was Rp 3.500.000". The completeness report warns when the
+data still claims an offer that has ended.
+
+**`PROMO-02` is partial.** The discount arithmetic is derived rather than stored and covered
+by 24 unit tests, which is the "verifiable" half — it exists precisely because two stored
+badges were wrong (-30% on a -29% pair, -10% on a -13% one). The refund interaction it also
+names needs refunds.
+
+The rest of `pricing` is not built and mostly cannot be: coupons and promotion rehearsal need
+storage and a staging environment, and `PROMO-04`'s "compliant with local law" needs a
+jurisdiction, which Doc B does not supply. See [Open decisions](#open-decisions).
 
 ## 15. Content, reviews and notifications — `CONT` `REV` `NOTIF`
 

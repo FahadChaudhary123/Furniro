@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { badgeFor } from './badge.js';
+import { badgeFor, discountFor } from './badge.js';
 
 /**
  * Derived badges.
@@ -98,5 +98,85 @@ describe('precedence and guards', () => {
 
   it('returns null when there is nothing to derive from', () => {
     expect(badgeFor({}, NOW)).toBeNull();
+  });
+});
+
+describe('discountFor — promotional expiry (PROMO-05)', () => {
+  const NOW_MS = NOW;
+  const withExpiry = (expiresAt) =>
+    product({ price: 700, old_price: 1400, discount_expires_at: expiresAt });
+
+  it('is live when there is no expiry at all', () => {
+    // Absent means no expiry — exactly the behaviour before this existed. Seven of the forty
+    // shipped products are in this state, and none of them changed.
+    expect(discountFor(product({ price: 700, old_price: 1400 }), NOW_MS)).toEqual({
+      oldPrice: 1400,
+      percent: 50,
+    });
+  });
+
+  it('is live before the expiry', () => {
+    expect(discountFor(withExpiry('2026-12-31T00:00:00Z'), NOW_MS)).toMatchObject({ percent: 50 });
+  });
+
+  it('is gone after the expiry', () => {
+    expect(discountFor(withExpiry('2026-01-01T00:00:00Z'), NOW_MS)).toBeNull();
+  });
+
+  it('treats the moment of expiry as expired, not as the last live second', () => {
+    const exact = new Date(NOW_MS).toISOString();
+    expect(discountFor(withExpiry(exact), NOW_MS)).toBeNull();
+    expect(discountFor(withExpiry(new Date(NOW_MS + 1).toISOString()), NOW_MS)).not.toBeNull();
+  });
+
+  it('treats an unparseable expiry as expired', () => {
+    // The alternative is promoting an offer whose end date nobody can read, which is the
+    // failure this requirement names.
+    expect(discountFor(withExpiry('next tuesday'), NOW_MS)).toBeNull();
+    expect(discountFor(withExpiry(''), NOW_MS)).toEqual({ oldPrice: 1400, percent: 50 });
+  });
+
+  it('never returns a discount that is not really one', () => {
+    expect(discountFor(product({ price: 1000, old_price: 1000 }), NOW_MS)).toBeNull();
+    expect(discountFor(product({ price: 1000, old_price: 900 }), NOW_MS)).toBeNull();
+    expect(discountFor(product({ price: 996, old_price: 1000 }), NOW_MS)).toBeNull();
+    expect(discountFor(null, NOW_MS)).toBeNull();
+  });
+});
+
+describe('the badge and the struck-through price agree', () => {
+  /**
+   * They are two halves of one promise. Before `discountFor` they were decided separately,
+   * in four places — so hiding an expired badge would have left three components still
+   * displaying "was Rp 3.500.000", which is precisely what PROMO-05 forbids.
+   */
+  const cases = [
+    ['no expiry', undefined],
+    ['future expiry', '2026-12-31T00:00:00Z'],
+    ['past expiry', '2026-01-01T00:00:00Z'],
+    ['unparseable expiry', 'soon'],
+  ];
+
+  for (const [name, expiresAt] of cases) {
+    it(`${name}: a discount badge appears if and only if an old price is shown`, () => {
+      const p = product({ price: 700, old_price: 1400, discount_expires_at: expiresAt });
+      const badge = badgeFor(p, NOW);
+      const discount = discountFor(p, NOW);
+
+      expect(Boolean(discount)).toBe(badge?.kind === 'discount');
+      if (discount) expect(badge.label).toBe(`-${discount.percent}%`);
+    });
+  }
+
+  it('an expired discount falls back to the New badge rather than showing nothing wrong', () => {
+    // Expiry removes the discount claim; it does not remove the product's other qualities.
+    const fresh = product({
+      price: 700,
+      old_price: 1400,
+      discount_expires_at: '2026-01-01T00:00:00Z',
+      created_at: new Date(NOW - 5 * DAY).toISOString(),
+    });
+    expect(discountFor(fresh, NOW)).toBeNull();
+    expect(badgeFor(fresh, NOW)).toEqual({ kind: 'new', label: 'New' });
   });
 });

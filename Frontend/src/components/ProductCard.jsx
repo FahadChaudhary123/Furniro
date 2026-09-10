@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
-import { badgeFor } from '../modules/catalogue';
+import { badgeFor, discountFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
 import Picture from '../shared/ui/Picture';
 
 const ProductCard = ({ product }) => {
   const badge = badgeFor(product);
+  const discount = discountFor(product);
   const { add } = useCart();
 
   return (
@@ -74,9 +75,12 @@ const ProductCard = ({ product }) => {
           <span className="font-semibold text-gray-900">
             {formatPrice(product.price)}
           </span>
-          {product.old_price && (
+          {/* PROMO-05: the struck-through price is the promotional claim, so it is
+              driven by the same `discountFor` the badge uses. Checking `old_price`
+              directly would keep promoting an offer whose expiry has passed. */}
+          {discount && (
             <span className="text-sm text-gray-600 line-through">
-              {formatPrice(product.old_price)}
+              {formatPrice(discount.oldPrice)}
             </span>
           )}
         </div>

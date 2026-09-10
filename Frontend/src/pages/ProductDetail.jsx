@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { useProduct, badgeFor } from '../modules/catalogue';
+import { useProduct, badgeFor, discountFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
@@ -32,6 +32,7 @@ const ProductDetail = () => {
   });
 
   const badge = product ? badgeFor(product) : null;
+  const discount = product ? discountFor(product) : null;
 
   /**
    * CAT-08. A discontinued product redirects to the alternative the API named, rather than
@@ -112,9 +113,10 @@ const ProductDetail = () => {
                 <span className="text-2xl font-semibold text-gray-900">
                   {formatPrice(product.price)}
                 </span>
-                {product.old_price && (
+                {/* PROMO-05 — see ProductCard.jsx. */}
+                {discount && (
                   <span className="text-lg text-gray-600 line-through">
-                    {formatPrice(product.old_price)}
+                    {formatPrice(discount.oldPrice)}
                   </span>
                 )}
               </div>

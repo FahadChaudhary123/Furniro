@@ -176,11 +176,26 @@ The catalogue item. Canonical shape above.
 | `image` | text | Storage key |
 | `created_at` | timestamptz | Drives the "New" badge |
 | `discontinued` | boolean \| absent | Optional. `true` withdraws the product from sale |
+| `discount_expires_at` | timestamptz \| absent | Optional. When the `old_price` claim stops being shown |
 
 **`discontinued` withdraws a product without deleting it** (`CAT-08`). Set it to `true` and
 the product leaves every listing, leaves the sitemap, and gains a rule in `dist/_redirects`;
 `GET /api/products/:slug` answers `410 Gone` with the nearest live alternative instead of
 `200`. Absent and `false` both mean "on sale" — only the literal `true` withdraws it.
+
+**`discount_expires_at` ends a promotion** (`PROMO-05`). Doc B §15 requires a campaign to
+carry an expiry and forbids promoting an expired offer. A struck-through `old_price` is that
+claim, and without an expiry it runs forever — the only way to end one was to edit the data.
+
+Absent means no expiry, which is what all seven discounted products do today; this adds the
+ability to end an offer, it does not create one. Past the expiry, `discountFor()` returns
+null, so **both** the badge and the struck-through price disappear together — they are two
+halves of one promise, and hiding only the badge would still be promoting the offer. An
+unparseable expiry counts as expired: continuing to advertise an offer whose end date nobody
+can read is the failure the requirement names.
+
+The completeness report warns about a product whose expiry has passed, so the stale
+`old_price` gets cleared rather than lingering as a claim nobody is making any more.
 
 **Do not delete the row instead.** A deleted slug can only 404, and Doc B §15 is explicit
 that an indexed URL should never land on a bare 404. The row is what makes the redirect
