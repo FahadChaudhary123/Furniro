@@ -228,6 +228,9 @@ payment state is uncertain") is a rule it enforces by asking `payments`, never b
 their tables. `SRCH-06`'s graceful degradation is only possible because of that: if the
 index dies, category browse still works.
 
+The current JSON catalogue matches query words in memory. The dedicated search read-model,
+inventory input and index remain Stage 4 work.
+
 ### Layer 5 — Operations surfaces
 
 | Module | Owns | Requirements | Size | Owner | Runbook |

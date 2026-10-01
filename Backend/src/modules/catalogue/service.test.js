@@ -101,6 +101,11 @@ describe('filtering', () => {
     expect(data.every((p) => `${p.name} ${p.description}`.toLowerCase().includes('sofa'))).toBe(true);
   });
 
+  it('matches multiple words across fields without requiring phrase order', () => {
+    const { data } = listProducts({ search: 'sofa luxury', limit: MAX_LIMIT });
+    expect(data.some((product) => product.slug === 'lolito')).toBe(true);
+  });
+
   it('applies a price range inclusively', () => {
     const min = 100_000_000;
     const max = 300_000_000;

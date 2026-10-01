@@ -87,7 +87,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **19 built, 11 partial, 104 not built.** Counted from the
+Of the 134 requirements below: **19 built, 12 partial, 103 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -179,13 +179,17 @@ and one of the largest unknowns — see [Open decisions](#open-decisions).
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
-| `SRCH-01` | Full-text product search | §5, §7 R7 | 4 | ⭕ |
+| `SRCH-01` | Full-text product search | §5, §7 R7 | 4 | ◐ |
 | `SRCH-02` | Search index rebuilt into a new index and alias-swapped, never rebuilt in place | §7 R7 | 4 | ⭕ |
 | `SRCH-03` | Index staleness ≤ 60 s | §5 SLO | 4 | ⭕ |
 | `SRCH-04` | Configurable synonyms and ranking rules, with expiry dates | §15 | 4 | ⭕ |
 | `SRCH-05` | Zero-result and low-conversion queries logged for weekly review | §4, §15 | 4 | ◐ |
 | `SRCH-06` | Graceful degradation: hide the search box and fall back to category browse rather than return empty results | §7 R7 | 4 | ◐ |
 | `SRCH-07`ⁱ | Faceted filtering and sorting on listing pages | — | 1 | ✅ |
+
+**`SRCH-01` is partial.** The JSON-backed API now matches all query words across a
+product's name and description, regardless of order, case or accents. It still scans
+published products in memory; there is no dedicated full-text index or relevance ranking.
 
 **`SRCH-05` is partial.** A search returning nothing is logged with the term and the active
 category (`search returned nothing`), so the weekly review has data. Only zero-result
@@ -208,7 +212,7 @@ error state already handles. That half becomes real when `SRCH-01`'s index exist
 
 `SRCH-07` is met. Category, search term, sort, page and page size all live in the URL and
 map onto parameters the API already validates, so a filtered view is shareable and the back
-button works. Full-text search (`SRCH-01`–`06`) is still a separate concern needing an index.
+button works. Indexed full-text search (`SRCH-01`–`06`) is still a separate concern.
 
 ## 6. Cart — `CART`
 
@@ -626,16 +630,16 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 8 | 6 | 7 |
+| Catalogue, search, content | 21 | 8 | 7 | 6 |
 | Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 1 | 1 | 15 |
 | Back office, support, privacy | 17 | 1 | 0 | 16 |
 | Platform, security, non-functional | 28 | 8 | 4 | 16 |
-| **Total** | **134** | **19** | **11** | **104** |
+| **Total** | **134** | **19** | **12** | **103** |
 
-**19 of 134 requirements are marked built** in the tables above; another 11 are partial.
-The remaining 104 require capabilities such as a database, identity, or a payment gateway.
+**19 of 134 requirements are marked built** in the tables above; another 12 are partial.
+The remaining 103 require capabilities such as a database, identity, or a payment gateway.
 
 This is the distance between the current storefront and the trading operation Document B
 is written to run.

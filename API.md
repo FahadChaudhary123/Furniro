@@ -131,7 +131,7 @@ Paginated catalogue. Backs the shop grid.
 | `limit` | integer | `16` | Max 100 |
 | `category` | string | — | One category slug |
 | `sort` | enum | `created_at:desc` | `created_at:asc/desc`, `price:asc/desc`, `name:asc/desc` |
-| `q` | string | — | Substring match on name and description |
+| `q` | string | — | All space-separated words match across name and description, case and accent insensitive |
 | `min_price` / `max_price` | integer | — | Minor units, inclusive |
 | `slugs` | string | — | Comma-separated, max 50. Batch lookup for the cart |
 

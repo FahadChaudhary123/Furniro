@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added multiword catalogue search across product names and descriptions, with case and
+  accent insensitive matching. The existing sort and category filters still apply.
+
 - Added a provider-neutral product mapping worksheet and validator. It checks that every
   catalogue slug has a unique platform variant ID without copying prices or enabling checkout.
 

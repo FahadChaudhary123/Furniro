@@ -5,6 +5,7 @@
 
 import * as repo from './repository.js';
 import { resolveRedirect as resolve, listRedirects as list } from './redirects.js';
+import { matchesProductQuery } from './searchQuery.js';
 
 export const DEFAULT_LIMIT = 16; // matches the shop grid's page size
 export const MAX_LIMIT = 100; // an uncapped limit is a one-request denial of service
@@ -55,12 +56,7 @@ export function listProducts(q = {}) {
   if (category) items = items.filter((p) => p.category?.slug === category);
 
   if (search) {
-    const needle = search.toLowerCase();
-    items = items.filter(
-      (p) =>
-        p.name.toLowerCase().includes(needle) ||
-        p.description.toLowerCase().includes(needle),
-    );
+    items = items.filter((p) => matchesProductQuery(p, search));
   }
 
   if (minPrice !== null) items = items.filter((p) => p.price >= minPrice);
