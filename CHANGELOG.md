@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added Render deployment configuration checks: the API rejects invalid production CORS
+  origins, and the storefront build rejects missing or placeholder public URLs.
+
 - Added multiword catalogue search across product names and descriptions, with case and
   accent insensitive matching. The existing sort and category filters still apply.
 

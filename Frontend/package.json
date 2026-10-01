@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && npm run seo:generate",
+    "deploy:check": "node scripts/check-deploy-config.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "budgets": "node scripts/check-budgets.mjs",

@@ -38,9 +38,10 @@ At initial Blueprint creation, Render prompts for these values:
 | Storefront | `VITE_SITE_ORIGIN` | Exact canonical storefront origin, with no trailing slash |
 
 These URLs are public configuration, never credentials. Confirm the assigned Render URLs
-before the first storefront build; a name collision may change the subdomain. If they are
-unknown during Blueprint creation, enter the intended values and correct them in the Render
-Dashboard before exposing the site. Render prompts for `sync: false` variables only on
+before the first storefront build; a name collision may change the subdomain. The Render
+build now runs `npm run deploy:check` and rejects missing, local, placeholder or malformed
+public URLs. Confirm the assigned service URLs and correct them in the Render Dashboard
+before rebuilding the storefront. Render prompts for `sync: false` variables only on
 initial creation; later changes must be made in each service's environment settings.
 Changing `VITE_API_URL` or `VITE_SITE_ORIGIN` requires a new storefront build. Check that
 `dist/sitemap.xml`, `dist/robots.txt`, and canonical URLs use the real storefront origin.
@@ -128,6 +129,8 @@ At deploy time:
   the host. Never put secrets in the repository.
 - `ALLOWED_ORIGINS` must list the production front-end origin. **`cors()` with no arguments
   reflects any origin** and must never reach production.
+- Production startup now rejects an unset, local, placeholder or malformed
+  `ALLOWED_ORIGINS` value. Use exact HTTPS origins without paths or trailing slashes.
 - Serve over HTTPS only.
 - Point the platform's **liveness** probe at `GET /health` and its **readiness** probe at
   `GET /health/ready`. Do not point liveness at readiness: a liveness probe that checks the

@@ -12,6 +12,7 @@
  */
 
 import 'dotenv/config';
+import { validateProductionOrigins } from './deploymentConfig.js';
 
 const NODE_ENV = process.env.NODE_ENV ?? 'development';
 const isProduction = NODE_ENV === 'production';
@@ -95,13 +96,11 @@ export function validateConfig() {
   if (missing.length) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
   }
+  if (isProduction) validateProductionOrigins(process.env.ALLOWED_ORIGINS);
 
   const warnings = [];
   if (!config.supabase.url || !config.supabase.anonKey) {
     warnings.push('SUPABASE_URL / SUPABASE_ANON_KEY not set — database access is unavailable');
-  }
-  if (isProduction && config.allowedOrigins.some((o) => o.includes('localhost'))) {
-    warnings.push('ALLOWED_ORIGINS contains localhost in production');
   }
   if (isProduction && config.build.sha === 'unknown') {
     warnings.push('GIT_SHA / RENDER_GIT_COMMIT not set — cannot identify the running build');

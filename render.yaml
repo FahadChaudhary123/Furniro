@@ -21,7 +21,7 @@ services:
     name: furniro-storefront
     runtime: static
     # The sitemap imports Backend data, so this build needs the whole repository.
-    buildCommand: cd Frontend && npm ci && npm run build
+    buildCommand: cd Frontend && npm ci && npm run deploy:check && npm run build
     staticPublishPath: ./Frontend/dist
     autoDeployTrigger: checksPass
     envVars:

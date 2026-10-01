@@ -13,7 +13,7 @@ import { defineConfig } from 'vitest/config';
  */
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.js'],
+    include: ['src/**/*.test.js', 'scripts/**/*.test.js'],
     exclude: ['e2e/**', 'node_modules/**'],
     environment: 'node',
     // No jsdom: everything here is a pure function. A component test would need one, and
