@@ -372,20 +372,21 @@ purchase path. That is [open decision 4](REQUIREMENTS.md#open-decisions).
 
 ### Next work
 
-The catalogue, price formatter and derived badges are already built. The next foundation
-work is to verify credential exposure and rotate the live credentials, settle a deployment
-target, and decide whether commerce will be built here or supplied by a platform. Those
-decisions shape the database, identity, checkout and payment work. The guest cart can remain
+The catalogue, price formatter and derived badges are already built. Render is selected
+for both tiers, and a commerce platform is selected for trading (see
+[ADR 0012](decisions/0012-adopt-commerce-platform.md)). The next foundation work is to
+rotate the live credentials, connect and validate the Render deployment, and select a
+commerce provider after mapping products, variants and checkout requirements. See the
+[provider comparison](COMMERCE_PLATFORM_COMPARISON.md). The guest cart can remain
 useful without inventing a server-side cart or order flow before those dependencies exist.
 
 ---
 
 ## What this decomposition does not settle
 
-- **Build vs. adopt** ([open decision 7](REQUIREMENTS.md#open-decisions)). If Furniro adopts
-  a commerce platform, roughly 12 of these 20 modules are bought rather than built, and this
-  document becomes an integration map instead. That decision should be made before Stage 3,
-  because Stage 3 is where the cost lands.
+- **Commerce provider** ([ADR 0012](decisions/0012-adopt-commerce-platform.md)). The
+  platform approach is accepted; this document is an integration map for the capabilities
+  the platform will own. Provider selection remains open.
 - **`inventory`'s stage**, which depends on the fulfilment model.
 - **Whether an ERP/PIM is upstream** (`CAT-09`). If so, `catalogue` and `inventory` become
   read-models over an external source of truth rather than owning their data — a materially

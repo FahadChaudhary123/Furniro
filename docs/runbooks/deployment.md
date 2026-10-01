@@ -1,7 +1,7 @@
 # Runbook: deployment
 
-🔴 **Nothing is deployed and no host has been chosen.** There is no `vercel.json`, no
-Dockerfile, and no environment configuration for a host. CI **is** running
+🔴 **Nothing is deployed.** Render is the selected host for the static storefront and Node
+API; [render.yaml](../../render.yaml) prepares both services. CI **is** running
 (`.github/workflows/ci.yml`) — lint, build, budgets, end-to-end, API smoke, dependency
 audit and secret scan. This is the procedure to follow once there is a host, and the set of
 decisions to make first.
@@ -11,8 +11,7 @@ decisions to make first.
 ## Prerequisites
 
 - [x] A git repository, with `main` as the default branch — done, CI is running
-- [ ] A hosting account for the front end (static)
-- [ ] A hosting account for the running back end (Node)
+- [ ] A Render account connected to this repository
 - [ ] Environment variables configured in the host — **not** committed
 - [ ] Database password reset and unused legacy `anon` key retired after checking for
       other consumers; see [secret-rotation.md](secret-rotation.md)
@@ -22,6 +21,37 @@ decisions to make first.
 ---
 
 ## Front end
+
+### Render Blueprint setup
+
+Create a Blueprint from the repository's `render.yaml` after the credential review below.
+The file defines `furniro-api` and `furniro-storefront`, deploys only when CI checks pass,
+and rewrites unknown static paths to `/index.html`. It pins Node 22 for both builds and
+does not provision a database.
+
+At initial Blueprint creation, Render prompts for these values:
+
+| Service | Variable | Value |
+|---|---|---|
+| API | `ALLOWED_ORIGINS` | Exact storefront origin, such as `https://<storefront>.onrender.com`, with no path |
+| Storefront | `VITE_API_URL` | Exact public API base, such as `https://<api>.onrender.com/api` |
+| Storefront | `VITE_SITE_ORIGIN` | Exact canonical storefront origin, with no trailing slash |
+
+These URLs are public configuration, never credentials. Confirm the assigned Render URLs
+before the first storefront build; a name collision may change the subdomain. If they are
+unknown during Blueprint creation, enter the intended values and correct them in the Render
+Dashboard before exposing the site. Render prompts for `sync: false` variables only on
+initial creation; later changes must be made in each service's environment settings.
+Changing `VITE_API_URL` or `VITE_SITE_ORIGIN` requires a new storefront build. Check that
+`dist/sitemap.xml`, `dist/robots.txt`, and canonical URLs use the real storefront origin.
+Do not put `Backend/.env` or Supabase credentials into either service: the current JSON
+repositories do not use them.
+
+The generated `dist/_redirects` file targets Netlify/Cloudflare Pages and is not a Render
+route configuration. Render's SPA rewrite is configured in `render.yaml`; discontinued
+product redirects currently fall back to client-side navigation there. Before public launch,
+configure equivalent host-level 301 rules or change hosting/redirect delivery and verify
+them against the live site.
 
 The front end is a static bundle. `npm run build` produces `Frontend/dist/`; anything that
 serves files can host it.
@@ -40,6 +70,7 @@ this is worth checking before the first deploy rather than after.
 | Netlify | `/* /index.html 200` in `_redirects` |
 | Nginx | `try_files $uri $uri/ /index.html;` |
 | Cloudflare Pages | Automatic with a `_redirects` file |
+| Render | `/*` rewrite to `/index.html` in `render.yaml` |
 
 ### Procedure
 
@@ -92,7 +123,7 @@ Build and run: `npm ci && npm start` in `Backend/`. Node `^20.19.0 || >=22.12.0`
 
 At deploy time:
 
-- Set `PORT` and `ALLOWED_ORIGINS` in the host's environment configuration. The current
+- Render sets `PORT`; set `ALLOWED_ORIGINS` in its environment configuration. The current
   JSON repositories do not need Supabase credentials; do not copy unused live secrets to
   the host. Never put secrets in the repository.
 - `ALLOWED_ORIGINS` must list the production front-end origin. **`cors()` with no arguments
@@ -102,7 +133,9 @@ At deploy time:
   `GET /health/ready`. Do not point liveness at readiness: a liveness probe that checks the
   database will restart a healthy server during a database blip, turning a degradation into
   an outage.
-- Inject `GIT_SHA` and `APP_VERSION` at build time. `/health` reports them, which is how
+- Render supplies `RENDER_GIT_COMMIT`; the API uses it as the `/health` build SHA unless
+  `GIT_SHA` is explicitly set. Set `APP_VERSION` when release automation is configured.
+  `/health` reports them, which is how
   Doc B §2 keeps "what is actually running" from being guesswork — and how a rollback is
   confirmed to have taken effect.
 - Verify after deploy with `npm run smoke` against the deployed URL:

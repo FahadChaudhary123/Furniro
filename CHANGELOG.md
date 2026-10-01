@@ -14,6 +14,19 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Deployment preparation (2026-10-01)
+
+- Added a Render Blueprint for the JSON-backed API and static storefront, with the SPA
+  rewrite and public URL settings; no service has been deployed.
+- Recorded the decision to adopt a commerce platform for trading in ADR 0012. Provider
+  selection and integration remain open.
+- The API now uses Render's deploy commit for `/health` when no explicit `GIT_SHA` is set;
+  production smoke checks reject an unknown build identity. Added a Shopify/Medusa
+  comparison to guide provider selection. Pakistan-only checkout in PKR is the target;
+  catalogue repricing is required before displaying PKR or enabling purchases.
+- The mobile featured-image browser check now waits for the API-rendered images before
+  counting them, removing an intermittent false failure under full-suite load.
+
 - **The `security` module** (`Backend/src/security/`) — `SEC-04` security headers via
   helmet (CSP `default-src 'none'`, nosniff, `X-Frame-Options: DENY`, no-referrer, HSTS in
   production only) and `SEC-03` rate limiting on `/api`. The API previously sent no security
@@ -752,8 +765,8 @@ are now fixed rather than dropped.
 
 ### Repository
 
-- **No deployment configuration** for either tier, and no host chosen. `dist/_redirects` is
-  generated for a host that understands it; none is selected.
+- **No deployment yet.** The Render Blueprint is prepared, but no services or live URLs
+  exist. `dist/_redirects` is generated for other hosts and is not used by Render.
 - **Live credentials still need rotation.** `Backend/.env` was absent from locally available
   Git history and tracked files when checked on 2026-10-01; external copies cannot be ruled
   out. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).

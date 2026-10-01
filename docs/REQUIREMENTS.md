@@ -591,22 +591,22 @@ listed.
 |---|---|---|
 | 1 | **Payment provider, and is a secondary genuinely required?** Doc B §7 R3 assumes one. Dual-gateway roughly doubles payment integration cost | `PAY-01`, `PAY-02` |
 | 2 | **PCI approach** — hosted checkout, or embedded element? Determines whether `PAY-12` is satisfiable by design or by audit | `PAY-01`, `PAY-12` |
-| 3 | **Market, currency and tax jurisdiction.** The UI renders both `Rp` and `Rs`; §11 retention and §4 legal review depend on jurisdiction | `PROMO-04`, `ORD-05`, `PRIV-*` |
+| 3 | **Partly resolved:** first market Pakistan only, checkout currency PKR. Catalogue amounts are still IDR and must be repriced; tax rules and legal basis need local review | `PROMO-04`, `ORD-05`, `PRIV-*` |
 | 4 | **Fulfilment model** — own warehouse, 3PL, or dropship? | All `FUL-*`, `INV-*` |
 | 5 | **Is there an ERP/PIM?** Doc B §15 treats it as the source of truth for price and stock. If none exists, the platform *is* the source of truth — a different architecture | `CAT-09`, `INV-*` |
 | 6 | **Search: database queries or a dedicated cluster?** §5's 60-second staleness SLO implies a cluster | All `SRCH-*` |
-| 7 | **Build, or adopt a platform?** Every requirement here is standard commerce functionality. Shopify or Medusa supplies most of §4–§17 on day one. Building it is 12–24 months for a full team | Everything |
+| 7 | **Resolved: adopt a commerce platform.** [ADR 0012](decisions/0012-adopt-commerce-platform.md). Provider selection and integration behavior remain open | Everything |
 | 8 | **Team size and budget.** Doc B §1 names ten role-holders and a 24/7 rota. Furniro has one person | Delivery plan, all stages |
 
-**Decision 7 deserves a direct answer before anything else.** Doc B describes an operation
+**Decision 7 is now answered.** Doc B describes an operation
 with a platform team, a warehouse, a finance function and a 24/7 rota. Nothing in this
 requirements list is differentiated — it is the standard feature set of an e-commerce
 platform. The differentiated work is catalogue, brand and merchandising, none of which
 requires building payments, search and fulfilment from scratch.
 
-That is a business decision, not a technical one, and it is not mine to make. But building
-all of the above from the current read API and guest cart is a multi-year programme, and it should
-be entered deliberately rather than by default.
+The next business decision is which platform fits the target market, fulfilment model and
+budget. Requirements remain open until the selected platform and Furniro's integration
+actually satisfy them.
 
 ---
 

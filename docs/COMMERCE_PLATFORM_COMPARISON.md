@@ -1,0 +1,51 @@
+# Commerce platform comparison
+
+**Status:** evaluation, 2026-10-01. [ADR 0012](decisions/0012-adopt-commerce-platform.md)
+selects a platform approach; it does not select a provider.
+
+The first release needs a provider-owned checkout, order record, payment handling and
+inventory. Furniro keeps the React storefront, JSON-backed read API and `{slug, quantity}`
+guest cart until an integration replaces the relevant data paths. The platform must own the
+amount charged. The current catalogue prices are display data only.
+
+| Criterion | Shopify | Medusa |
+|---|---|---|
+| Checkout path | Storefront Cart API accepts variant IDs and returns a URL for Shopify's hosted web checkout. [Source](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/cart/manage) | Storefront checkout is built through cart and payment-provider steps; Medusa supplies commerce modules and an admin. [Source](https://docs.medusajs.com/learn) |
+| Operations | Hosted commerce service; Furniro still runs its storefront and read API. [Source](https://shopify.dev/docs/storefronts/headless/bring-your-own-stack) | The commerce application needs deployment and operations, either self-hosted or on Medusa Cloud. [Source](https://docs.medusajs.com/learn) |
+| Cost model | Subscription plus payment fees; the [current US pricing page](https://www.shopify.com/pricing) lists Basic at $29/month billed yearly, but region and gateway costs must be checked for the actual business. | Hosting, database, payment-provider and engineering costs depend on deployment and providers; [Medusa's pricing page](https://medusajs.com/pricing) is the place to check a managed option. |
+| Flexibility | Faster path to a hosted checkout, with platform-specific product, variant and cart APIs. | More control over the commerce application and its workflows, with more integration and operating work. [Source](https://docs.medusajs.com/learn) |
+
+## Pakistan launch constraint
+
+The merchant is based in Pakistan. Shopify's current [supported-country list](https://help.shopify.com/en/manual/payments/shopify-payments/supported-countries)
+does not include Pakistan, so Shopify Payments cannot be assumed. Shopify does support
+[third-party gateways](https://help.shopify.com/en/manual/payments/third-party-providers/payment-gateway-availability),
+but a specific provider must be confirmed in the merchant's Shopify admin and with that
+provider before implementation. Third-party [transaction fees](https://help.shopify.com/en/manual/payments/third-party-providers)
+may apply. Medusa allows a [custom payment provider](https://docs.medusajs.com/resources/commerce-modules/payment/payment-provider),
+which creates integration work rather than solving gateway availability by itself.
+
+The first checkout market is **Pakistan only, charged in PKR**. The current catalogue
+amounts were authored as Indonesian rupiah (`IDR`), so they are not PKR price data.
+Reprice every product in integer PKR minor units and approve the amounts before a PKR
+formatter or checkout is enabled. Relabelling the existing numbers would mislead buyers.
+
+## Gates before selecting a provider
+
+1. Obtain approved PKR prices for the 40 products and confirm whether prices include tax.
+   Shopify's [payment availability](https://help.shopify.com/en/manual/payments/third-party-providers/payment-gateway-availability)
+   is country-specific; Medusa still needs an available payment provider.
+2. Confirm whether products are stocked, made to order or drop-shipped, and who owns tax,
+   shipping rates and returns. This determines whether platform inventory and checkout can
+   satisfy `INV`, `FUL`, `CHK` and `RET` requirements.
+3. Map each published Furniro slug to a platform product and variant, including currency,
+   price, availability and image. No mapping exists today. Do not expose an enabled checkout
+   action for an unmapped cart.
+4. Run a test purchase through payment, order creation, cancellation/refund and webhook
+   delivery. Requirements stay open until this works in a non-production environment.
+
+**Provisional recommendation:** Shopify is the shorter implementation path if a suitable
+third-party gateway accepts this Pakistan merchant and target market. Medusa is a
+better candidate when required workflows cannot be represented in Shopify and the team can
+operate another backend. The country/currency and fulfilment decisions are missing, so this
+comparison is not a provider approval or an authorization to create an account.

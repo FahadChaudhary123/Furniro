@@ -1,0 +1,37 @@
+# Render Blueprint for the current JSON-backed storefront and API.
+# Set the three public URLs during Blueprint creation; see docs/runbooks/deployment.md.
+services:
+  - type: web
+    name: furniro-api
+    runtime: node
+    rootDir: Backend
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        sync: false
+
+  - type: web
+    name: furniro-storefront
+    runtime: static
+    # The sitemap imports Backend data, so this build needs the whole repository.
+    buildCommand: cd Frontend && npm ci && npm run build
+    staticPublishPath: ./Frontend/dist
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_SITE_ORIGIN
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

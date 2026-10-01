@@ -48,8 +48,8 @@ test.describe('home page', () => {
 
   test('every featured image loads', async ({ page }) => {
     const images = featuredGrid(page).locator('img');
+    await expect(images).toHaveCount(8);
     const count = await images.count();
-    expect(count).toBe(8);
 
     // Lazy-loaded: scroll each into view, then wait for it to decode.
     for (let i = 0; i < count; i++) {

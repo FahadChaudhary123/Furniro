@@ -34,6 +34,7 @@ Not here: how something works (that is the code), what changed (that is
 | [0009](0009-size-images-before-format.md) | Size images to their box before changing format | 2026-09-08 | Accepted |
 | [0010](0010-end-to-end-first-testing.md) | End-to-end tests as the primary safety net | 2026-09-08 | Accepted |
 | [0011](0011-automated-accessibility-checks.md) | Automated accessibility checks, with a recorded brand exception | 2026-09-08 | Accepted |
+| [0012](0012-adopt-commerce-platform.md) | Adopt a commerce platform for trading | 2026-10-01 | Accepted |
 
 ## A caveat on these dates
 

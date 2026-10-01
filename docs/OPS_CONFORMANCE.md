@@ -9,8 +9,9 @@ keeping. This document exists so the distance is measured rather than assumed �
 manual for a system you do not have is a document nobody follows.
 
 > **Scope decision (2026-09-07): Furniro is the system Document B governs.** The current
-> current storefront and read API grow into everything Doc B assumes — payments, orders, fulfilment,
-> search, the lot. Stages 1–4 of the [roadmap](#adoption-roadmap) are therefore the plan of
+> current storefront and read API grow into an integration with a commerce platform for
+> payments, orders, fulfilment and other trading functions (see [ADR 0012](decisions/0012-adopt-commerce-platform.md)).
+> Stages 1–4 of the [roadmap](#adoption-roadmap) are therefore the plan of
 > record, not a hypothetical. Every ⏳ in the table below is scheduled work, not a
 > permanent exclusion.
 >

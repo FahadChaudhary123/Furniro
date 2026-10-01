@@ -23,6 +23,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [docs/runbooks/](docs/runbooks/) | Operational procedures (deploy, rollback, secret rotation) |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Document A (derived) — 134 functional requirements with IDs, reconstructed from Document B |
 | [docs/MODULES.md](docs/MODULES.md) | The 134 requirements divided into 20 modules — boundaries, dependencies, build order |
+| [docs/COMMERCE_PLATFORM_COMPARISON.md](docs/COMMERCE_PLATFORM_COMPARISON.md) | Shopify and Medusa comparison; provider decision still open |
 | [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md) | Document B (ops standard) mapped against reality, plus the staged roadmap |
 | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | External services, criticality, credentials location, fallbacks |
 | [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md) | What personal data the system processes, why, and for how long (`PRIV-06`) |
@@ -149,7 +150,7 @@ under *Unreleased*.
 | No server-side cart, checkout, payments or orders | [docs/MODULES.md](docs/MODULES.md) |
 | Contact and newsletter forms are disabled — no endpoint exists to receive a message | [Contact.jsx](Frontend/src/pages/Contact.jsx) |
 | The brand gold `#B88E2F` is 3.02:1 on white — fails WCAG AA for normal text | [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) |
-| No deployment configuration, and no host chosen | repo-wide |
+| Render Blueprint prepared; no deployment yet | [render.yaml](render.yaml) |
 | `Backend/.env` rotation outstanding; no copy was found in local Git history on 2026-10-01 | [SECURITY.md](SECURITY.md) |
 
 ---

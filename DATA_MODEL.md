@@ -120,10 +120,12 @@ function badgeFor(product, now = Date.now()) {
 
 **Store integers in minor units. Never floats, never formatted strings.**
 
-Prices are Indonesian rupiah — the UI renders `Rp`. IDR has no minor unit in practice, but
-the storefront also renders `Rs` on the same card (see below), so the currency question is
-unsettled and a fixed 2-decimal minor unit keeps every option open. `2_500_000.00` rupiah
-is stored as `250000000`.
+Current catalogue prices were authored as Indonesian rupiah and the UI renders `Rp`.
+The first planned checkout market is now Pakistan only, charged in PKR. These existing
+amounts are **not PKR prices**. Each product needs an approved PKR price before the
+formatter or checkout changes currency. Do not relabel the IDR amounts. `2_500_000.00`
+rupiah is currently stored as `250000000`; the fixed 2-decimal integer representation
+can also hold future PKR prices after explicit repricing.
 
 Floats are disqualified outright: `0.1 + 0.2 !== 0.3`, and money that does not add up is a
 defect a customer notices.

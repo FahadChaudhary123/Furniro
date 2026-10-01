@@ -50,6 +50,13 @@ async function main() {
   check('GET /health returns 200', health.status === 200, `got ${health.status}`);
   check('reports status ok', healthBody.status === 'ok');
   check('reports build sha', typeof healthBody.build?.sha === 'string');
+  if (healthBody.env === 'production') {
+    check(
+      'production build has a commit SHA',
+      typeof healthBody.build?.sha === 'string' && /^[0-9a-f]{7,40}$/i.test(healthBody.build.sha),
+      'set GIT_SHA or provide RENDER_GIT_COMMIT',
+    );
+  }
   check('reports feature flags', typeof healthBody.flags === 'object');
   check('reports uptime', typeof healthBody.uptimeSeconds === 'number');
   check(

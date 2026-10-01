@@ -58,11 +58,11 @@ export const config = {
 
   /**
    * Identifies what is actually running (Doc B §2: "so 'what is actually running' is never
-   * guesswork"). These fall back to 'unknown' until CI injects them at build time — see
-   * docs/runbooks/deployment.md.
+   * guesswork"). Render supplies its commit SHA at runtime; other hosts can set GIT_SHA.
+   * See docs/runbooks/deployment.md.
    */
   build: {
-    sha: process.env.GIT_SHA ?? 'unknown',
+    sha: process.env.GIT_SHA || process.env.RENDER_GIT_COMMIT || 'unknown',
     version: process.env.APP_VERSION ?? '0.0.0',
     builtAt: process.env.BUILT_AT ?? null,
   },
@@ -104,7 +104,7 @@ export function validateConfig() {
     warnings.push('ALLOWED_ORIGINS contains localhost in production');
   }
   if (isProduction && config.build.sha === 'unknown') {
-    warnings.push('GIT_SHA not set — cannot identify the running build');
+    warnings.push('GIT_SHA / RENDER_GIT_COMMIT not set — cannot identify the running build');
   }
   return warnings;
 }
