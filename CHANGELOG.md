@@ -668,8 +668,8 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
   Surfaced by the new CI audit gate, which was red on arrival. Most were dev-only, but
   `react-router-dom` (7.13.0 -> 7.18.3) is a runtime dependency that shipped to users.
   Doc B §10 requires high severity patched within 7 days.
-- **Action still outstanding: rotate `SUPABASE_ANON_KEY` and `DATABASE_URL`** before the
-  first commit. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) and
+- **Action still outstanding: reset the database password and retire the unused legacy
+  `anon` key after checking other consumers.** See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first) and
   [docs/runbooks/secret-rotation.md](docs/runbooks/secret-rotation.md).
 
 ### Changed
@@ -754,8 +754,9 @@ are now fixed rather than dropped.
 
 - **No deployment configuration** for either tier, and no host chosen. `dist/_redirects` is
   generated for a host that understands it; none is selected.
-- **Whether `Backend/.env` ever reached git history is unverified.** Rotation is outstanding
-  regardless — see [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
+- **Live credentials still need rotation.** `Backend/.env` was absent from locally available
+  Git history and tracked files when checked on 2026-10-01; external copies cannot be ruled
+  out. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
 - **No privacy notice** (`PRIV-07`). Everything in the processing register is undisclosed to
   the people it concerns. Needs legal copy this project will not invent.
 

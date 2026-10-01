@@ -30,18 +30,16 @@ service for others.
 
 ## Scope note
 
-The table that prompted this policy assumed the project handles user data and payments.
-**It still handles neither.** There is no authentication, no checkout, no payment
-integration, and no database. The contact form has no submit handler and discards what is
-typed into it.
+The project does not handle payments, accounts, checkout or orders, and has no database.
+The contact and newsletter forms are disabled because there is no receiving endpoint.
 
-What has changed since this was written: the front end now calls an API, and there is a
-guest cart. Neither collects personal data — the cart holds product slugs and quantities in
-the visitor's own browser and sends nothing.
+The guest cart holds product slugs and quantities in the visitor's browser. The API also
+processes request and rate-limit data, client error reports and zero-result search terms
+in logs. These activities are recorded in [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md).
 
 That does not make the project risk-free, and the exposure below is real and current. The
-controls in the later sections must be in place *before* the first byte of user data is
-accepted — which will be the contact form.
+controls in the later sections apply now, and must expand before a contact form accepts
+customer messages.
 
 ---
 
@@ -58,7 +56,9 @@ of this project's life; ignore rules now exist at the root and in `Backend/` and
 running against it, so the earlier reasoning — "nothing has leaked because there is no
 repository" — no longer holds.
 
-**Whether `Backend/.env` was ever committed has not been verified.** Check it:
+**Checked 2026-10-01 against the local repository:** `Backend/.env` is absent from all
+locally available Git history and from the tracked-file list. `Backend/.gitignore` ignores
+it. This does not establish what may exist in external clones or caches. Recheck with:
 
 ```bash
 git log --all --oneline --name-only -- '**/.env'   # any commit that touched it
@@ -78,9 +78,10 @@ repository.
 
 **Fix, in order:**
 
-1. Run the three commands above and establish whether `.env` is in the history.
-2. **Rotate `DATABASE_URL` and `SUPABASE_ANON_KEY`** in the Supabase dashboard. This is
-   outstanding either way and has been since the credentials were first noticed.
+1. Recheck tracked files and history before any authorized commit or publish.
+2. **Reset the database password and retire the unused legacy `anon` key** through the
+   current [rotation runbook](docs/runbooks/secret-rotation.md). Check other consumers
+   before disabling a key. This remains outstanding.
 3. Confirm the ignore rules are active — `.gitignore` exists at the root and in `Backend/`
    and `Frontend/`, all covering `.env` and its variants.
 4. If `.env` is tracked, `git rm --cached Backend/.env`, commit, and purge history
@@ -90,13 +91,13 @@ repository.
 
 ### 2. Know what the anon key is
 
-`SUPABASE_ANON_KEY` is *designed* to be public and will end up in client-side code if the
-front end ever talks to Supabase directly. That is safe **only if row-level security is
-enabled on every table.** Without RLS the anon key is a full read/write credential handed
-to every visitor.
+`SUPABASE_ANON_KEY` is a legacy public API key. The current storefront does not embed it.
+If the front end ever talks to Supabase directly, use a publishable key and verify
+row-level security policies on every exposed table before launch. A public key without
+effective RLS can expose data to every visitor.
 
-Supabase tables have RLS off by default. [DATA_MODEL.md](DATA_MODEL.md#proposed-schema)
-enables it on every table and grants `select` only.
+The proposed schema in [DATA_MODEL.md](DATA_MODEL.md#proposed-schema) enables RLS and
+grants public reads only. It has not been applied to a database.
 
 The `service_role` key is the opposite: it bypasses RLS completely. It belongs on the
 server, in an environment variable, and nowhere else — never in `Frontend/`, never behind a
@@ -126,8 +127,9 @@ test fixture, not in a commit message.
 
 | Value | Lives | May reach the browser |
 |---|---|---|
-| `SUPABASE_URL` | Both tiers | Yes |
-| `SUPABASE_ANON_KEY` | Both tiers | Yes — **only with RLS enabled** |
+| `SUPABASE_URL` | Backend config today; public if a browser client is added | Yes |
+| Legacy `SUPABASE_ANON_KEY` | Backend config today, unused by JSON repositories | Public key; retire after checking other consumers |
+| Supabase publishable key | Future Supabase client, if needed | Yes — with effective RLS policies |
 | `DATABASE_URL` | Server only | **Never** |
 | `service_role` key | Server only | **Never** |
 | Payment provider secret key | Server only | **Never** |
@@ -158,8 +160,9 @@ Runbook: [docs/runbooks/secret-rotation.md](docs/runbooks/secret-rotation.md).
 
 ## Handling user data
 
-Nothing is collected today. The contact form will be first, so these apply from the commit
-that gives it an `onSubmit`.
+The current processing activities are listed in the
+[processing register](docs/PROCESSING_REGISTER.md). A working contact form would add
+names, email addresses and messages, so these rules apply before it is enabled.
 
 **Collect the minimum.** Name, email, message. Not a phone number, not an address, until
 something actually needs one. Data you never collected cannot leak.
@@ -179,8 +182,9 @@ via `pg` is ever added, use `$1` placeholders — never template-literal interpo
 **Rate limit every public write.** Otherwise the contact endpoint is a free spam relay and
 a trivial way to fill the database.
 
-**Do not log personal data.** No request bodies containing messages or emails, no tokens,
-no credentials. Log a correlation id and look up what you need deliberately.
+**Minimise logged data.** Never log request bodies containing messages or emails, tokens,
+or credentials. Request logs omit query strings. Zero-result search terms are a documented,
+bounded exception in the processing register; do not expand it casually.
 
 **Have a retention rule.** Contact submissions get an expiry — 12 months is a reasonable
 default — and something that actually deletes them. Indefinite retention is a growing

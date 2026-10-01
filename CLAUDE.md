@@ -10,18 +10,21 @@ Instructions for AI coding agents working in this repository. Human contributors
 Furniro, a furniture e-commerce storefront. React 19 + Vite 8 front end; Express 5 +
 Supabase back end.
 
-**The back end runs and serves the catalogue.** `Backend/src/platform/` (config, logging,
-correlation ids, errors, health) and `Backend/src/modules/catalogue/` (products,
-categories) are built. Nothing else is: no cart, orders, auth or payments.
+**The back end serves the catalogue and content.** `Backend/src/platform/` (config,
+logging, correlation ids, errors, health, client error reports),
+`Backend/src/modules/catalogue/` (products, categories),
+`Backend/src/modules/content/` (blog posts), and `Backend/src/security/` are built.
+There is no server-side cart, database, inventory, orders, auth, checkout or payments.
 
-**The front end fetches products from the API** via `src/modules/catalogue`. It holds no
-product data of its own. Other sections (hero, categories, rooms, blog) still use inline
-arrays.
+**The front end fetches products and posts from the API** via `src/modules/catalogue`
+and `src/modules/content`. It holds no product data of its own. A guest cart lives in
+`src/modules/cart` and persists `{slug, quantity}` in browser storage. Some presentation
+content still lives in front-end modules.
 
 Product data lives in exactly one place: `Backend/src/modules/catalogue/data/products.json`.
 There is no database — the repository reads that file. Do not add a second copy anywhere.
 
-Do not write code that assumes a database, a cart, or an authenticated user. Do not add
+Do not write code that assumes a database, a server-side cart, or an authenticated user. Do not add
 `fetch()` to an endpoint that is not mounted in `Backend/src/app.js`.
 
 ---
@@ -90,9 +93,9 @@ the most common route to stored XSS in React. Keep it that way.
 **Never bump `vite` casually.** It is pinned at `8.0.0-beta.13` through an `overrides`
 block that forces the version onto transitive dependents. Betas break between releases.
 
-**Do not run `git init`, commit, or push** unless explicitly asked. This is not yet a git
-repository, and initialising it while `Backend/.env` holds live credentials risks
-committing them. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
+**Do not run `git init`, commit, or push** unless explicitly asked. This is already a git
+repository; `Backend/.env` holds live credentials, so check tracked and staged files
+before any authorized commit. See [SECURITY.md](SECURITY.md#-current-exposure--act-on-this-first).
 
 ---
 
@@ -135,22 +138,22 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
 ### Verify before claiming done
 
 ```bash
-cd Frontend && npm run verify   # lint + 67 unit checks + build + budgets + SEO check
-cd Frontend && npm run e2e      # 389 browser checks; starts both servers itself
-cd Backend  && npm test         # 72 unit checks
+cd Frontend && npm run verify   # lint + unit tests + build + budgets + SEO check
+cd Frontend && npm run e2e      # browser checks; starts both servers itself
+cd Backend  && npm test         # unit tests
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
-cd Backend  && npm run smoke    # 85 API checks against a running server
+cd Backend  && npm run smoke    # API checks against a running server
 ```
 
 All of these must pass. **A build that succeeds is not a page that renders** — the e2e suite
 exists because lint, build, budgets and every API check were green while `/shop` rendered a
-blank page. There are still no unit tests.
+blank page. Unit tests now exist in both packages.
 
 ---
 
 ## Working style
 
-**Match the surrounding code.** This codebase has no TypeScript, no test suite and no state
+**Match the surrounding code.** This codebase has no TypeScript or state
 library. Do not introduce one as a side effect of an unrelated task.
 
 **Fix what you were asked to fix.** The known-issues list in
@@ -173,9 +176,9 @@ The one dependency added against that instinct is `axe-core`, 3 MB as a devDepen
 justified in [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) because a
 half-implemented accessibility checker is worse than none.
 
-**Say when a request rests on a wrong premise.** A task that assumes a working API or a
-cart is a task built on something that is not there. Flag it, then do what can actually be
-done rather than building against an imagined back end.
+**Say when a request rests on a wrong premise.** The API and guest cart work, but a
+server-side cart, database and commerce flow do not exist. Flag a missing dependency,
+then do what can actually be done.
 
 ---
 

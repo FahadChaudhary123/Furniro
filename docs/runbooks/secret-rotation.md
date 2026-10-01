@@ -28,18 +28,20 @@ Removing the file does not un-leak the value. Only rotation does.
 `Backend/.env` holds live, non-placeholder values for `SUPABASE_URL`, `SUPABASE_ANON_KEY`
 and `DATABASE_URL`. `Backend/.gitignore` was an empty file for part of this project's life.
 
-**The repository now exists on GitHub with CI running against it.** Whether `.env` was ever
-committed has not been verified — see
-[SECURITY.md](../../SECURITY.md#-current-exposure--act-on-this-first) for the three commands
-that answer it. Rotate regardless of the answer: the safe assumption for a credential that
+**The repository now exists on GitHub with CI running against it.** On 2026-10-01,
+`Backend/.env` was absent from locally available Git history and tracked files, and its
+ignore rule was active. See [SECURITY.md](../../SECURITY.md#-current-exposure--act-on-this-first).
+Rotate regardless of the local check: the safe assumption for a credential that
 has sat in a working directory across a long session, on a machine that syncs and backs up,
 is that it has been somewhere you did not intend.
 
 **`DATABASE_URL` is the one that matters.** It embeds the database password and grants
 direct read/write access to the entire database, bypassing row-level security completely.
 
-Rotate both `DATABASE_URL` and `SUPABASE_ANON_KEY` now, while it costs a five-minute
-procedure and zero downtime.
+Reset the database password and retire the unused legacy `anon` key. Confirm other
+consumers before disabling a key; the current Furniro API reads JSON and does not call
+Supabase. Supabase's [current API-key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
+recommends publishable keys in place of legacy `anon` keys.
 
 ---
 
@@ -47,7 +49,8 @@ procedure and zero downtime.
 
 ### `DATABASE_URL` — the Postgres password
 
-1. **Supabase dashboard → Project Settings → Database → Reset database password.**
+1. **Supabase dashboard → Database → Settings → reset the database password.** See
+   [Supabase's reset guide](https://supabase.com/docs/guides/troubleshooting/how-do-i-reset-my-supabase-database-password-oTs5sB).
 2. Copy the new connection string.
 3. Update `Backend/.env` locally.
 4. Update it in every deployed environment's configuration.
@@ -60,17 +63,26 @@ are before you start. Today the answer is still "nothing" — the API reads from
 and no code has ever opened a database connection — which makes now the cheapest possible
 moment to do it. That stops being true the day a schema exists.
 
-### `SUPABASE_ANON_KEY`
+### Legacy `SUPABASE_ANON_KEY`
 
-1. **Supabase dashboard → Project Settings → API → rotate the anon key.**
-2. Update `Backend/.env` and every deployed environment.
-3. Rebuild and redeploy the front end **if** it embeds the key — a `VITE_`-prefixed value
-   is baked into the bundle at build time, so updating the host's environment variable
-   alone changes nothing until a rebuild.
+Supabase is replacing the legacy `anon` key with a publishable API key. Creating a
+publishable key does **not** revoke the legacy key. Follow the
+[migration guide](https://supabase.com/docs/guides/getting-started/migrating-to-new-api-keys):
 
-**Before rotating, confirm row-level security is enabled on every table.** The anon key is
-public by design; RLS is the only thing that makes that safe. Without it, rotation just
-replaces one full-access public credential with another.
+1. In **Settings → API Keys**, create or locate a publishable key. Check every consumer of
+   the legacy key, including any outside this repository.
+2. Move consumers that need Supabase access to the publishable key. The current Furniro
+   storefront does not embed a Supabase key, and the API's JSON repositories do not call
+   Supabase. Do not add a new key to either tier merely to replace an unused value.
+3. Confirm from the dashboard's last-used information that no consumer still uses the
+   legacy key; then disable the legacy `anon` key in **Settings → API Keys**. Disabling is
+   a separate step. Do not assume creating the new key revoked the old one.
+4. If a browser bundle ever embeds a key, rebuild and redeploy it after changing that
+   value: `VITE_` variables are baked into the bundle at build time.
+
+Before any browser client queries Supabase tables, enable row-level security and the
+intended policies on every exposed table. See
+[Supabase's API-key guidance](https://supabase.com/docs/guides/getting-started/api-keys).
 
 ### `service_role` key
 
@@ -88,8 +100,9 @@ handling. The publishable key is public and needs a front-end rebuild.
 
 ## After rotating
 
-- [ ] New value works in every environment
-- [ ] Old value confirmed dead — try it
+- [ ] New database password works for every actual consumer
+- [ ] Old database password is rejected
+- [ ] Legacy `anon` key is disabled after consumers move, or its continued use is recorded
 - [ ] Provider access logs checked for use you cannot account for
 - [ ] `Backend/.env` is ignored: `git check-ignore -v Backend/.env`
 - [ ] Team told which value rotated — **never the value itself**
@@ -122,7 +135,8 @@ Even with no leak:
 | Credential | Interval |
 |---|---|
 | Database password | 90 days |
-| Supabase anon key | 180 days |
+| Legacy Supabase `anon` key | Retire after consumers migrate; do not schedule rotation of a deprecated key |
+| Supabase publishable key | Reissue as required by the provider or after suspected misuse |
 | `service_role` key | 90 days |
 | Payment provider keys | 180 days, and on any staff change |
 

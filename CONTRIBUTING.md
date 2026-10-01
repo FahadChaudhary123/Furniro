@@ -29,7 +29,7 @@ The back end runs:
 cd Backend && npm install && npm run dev
 ```
 
-Verify it with `npm run smoke` in another shell — 17 checks against the running server.
+Verify it with `npm run smoke` in another shell — 85 checks against the running server.
 Structure and boundary rules: [docs/MODULES.md](docs/MODULES.md).
 
 ### Before you commit
@@ -160,11 +160,11 @@ Hooks are `useThing`. Utilities and variables are `camelCase`; module-level cons
 
 Function components with hooks. No classes.
 
-Hoist static data to module scope. `blogPosts` in `BlogSection.jsx` is declared inside the
-component body and reallocated every render — do not copy that pattern.
+Hoist static presentation data to module scope. Product and blog data come from their
+backend modules; do not recreate them in a component.
 
-Keep components under ~150 lines. `ProductGrid.jsx` is 324 because a 32-item array is
-inlined above the component; that array belongs in `src/data/`.
+Keep components focused. `ProductGrid.jsx` now fetches and renders the catalogue; the
+product array lives only in `Backend/src/modules/catalogue/data/products.json`.
 
 Every item in a `.map()` needs a stable `key`. Not the array index — reorder or filter the
 list and React reuses the wrong DOM node.
@@ -184,9 +184,8 @@ on top.
 
 Order them: external packages, then internal modules, then assets, then styles.
 
-Relative paths only — there is no path alias configured. Note `App.jsx` imports
-`../src/components/Navbar` from inside `src/`; that works but is a detour. Write
-`./components/Navbar`.
+Relative paths only — there is no path alias configured. `App.jsx` imports
+`./components/Navbar` from inside `src/`.
 
 ### Images
 
@@ -233,7 +232,7 @@ or mishandles IPv6, and a hand-rolled header set drifts as browser guidance chan
 version onto transitive dependents too. Betas ship breaking changes between releases.
 
 Do not bump it casually. When you do: read the changelog, run `npm run build` and
-`npm run dev`, click through all four routes, and do it in its own commit so it can be
+`npm run dev`, click through the core storefront routes, and do it in its own commit so it can be
 reverted alone.
 
 ### Browser data

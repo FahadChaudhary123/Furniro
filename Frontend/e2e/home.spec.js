@@ -83,6 +83,18 @@ test.describe('home page', () => {
   });
 
   test('recently created products carry a New badge', async ({ page }) => {
+    // Checked-in dates age naturally. Supply a fresh date through the API so this
+    // remains a browser test of badge rendering after the seed product ages out.
+    await page.route('**/api/products/featured', async (route) => {
+      const response = await route.fetch();
+      const body = await response.json();
+      body.data = body.data.map((product) =>
+        product.name === 'Respira' ? { ...product, created_at: new Date().toISOString() } : product,
+      );
+      await route.fulfill({ response, body: JSON.stringify(body) });
+    });
+    await page.reload();
+
     const card = page
       .locator('.group')
       .filter({ has: page.getByRole('heading', { name: 'Respira' }) });

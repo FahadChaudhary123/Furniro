@@ -56,9 +56,11 @@ reconciliation export · marketing automation beyond transactional sends · phys
 
 ### Current reality
 
-Furniro today implements a fraction of this: a four-page static storefront with a hardcoded
-32-item catalogue and no back end. Status is tracked per requirement below and mapped to
-the stages in [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap).
+Furniro today implements a fraction of this: a storefront with a running catalogue and
+content API, 40 products in one JSON repository, and a browser-based guest cart. It has no
+database, authenticated accounts, checkout, orders, or payments. Status is tracked per
+requirement below and mapped to the stages in
+[OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap).
 
 ---
 
@@ -603,7 +605,7 @@ platform. The differentiated work is catalogue, brand and merchandising, none of
 requires building payments, search and fulfilment from scratch.
 
 That is a business decision, not a technical one, and it is not mine to make. But building
-all of the above from a four-page static storefront is a multi-year programme, and it should
+all of the above from the current read API and guest cart is a multi-year programme, and it should
 be entered deliberately rather than by default.
 
 ---
@@ -619,22 +621,19 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 6 | 3 | 12 |
+| Catalogue, search, content | 21 | 8 | 6 | 7 |
 | Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
-| Accounts, promotions, reviews, notifications | 17 | 0 | 0 | 17 |
-| Back office, support, privacy | 17 | 0 | 1 | 16 |
-| Platform, security, non-functional | 28 | 8 | 1 | 19 |
-| **Total** | **134** | **15** | **5** | **114** |
+| Accounts, promotions, reviews, notifications | 17 | 1 | 1 | 15 |
+| Back office, support, privacy | 17 | 1 | 0 | 16 |
+| Platform, security, non-functional | 28 | 8 | 4 | 16 |
+| **Total** | **134** | **19** | **11** | **104** |
 
-**9 of 134 requirements are met** — `CAT-02` (alt text), `CAT-06` (browsable categories),
-`CAT-07` (product pages at stable slugs), `CONT-01` (blog served from the API),
-`CART-01` (guest cart), `SRCH-07` (faceted filtering and sorting), `SEC-05`/`SEC-06`
-(CI gates), `NFR-06` (budgets), and `PLAT-01`–`03` (health, correlation ids, structured
-logging). A further 6 are partial.
+**19 of 134 requirements are marked built** in the tables above; another 11 are partial.
+The remaining 104 require capabilities such as a database, identity, or a payment gateway.
 
-This is not a criticism of the codebase; it is the honest distance between a static
-storefront and the trading operation Document B is written to run.
+This is the distance between the current storefront and the trading operation Document B
+is written to run.
 
 ---
 

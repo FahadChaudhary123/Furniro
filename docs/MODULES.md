@@ -25,8 +25,8 @@ start there. Do not.
 | Doc B §8 restore drill | One database | Per-service restore, plus consistency between them |
 | Team required | 1+ | A platform team before any feature work |
 
-Furniro has one person and an empty `Backend/index.js`. Microservices would spend the entire
-budget on infrastructure and deliver no requirements.
+Furniro has a running Express API and substantial commerce work still ahead. Microservices
+would spend the current budget on infrastructure before those requirements land.
 
 **The boundaries below are real either way.** Modules own their data, expose an explicit
 interface, and never reach into each other's internals. That is what makes extraction
@@ -171,8 +171,9 @@ The publish gate (`CAT-03`) lives in `publishGate.js` and is applied by `reposit
 it sits at the module's data boundary: every read path inherits it and none can opt out.
 `npm run completeness` is the `CAT-04` report over the same rules — one definition, two
 consumers, no chance of the report and the API disagreeing.
-The remaining `CAT-*` work is variants, the publish gate and the ERP/PIM feed. The other
-three modules in this layer are unstarted.
+The remaining `CAT-*` work includes missing tax, weight and SEO fields, variants, and the
+ERP/PIM feed. `identity` and `inventory` are unstarted; `pricing` has an implemented
+promotion-expiry rule but no pricing module or server-side checkout calculator.
 
 **`inventory` is separated from `catalogue` deliberately.** They look like one thing and are
 not: catalogue data is read-heavy, cacheable and edited by humans; stock is write-heavy,
@@ -324,12 +325,10 @@ Frontend/src/
 └── pages/                    ← route composition only
 ```
 
-The current `components/` `sections/` `pages/` split is a reasonable *presentation*
-structure and should survive inside `shared/ui` and `modules/*/components`. The change is
-that `ProductGrid.jsx` — currently 324 lines because a 32-item catalogue is inlined above
-the component — becomes `modules/catalogue/` with the data behind an `api` boundary. That
-single move also resolves the two-incompatible-product-shapes problem in
-[DATA_MODEL.md](../DATA_MODEL.md#the-product-shape-conflict-resolved).
+The current `components/`, `sections/`, and `pages/` split remains the presentation
+structure. Catalogue and content data already sit behind module API boundaries, while the
+guest cart lives in `modules/cart/`. Product data is served from one backend JSON file;
+the earlier duplicate product shapes were resolved.
 
 Back office is a **separate application**, not a route inside the storefront. It has a
 different auth model (`ADM-02`: RBAC + MFA), a different audience, and no reason to share a
@@ -360,9 +359,9 @@ Stages match [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap).
 
 | Stage | Modules | Why here |
 |---|---|---|
-| **0** — now | `security` (partial) | Already done: `SEC-05`, `SEC-06`. Rotation outstanding |
-| **1** — back end exists | `platform`, `catalogue`, `content` | Nothing else can be built until `platform` exists. `catalogue` unblocks the most and is buildable today |
-| **2** — accounts and cart | `identity`, `cart`, `privacy` (min), `backoffice` (min) | `privacy` must land with the first stored personal data, not after |
+| **0** — foundation | `security` (partial) | CI scanning, headers and rate limiting exist; credential rotation is outstanding |
+| **1** — API and data | `platform`, `catalogue`, `content` | Read APIs and JSON repositories exist; a database, deployment and alerting do not |
+| **2** — accounts and cart | `identity`, `cart`, `privacy` (min), `backoffice` (min) | A guest cart exists; identity, server persistence, privacy notice and admin access remain |
 | **3** — trading | `pricing`, `checkout`, `payments`, `orders`, `notifications`, `returns`, `jobs` | The stage that justifies Document B. 55 requirements |
 | **4** — scale | `inventory`, `fulfilment`, `search`, `reviews`, `support` | Needs volume to be worth automating |
 
@@ -371,23 +370,13 @@ made-to-order furniture, not for held stock. **If stock is held, `inventory` mov
 3 and becomes a prerequisite of `checkout`**, because `CART-03` reservations gate the
 purchase path. That is [open decision 4](REQUIREMENTS.md#open-decisions).
 
-### Start here
+### Next work
 
-`catalogue`, and specifically its data shape. It is buildable with no back end, it unblocks
-`pricing`, `cart`, `search` and `reviews`, and the work is not wasted if the platform
-decision (open decision 7) later goes the other way — a normalised catalogue is what you
-would migrate *into* Shopify or Medusa anyway.
-
-The first three commits, in order:
-
-1. Move the catalogue to `Frontend/src/modules/catalogue/data/products.js` in one canonical
-   shape, imported by both consumers. Fixes the shape conflict and the 404 image paths.
-2. Introduce the price formatter; delete every inline `toLocaleString()` and the `Rs` typo.
-3. Derive badges rather than storing them.
-
-All three are already specified in
-[DATA_MODEL.md](../DATA_MODEL.md#migration-path) and are worth doing regardless of every
-open decision.
+The catalogue, price formatter and derived badges are already built. The next foundation
+work is to verify credential exposure and rotate the live credentials, settle a deployment
+target, and decide whether commerce will be built here or supplied by a platform. Those
+decisions shape the database, identity, checkout and payment work. The guest cart can remain
+useful without inventing a server-side cart or order flow before those dependencies exist.
 
 ---
 

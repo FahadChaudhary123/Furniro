@@ -20,18 +20,20 @@ Browser
   ▼
 Frontend/  ── React 19 SPA, built by Vite 8, served as static files
   │
-  │  HTTPS/JSON   ← catalogue only; cart, orders, auth still to come
+  │  HTTP/JSON   ← catalogue, content and client error reports
   ▼
 Backend/   ── Express 5 API
   │
-  │  @supabase/supabase-js
+  │  JSON repositories today; database integration is planned
   ▼
-Supabase   ── managed Postgres + Auth + Storage
+Backend/src/modules/*/data/*.json
 ```
 
-That hop now carries the catalogue: the shop grid and the home-page strip fetch from
-`GET /api/products`. Everything else on the page — hero, range categories, rooms, blog —
-still renders from arrays inside its own component.
+The shop and home-page product strip fetch catalogue data from the API. Blog pages fetch
+content through the same tier. The guest cart stays in browser storage and re-reads product
+details from the API; hero, range categories and rooms remain presentation data in the
+front end. Supabase is a dependency for a future data layer, but no current repository
+queries it.
 
 ### Why a separate back end at all
 
@@ -68,24 +70,19 @@ Three tiers, by directory, with a strict dependency direction:
 pages/  ──imports──▶  sections/  ──imports──▶  components/
 ```
 
-- **`pages/`** — one file per route. Each is a thin list of sections in order, holding no
-  logic of its own. [Shop.jsx](Frontend/src/pages/Shop.jsx) is representative: four
-  children, no state.
-- **`sections/`** — a full-width band of the page (Hero, BrowseRange, BlogSection). Owns
-  its own content array and its own local state.
+- **`pages/`** — route targets that compose sections and module hooks.
+- **`sections/`** — full-width page bands (Hero, BrowseRange, BlogSection). Presentation
+  content can live here; catalogue and blog data come from their modules.
 - **`components/`** — reused across pages (Navbar, Footer, ProductCard).
+- **`modules/`** — catalogue and content API clients, and the guest cart state.
 
 Nothing imports upward. A section never imports a page.
 
 ### State
 
-There is no global state — no Context, no Redux, no React Query. All state is `useState`
-local to one component, and there are exactly two pieces of it:
-
-| State | Owner | Purpose |
-|---|---|---|
-| `isOpen` | [Navbar.jsx](Frontend/src/components/Navbar.jsx) | Mobile drawer open/closed |
-| `currentPage` | [ProductGrid.jsx](Frontend/src/components/ProductGrid.jsx) | Shop pagination |
+The cart uses React Context through `CartProvider`. Shop category, search, sort, page and
+page size live in the URL; the mobile drawer and other presentation state are local to
+components. There is no Redux or server-state library.
 
 Server data now arrives through `useProducts()` / `useFeaturedProducts()` in
 `modules/catalogue`, each owning its own loading and error state. That is deliberate: a
@@ -103,17 +100,10 @@ from the API, so a repricing is reflected immediately and no stale price can be 
 ### Routing
 
 [main.jsx](Frontend/src/main.jsx) mounts `BrowserRouter`; [App.jsx](Frontend/src/App.jsx)
-renders `Navbar` outside `Routes` so it persists across navigation, then declares four
-routes.
-
-Two structural notes:
-
-- **`Footer` is not in `App.jsx`.** Every page imports and renders its own. That is four
-  copies of one decision — moving `Footer` up beside `Navbar` removes the duplication and
-  guarantees consistency, at the cost of pages no longer controlling their own trailer.
-- **A `*` catch-all is in place**, rendering `NotFound`. Each route sets its own document
-  head — title, meta description, canonical and robots — through `shared/lib/usePageMeta`,
-  driven by the route manifest in `shared/lib/routes.js`.
+renders `Navbar`, the route tree and one shared `Footer`. The routes are `/`, `/shop`,
+`/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact`, plus `*` for `NotFound`.
+Each route sets its own document head — title, meta description, canonical and robots —
+through `shared/lib/usePageMeta`, driven by `shared/lib/routes.js`.
 
 `BrowserRouter` uses the History API, so **any static host must rewrite unknown paths to
 `index.html`** or a hard refresh on `/shop` returns a 404 from the host. See
@@ -161,18 +151,16 @@ visitor has just landed on costs a round trip before anything renders, which opt
 wrong thing. Each other route is its own chunk, so someone reading the blog no longer
 downloads the cart and the shop grid.
 
-Vite 8 with `@vitejs/plugin-react`. `vite.config.js` is at defaults — no path aliases, so
-imports are relative, which is why `App.jsx` reaches for `../src/components/Navbar` from
-inside `src/`. An `@` to `src` alias would flatten that.
+Vite 8 with `@vitejs/plugin-react`. There is no path alias, so imports are relative.
+`assetsInlineLimit` is set to `0` so image variants remain separate files.
 
 Vite 8 is a **beta**, pinned through an `overrides` block in `package.json` that forces the
 version onto transitive dependents too. Betas move fast and can break between releases;
 [CONTRIBUTING.md](CONTRIBUTING.md) covers the upgrade discipline this implies.
 
-Images under `src/assets/` are imported as modules, so they are hashed, and inlined or
-emitted by the bundler. Files in `public/` are copied verbatim and must be referenced by
-absolute path. The broken shop images are exactly this distinction going wrong — they use
-`public/`-style paths for files that were never placed in `public/`.
+Images under `src/assets/` are imported as modules, hashed and emitted by the bundler.
+Files in `public/` are copied verbatim and must be referenced by absolute path. Confusing
+those paths once broke every shop image; the catalogue image resolver now handles the keys.
 
 ---
 
@@ -208,9 +196,10 @@ The rule that makes the layering worth having is unchanged, only relocated: **no
 `repository.js` touches the data store.** That is what keeps the data layer swappable and
 the services testable without a server.
 
-**Built.** `Backend/src/platform/` implements the Layer 0 module — config, logging,
-correlation ids, error handling, health — and `src/app.js` is the composition root domain
-modules mount into. The old `config/supabase.js` is gone; its two defects (ESM syntax in a
+**Built.** `Backend/src/platform/` implements config, logging, correlation ids, error
+handling, health and client error reports. `Backend/src/security/` provides headers and
+rate limiting; catalogue and content modules serve read APIs. `src/app.js` is the
+composition root they mount into. The old `config/supabase.js` is gone; its two defects (ESM syntax in a
 package not declared as ESM, and a client constructed before dotenv had run) are fixed by
 construction. See [README.md](README.md#back-end-structure) and
 [docs/MODULES.md](docs/MODULES.md).
@@ -245,13 +234,12 @@ four-argument signature `(err, req, res, next)`, and let handlers throw.
 
 ## Data
 
-Today: JavaScript arrays inside component files. Six independent literals across five
-files, two of them describing products in mutually incompatible shapes. See
-[DATA_MODEL.md](DATA_MODEL.md).
+Today: canonical products and posts live in JSON repositories behind the API. The
+front end resolves API image keys and formats integer minor-unit prices at render time.
+Marketing sections still hold presentation arrays. See [DATA_MODEL.md](DATA_MODEL.md).
 
-Planned: Supabase Postgres. The migration path is to keep the array shape as the API
-response shape wherever it is already sensible, so components change at the fetch boundary
-only — one `useProducts()` hook replacing one `import`.
+Planned: a database-backed repository, after the commerce platform and data ownership
+decisions. The API response shape can remain stable while the repository changes.
 
 ---
 
@@ -269,14 +257,7 @@ only — one `useProducts()` hook replacing one `import`.
 
 ## Known architectural debt
 
-Ordered by how expensive each becomes if deferred:
-
-1. **No shared state container.** Blocks the cart entirely, and the cart is the next
-   feature. Highest cost to defer.
-2. **Product data duplicated in two shapes.** Guarantees the API integration is done twice,
-   inconsistently. Reconcile before writing any fetch code.
-3. **Back end is three unpicked stacks and an empty entry point.** Every day it stays that
-   way, the front end grows more assumptions about data it invents locally.
-4. **No tests and no CI.** Nothing prevents a regression from reaching a deployment.
-5. **Footer duplicated across four pages** and **no 404 route.** Both cheap now, both
-   permanent irritants later.
+The remaining structural gaps are a durable data store, identity, server-side commerce
+state, deployment infrastructure and alerting. The guest cart, canonical catalogue,
+shared footer, error boundary, tests and CI are already in place. Decide whether to build
+commerce here or adopt a platform before designing checkout and payments.

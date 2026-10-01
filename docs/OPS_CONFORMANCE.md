@@ -9,7 +9,7 @@ keeping. This document exists so the distance is measured rather than assumed �
 manual for a system you do not have is a document nobody follows.
 
 > **Scope decision (2026-09-07): Furniro is the system Document B governs.** The current
-> four-page storefront grows into everything Doc B assumes — payments, orders, fulfilment,
+> current storefront and read API grow into everything Doc B assumes — payments, orders, fulfilment,
 > search, the lot. Stages 1–4 of the [roadmap](#adoption-roadmap) are therefore the plan of
 > record, not a hypothetical. Every ⏳ in the table below is scheduled work, not a
 > permanent exclusion.
@@ -39,14 +39,14 @@ running once they exist.
 | Document B assumes | Furniro has |
 |---|---|
 | Payment gateway, plus a secondary to fail over to | No payment code, no provider account |
-| Orders, carts, reservations, ATP, oversell handling | No cart. No order. No persistence |
+| Orders, carts, reservations, ATP, oversell handling | Guest cart in browser storage; no order, reservation or server persistence |
 | Warehouse, carriers, label printing, manifests | None |
-| Search cluster with alias-swap reindexing | No search. The navbar search icon has no handler |
-| Database replicas, WAL/binlog, cross-region failover | No database. `Backend/index.js` is 0 bytes |
-| CDN, WAF, status page, error tracking, uptime monitoring | None |
-| ERP/PIM feeding price and stock | 32 product rows hardcoded in a `.jsx` file |
-| `local`, `ci`, `staging`, `production` | `local` only |
-| CI with 7 gates blocking merge | No CI. **No git repository** |
+| Search cluster with alias-swap reindexing | Basic catalogue search exists; no search index or cluster |
+| Database replicas, WAL/binlog, cross-region failover | No database; the API uses JSON repositories |
+| CDN, WAF, status page, error tracking, uptime monitoring | Client error logging exists; no CDN, WAF, status page or alerting |
+| ERP/PIM feeding price and stock | 40 products in one backend JSON file; no ERP/PIM feed |
+| `local`, `ci`, `staging`, `production` | `local` and CI; no staging or production deployment |
+| CI with 7 gates blocking merge | Git and CI exist; the full target operating gates do not |
 | 10 named role-holders, 24/7 paid on-call rota | One contact address |
 | Trading revenue, error budgets, unit economics | No customers, no revenue, no spend |
 
@@ -105,18 +105,19 @@ Document B §2: *"Committing a secret is treated as a Sev 2 incident and the sec
 rotated, not just removed from history."*
 
 `Backend/.env` holds live, non-placeholder values for `SUPABASE_ANON_KEY` and
-`DATABASE_URL`. `Backend/.gitignore` was a 0-byte file until the previous pass. Nothing has
-leaked only because there was no git repository at the time. **That is no longer true** —
-the repository exists on GitHub with CI running against it, and whether `.env` reached the
-history has not been verified.
+`DATABASE_URL`. `Backend/.gitignore` was once empty. A 2026-10-01 check found no
+`Backend/.env` in locally available Git history or tracked files, and confirmed the ignore
+rule. That local check cannot rule out external copies or other exposure.
 
-By Doc B's own rule this is **Sev 2 the moment `git init` runs**, and the required response
-is rotation, not deletion. §10 also schedules secret rotation quarterly regardless.
+There is no evidence here that a secret was committed, so the Sev 2 rule cannot be applied
+from `git init` alone. The database password is still overdue for rotation, and §10 also
+schedules routine rotation quarterly.
 
-**Outstanding:** rotate both credentials. Procedure:
+**Outstanding:** reset the database password and retire the unused legacy `anon` key.
+Check other consumers before disabling it. Procedure:
 [secret-rotation.md](runbooks/secret-rotation.md#-outstanding-rotate-now).
 
-Also adoptable from §10 with no back end at all:
+Also adoptable from §10 before the commerce backend exists:
 
 - **Dependency vulnerability scanning** — now a blocking CI gate across both packages.
   It was red on arrival: **23 vulnerabilities, 15 high**, including `react-router-dom`,
@@ -200,7 +201,7 @@ Mostly satisfied. Two of Doc B's rules are worth adopting explicitly:
 
 Doc B's onboarding test — *a new engineer reaches a running local environment and a first
 merged change in under three days* — is currently untestable in its second half: there is
-no repository to merge into.
+a repository to merge into, but no documented onboarding measurement yet.
 
 ---
 
@@ -209,24 +210,24 @@ no repository to merge into.
 Each stage turns on the Doc B sections that become measurable at that point. Nothing here
 requires adopting Doc B out of order, which is the usual way an ops standard gets abandoned.
 
-### Stage 0 — no back end (now)
+### Stage 0 — foundation (partly complete)
 
 Everything here is doable this week and none of it is thrown away later.
 
 - [x] `git init`, `main` as default — done; `.env` handling still needs verifying
-- [ ] **Rotate `DATABASE_URL` and `SUPABASE_ANON_KEY`** (§2, §10)
+- [ ] **Reset the database password and retire the unused legacy `anon` key** (§2, §10)
 - [x] CI running lint + build + `npm audit` + secret scan on every PR (§3 gates, reduced) — `.github/workflows/ci.yml`; running
 - [x] Bundle and image budgets enforced in CI (§12) — `Frontend/scripts/check-budgets.mjs`
-- [~] Compress images (§12, §15) — **done**, 24 MB -> 2.51 MB. WebP/AVIF derivatives and
-      below-the-fold lazy-loading still outstanding (both need component changes)
+- [x] Compress images (§12, §15), serve AVIF/WebP derivatives and lazy-load below-the-fold
+      images. The remaining image gap is low-resolution source photography for seven products.
 - [x] Third-party register started (§16)
 - [ ] Ownership register, honest about being one person (§1)
 - [x] Dependency vulnerabilities triaged to zero in both packages (§10)
 - [x] Platform module built — health endpoint, correlation ids, structured logging, error
       handling, CORS allowlist (`PLAT-01`–`04`, part of §2 and §5)
-- [ ] Execute `local-development.md` as written and correct what is wrong (§18)
+- [x] Execute `local-development.md` as written and correct what is wrong (§18)
 
-### Stage 1 — back end and database exist
+### Stage 1 — API exists; database and deployment remain
 
 - [ ] `staging` environment, seeded and non-production (§2)
 - [ ] Backups verified by **restore**, with the wall-clock time recorded as the real RTO

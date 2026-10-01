@@ -1,14 +1,13 @@
 # API
 
-**Status: catalogue and content are live; nothing else is.** The product, category and
-blog endpoints are implemented, consumed by the front end, and covered by 60 smoke checks.
-Everything else below is still the contract to build against.
+**Status: catalogue, content and client-error reporting are live.** Product, category and
+blog reads plus `POST /api/client-errors` are implemented and covered by 85 smoke checks.
+Contact, identity and commerce endpoints below are proposed contracts.
 
-Conventions and error shapes here are binding once implementation starts — agreeing them
-before the first route is written is the point of the document.
+Conventions and error shapes here govern the implemented routes and guide future ones.
 
 - Entity shapes: [DATA_MODEL.md](DATA_MODEL.md)
-- Layering (`routes` → `controllers` → `models`): [ARCHITECTURE.md](ARCHITECTURE.md#back-end)
+- Layering (`routes` → `controller` → `service` → `repository`): [ARCHITECTURE.md](ARCHITECTURE.md#back-end)
 
 ---
 
@@ -97,7 +96,7 @@ GET /api/products?page=1&limit=16
 ```json
 {
   "data": [ /* … */ ],
-  "meta": { "page": 1, "limit": 16, "total": 32, "total_pages": 2 }
+  "meta": { "page": 1, "limit": 16, "total": 40, "total_pages": 3 }
 }
 ```
 
@@ -130,8 +129,8 @@ Paginated catalogue. Backs the shop grid.
 |---|---|---|---|
 | `page` | integer | `1` | 1-indexed |
 | `limit` | integer | `16` | Max 100 |
-| `category` | string | — | Category slug; repeat for OR |
-| `sort` | enum | `created_at:desc` | `price:asc`, `price:desc`, `name:asc`, `created_at:desc` |
+| `category` | string | — | One category slug |
+| `sort` | enum | `created_at:desc` | `created_at:asc/desc`, `price:asc/desc`, `name:asc/desc` |
 | `q` | string | — | Substring match on name and description |
 | `min_price` / `max_price` | integer | — | Minor units, inclusive |
 | `slugs` | string | — | Comma-separated, max 50. Batch lookup for the cart |
@@ -143,8 +142,8 @@ should drop out of a cart, not break it.
 `sort` is a closed enum validated against a whitelist. **Never interpolate it into SQL** —
 a sort parameter passed through to an `ORDER BY` is a classic injection vector.
 
-This endpoint is what makes the shop page's two dropdowns functional; they are inert today
-because the data is a local array of formatted price strings.
+The shop sends its filter and sort choices to this endpoint; prices stay as integer minor
+units until the front end formats them for display.
 
 ```http
 GET /api/products?page=1&limit=16&category=living-room&sort=price:asc
@@ -165,7 +164,7 @@ GET /api/products?page=1&limit=16&category=living-room&sort=price:asc
       "created_at": "2026-02-16T09:00:00Z"
     }
   ],
-  "meta": { "page": 1, "limit": 16, "total": 32, "total_pages": 2 }
+  "meta": { "page": 1, "limit": 16, "total": 40, "total_pages": 3 }
 }
 ```
 
@@ -224,8 +223,8 @@ report a substitution. The 301 belongs on the page URL, and `npm run build` gene
 A product becomes `410` either by failing the publish gate or by carrying
 `"discontinued": true` in the catalogue data.
 
-Returns the item shape plus `gallery` (array of image keys) and `stock` (integer) once a
-product detail page exists. There is no such page today.
+The product detail page exists and consumes this response. `gallery` and authoritative
+`stock` fields are not implemented; inventory remains a separate future module.
 
 ### Write endpoints
 
@@ -265,8 +264,7 @@ Flat list, unpaginated — there are seven.
 
 Paginated, `limit` default `3`. Sorted `published_at:desc`.
 
-`published_at` is a real timestamp; the current local data stores `"14 Oct 2022"`, a
-display string that cannot be sorted. Format at render.
+`published_at` is a real timestamp in the JSON repository, formatted at render time.
 
 ### `GET /api/posts/recent`
 
@@ -339,8 +337,8 @@ gets ignored.
 
 > 🔴 **Not implemented.**
 
-Backs the form in [Contact.jsx](Frontend/src/pages/Contact.jsx), which currently has no
-`onSubmit` handler at all — submitting it reloads the page and drops the message.
+Would back the form in [Contact.jsx](Frontend/src/pages/Contact.jsx). That form is disabled
+with an explanation until a receiving endpoint, storage and delivery path exist.
 
 ```json
 {
@@ -361,7 +359,7 @@ validation is a convenience and not a control:
 | `subject` | Optional, ≤ 200 chars |
 | `message` | Required, 1–5000 chars |
 
-This is the first endpoint to accept public input, so it is the first that needs:
+This would be the first endpoint to accept a customer message, so it needs:
 
 - **Rate limiting** — per IP, e.g. 5/hour. Without it the form is a free spam relay.
 - **A bot check** — honeypot field or CAPTCHA.
@@ -374,9 +372,10 @@ This is the first endpoint to accept public input, so it is the first that needs
 
 ## Cart and checkout
 
-> 🔴 **Not implemented, not designed.**
+> 🔴 **No server-side cart or checkout endpoints are implemented.**
 
-Deferred until there is a cart in the front end. Two rules are fixed in advance because
+The frontend has a guest cart storing `{slug, quantity}` in browser storage. Server-side
+commerce is deferred. Two rules are fixed in advance because
 retrofitting them is expensive and getting them wrong is a financial loss, not a bug:
 
 1. **The client never sends a price.** It sends `product_id` and `quantity`. The server
@@ -444,15 +443,15 @@ Order matters — items 1–3 are the ones that are painful to add afterwards.
 
 - [x] `"type": "module"` in `Backend/package.json`, `start`/`dev` scripts, `dotenv.config()` first
 - [x] Error middleware last, four-arg signature, correlation ids, no internals in `500`s
-- [x] CORS allowlist from environment — rate limiting still outstanding (no public write yet)
-- [~] Validation at the edge — hand-rolled in the catalogue controller. A schema library is
-      still the right answer once a second module needs it
+- [x] CORS allowlist from environment, security headers and `/api` rate limiting
+- [x] Validation at the catalogue and content HTTP edges
 - [x] `GET /api/products` with pagination, filter, whitelisted sort
 - [x] `GET /api/categories`, `GET /api/products/featured`, `GET /api/products/:slug`
 - [ ] `POST /api/contact` with rate limit and bot check
 - [x] `GET /api/posts`, `GET /api/posts/:slug`, plus `/recent` and `/tags`
 - [ ] Authentication, then admin writes
-- [ ] Cart, orders, payments — server-computed totals only
+- [x] Guest cart in browser storage; the API supplies batched product lookup
+- [ ] Server-side cart, checkout, orders and payments — server-computed totals only
 - [ ] Generate OpenAPI from the route definitions and replace this file's hand-written
       endpoint sections with the generated reference; keep the conventions above by hand
 

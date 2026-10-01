@@ -29,10 +29,11 @@ Requires Node `^20.19.0` or `>=22.12.0` — Vite 8 will not start below that.
 | `npm run preview` | Serve the built `dist/` |
 | `npm run lint` | ESLint over `**/*.{js,jsx}` |
 | `npm run budgets` | Performance budgets against `dist/` |
-| `npm run verify` | lint + build + budgets |
+| `npm run verify` | lint + unit tests + build + budgets + SEO check |
 | `npm run e2e` | Playwright end-to-end suite (starts both servers) |
 
-Run `npm run verify` and `npm run e2e` before opening a PR. There are no unit tests yet.
+Run `npm run verify` and `npm run e2e` before opening a PR. Unit tests live alongside
+the frontend modules and shared helpers.
 
 The e2e suite starts the API itself, so `Backend/` needs its dependencies installed too.
 

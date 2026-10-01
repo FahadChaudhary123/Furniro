@@ -1,18 +1,18 @@
 # Data model
 
-The app has no database. Entities are JavaScript array literals. This document records
-those shapes, the conflicts between them, and the Postgres schema they imply.
+The app has no database. Catalogue and blog data live in backend JSON repositories;
+presentation data remains in frontend modules. This document records the current shapes,
+the historical conflicts between them, and a proposed Postgres schema.
 
 > **Products are now resolved and served over HTTP.** The catalogue lives in
 > `Backend/src/modules/catalogue/data/products.json` — 40 products, one canonical shape,
 > integer minor units, derived badges — and the front end fetches it from
-> `GET /api/products`. There is no second copy anywhere. The conflict analysis below is kept
-> as the record of why the shape is what it is; everything else on this page still describes
-> the current state.
+> `GET /api/products`. There is no second copy anywhere. Historical conflict analysis below
+> explains why the canonical shape was chosen; the proposed schema is future work.
 
 ---
 
-## Current state: six literals across five files
+## Current data sources
 
 | Entity | Defined in | Rows | Scope |
 |---|---|---|---|

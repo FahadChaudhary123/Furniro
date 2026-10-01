@@ -2,10 +2,9 @@
 
 A furniture e-commerce storefront. React + Vite front end, Express + Supabase back end.
 
-> **Project status: front end is a working static storefront; back end is an empty scaffold.**
-> Every page renders from hard-coded arrays in the component files. There is no API, no
-> database, no cart persistence, and no checkout yet. See [Current state](#current-state)
-> for exactly what does and does not exist.
+> **Project status: the storefront and read API run locally.** Catalogue and blog content
+> come from the API, and a guest cart persists in browser storage. There is no database,
+> account system, checkout, payments or orders. See [Current state](#current-state).
 
 ---
 
@@ -35,7 +34,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 
 - **Node.js `^20.19.0` or `>=22.12.0`** — required by Vite 8. Verified on Node 22.18.0, npm 11.10.0.
 - npm (bundled with Node).
-- A Supabase project, once back-end work begins. Not needed to run the front end.
+- A Supabase project is not needed for the current JSON-backed read API.
 
 ---
 
@@ -52,7 +51,7 @@ Vite serves on <http://localhost:5173>, or the next free port if 5173 is taken.
 **The API must be running too.** The shop and home-page product grids fetch from it; without
 it they show an error with a retry rather than products. Start it in a second shell — see
 [Running the back end](#running-the-back-end). Everything else (hero, categories, blog,
-contact) renders standalone.
+contact) needs no product data. The blog also fetches from the API.
 
 | Script | Does |
 |---|---|
@@ -67,7 +66,7 @@ contact) renders standalone.
 | `npm run audit:images` | Intrinsic width vs rendered box; flags oversized **and** undersized files |
 | `npm test` | Unit tests (67 checks, under a second) |
 | `npm run verify` | lint + unit + build + budgets + seo — run this before opening a PR |
-| `npm run e2e` | Playwright end-to-end suite (389 checks; starts both servers) |
+| `npm run e2e` | Playwright end-to-end suite (starts both servers) |
 
 Set `VITE_API_URL` in `Frontend/.env.local` to point at a different API. It defaults to
 `http://localhost:3000/api`. **Every `VITE_`-prefixed variable is public** — it is inlined
@@ -93,7 +92,7 @@ fails at the point of use rather than at boot.
 |---|---|
 | `npm start` | Run the server |
 | `npm run dev` | Run with nodemon reload |
-| `npm test` | Unit tests for the services (34 checks) |
+| `npm test` | Unit tests for the services and platform (72 checks) |
 | `npm run smoke` | Smoke-test a running server (85 checks) |
 | `npm run completeness` | Catalogue data-quality report (`CAT-04`); non-zero if a product is blocked |
 | `npm run latency` | API latency benchmark (`NFR-04`); start the server with `RATE_LIMIT_MAX=3000` |
@@ -123,7 +122,7 @@ npm run smoke
 
 ### What works
 
-- Six routes — `/`, `/shop`, `/shop/:slug`, `/about`, `/contact` and a `*` catch-all —
+- Routes `/`, `/shop`, `/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact` and a `*` catch-all —
   wired through React Router in [App.jsx](Frontend/src/App.jsx), each setting its own
   document title.
 - Product detail pages backed by `GET /api/products/:slug`, distinguishing a missing
@@ -134,9 +133,9 @@ npm run smoke
   shared and the back button works.
 - Responsive navbar with a mobile drawer, and a shared footer.
 - Home page composed of Hero, BrowseRange, ProductsSection, RoomsInspiration and ShareSetup
-  sections, wrapped in a Framer Motion scroll-in animation.
-- Shop page with a 32-item catalogue paginated 16 per page.
-- Contact page with a laid-out form.
+  sections, with a CSS reveal animation.
+- Shop page with a 40-item catalogue paginated 16 per page.
+- Contact page with a disabled form that explains why messages cannot be submitted yet.
 - Tailwind styling throughout, plus hand-written marquee keyframes in
   [index.css](Frontend/src/index.css).
 
@@ -147,11 +146,11 @@ under *Unreleased*.
 
 | Gap | Where |
 |---|---|
-| "Add to cart", Share, Compare and Like have no handlers; there is no cart state anywhere | [ProductCard.jsx](Frontend/src/components/ProductCard.jsx) |
+| No server-side cart, checkout, payments or orders | [docs/MODULES.md](docs/MODULES.md) |
 | Contact and newsletter forms are disabled — no endpoint exists to receive a message | [Contact.jsx](Frontend/src/pages/Contact.jsx) |
 | The brand gold `#B88E2F` is 3.02:1 on white — fails WCAG AA for normal text | [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md) |
 | No deployment configuration, and no host chosen | repo-wide |
-| `Backend/.env` rotation outstanding; whether it reached git history is unverified | [SECURITY.md](SECURITY.md) |
+| `Backend/.env` rotation outstanding; no copy was found in local Git history on 2026-10-01 | [SECURITY.md](SECURITY.md) |
 
 ---
 

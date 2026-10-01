@@ -3,8 +3,8 @@
 Operational procedures for Furniro. Each runbook is written to be followed under pressure:
 numbered steps, explicit commands, and a stated way to tell whether the step worked.
 
-> **Nothing is deployed yet.** There is no hosting account, no CI, no deployment
-> configuration, and no production environment. These runbooks are the procedures to follow
+> **Nothing is deployed yet.** CI exists, but there is no chosen host, deployment
+> configuration or production environment. These runbooks are the procedures to follow
 > when there is one — written now, while there is time to think, rather than during the
 > first incident. Steps that describe a not-yet-existing environment are marked 🔴.
 

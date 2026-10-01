@@ -85,7 +85,7 @@ cd Frontend && npm ci && npm run build
 ## 4. Verify
 
 - [ ] The original symptom is gone
-- [ ] All four routes load
+- [ ] The affected route and core storefront routes load (`/`, `/shop`, `/cart`, `/about`, `/contact`)
 - [ ] Hard refresh on `/shop` works
 - [ ] No console errors
 - [ ] The deployed version is the one you intended
@@ -135,7 +135,8 @@ independently reversible.
 Every rollback is evidence that something upstream was missing. The candidates for this
 project, in order of what they would have caught:
 
-- **No tests.** Nothing mechanical stands between a regression and production.
-- **No CI.** Nothing runs `lint` and `build` before a merge.
+- **Test coverage gap.** CI runs unit, browser and API checks, but a missed behavior can
+  still reach production; add a regression check for each incident.
+- **CI coverage gap.** Review whether the failing path was exercised by the existing gates.
 - **No staging environment.** Production is the first place anything is exercised.
-- **No error tracking.** You will find out from a user, not a dashboard.
+- **No alerting.** Client and server errors are logged, but nobody is paged automatically.

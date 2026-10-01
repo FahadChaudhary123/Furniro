@@ -8,16 +8,16 @@ decisions to make first.
 
 ---
 
-## Prerequisites, none of which exist yet
+## Prerequisites
 
 - [x] A git repository, with `main` as the default branch — done, CI is running
 - [ ] A hosting account for the front end (static)
-- [ ] A hosting account for the back end (Node), once it has code
+- [ ] A hosting account for the running back end (Node)
 - [ ] Environment variables configured in the host — **not** committed
-- [ ] `SUPABASE_ANON_KEY` and `DATABASE_URL` rotated; the current values must be treated as
-      compromised, see [secret-rotation.md](secret-rotation.md)
-- [ ] Row-level security enabled on every Supabase table
-      ([why](../../SECURITY.md#2-know-what-the-anon-key-is))
+- [ ] Database password reset and unused legacy `anon` key retired after checking for
+      other consumers; see [secret-rotation.md](secret-rotation.md)
+- [ ] If Supabase tables are introduced, enable row-level security on every table
+      before exposing the anon key ([why](../../SECURITY.md#2-know-what-the-anon-key-is))
 
 ---
 
@@ -55,7 +55,7 @@ this is worth checking before the first deploy rather than after.
    ```bash
    cd Frontend
    npm ci              # not `npm install` — respects the lockfile exactly
-   npm run verify      # lint + build + performance budgets, the same gates CI runs
+   npm run verify      # lint + unit tests + build + budgets + SEO check
    ```
 
    **Verify:** `dist/index.html` and `dist/assets/` exist, all budgets report `ok`, and the
@@ -67,7 +67,8 @@ this is worth checking before the first deploy rather than after.
    npm run preview
    ```
 
-   Load `/`, `/shop`, `/about`, `/contact`. Then **reload the page while on `/shop`** — this
+   Load `/`, `/shop`, `/shop/syltherine`, `/cart`, `/about`, `/contact` and a blog post.
+   Then **reload the page while on `/shop`** — this
    is the check that catches a missing SPA rewrite.
 
 4. **Set environment variables in the host.** Only `VITE_`-prefixed variables reach the
@@ -76,24 +77,24 @@ this is worth checking before the first deploy rather than after.
 
 5. **Deploy**, per your host's mechanism.
 
-6. **Verify in production:** all four routes, a hard refresh on a non-root route, browser
+6. **Verify in production:** core storefront routes, a hard refresh on a non-root route, browser
    console free of errors, and images loading.
 
 ---
 
 ## Back end
 
-The back end now runs and can be deployed, though it serves only `/health` and
-`/health/ready` — no domain endpoints are mounted yet. Deploying it early is still worth it:
-it proves the pipeline, the environment configuration and the health probe before anything
-depends on them.
+The back end serves the catalogue, blog and client-error endpoint as well as health
+checks. The storefront depends on it for products, posts and cart line details; deploy
+and verify the API before directing the storefront to it.
 
 Build and run: `npm ci && npm start` in `Backend/`. Node `^20.19.0 || >=22.12.0`.
 
 At deploy time:
 
-- Set `PORT`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL` and `ALLOWED_ORIGINS` in
-  the host's environment configuration. Never in the repository.
+- Set `PORT` and `ALLOWED_ORIGINS` in the host's environment configuration. The current
+  JSON repositories do not need Supabase credentials; do not copy unused live secrets to
+  the host. Never put secrets in the repository.
 - `ALLOWED_ORIGINS` must list the production front-end origin. **`cors()` with no arguments
   reflects any origin** and must never reach production.
 - Serve over HTTPS only.
@@ -151,7 +152,7 @@ silently is not a gate.
 
 ## After deploying
 
-- [ ] All four routes load
+- [ ] Core storefront routes load, including a product and blog post
 - [ ] Hard refresh on `/shop` works (SPA rewrite confirmed)
 - [ ] No console errors
 - [ ] Images load
