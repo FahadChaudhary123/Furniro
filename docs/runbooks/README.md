@@ -3,8 +3,8 @@
 Operational procedures for Furniro. Each runbook is written to be followed under pressure:
 numbered steps, explicit commands, and a stated way to tell whether the step worked.
 
-> **Nothing is deployed yet.** CI exists, but there is no chosen host, deployment
-> configuration or production environment. These runbooks are the procedures to follow
+> **Nothing is deployed yet.** Render is selected and `render.yaml` is prepared, but no
+> production environment exists. These runbooks are the procedures to follow
 > when there is one — written now, while there is time to think, rather than during the
 > first incident. Steps that describe a not-yet-existing environment are marked 🔴.
 
@@ -14,6 +14,7 @@ numbered steps, explicit commands, and a stated way to tell whether the step wor
 | [deployment.md](deployment.md) | Shipping to an environment |
 | [rollback.md](rollback.md) | A deploy broke something and you need it undone |
 | [secret-rotation.md](secret-rotation.md) | A credential leaked, or routine rotation |
+| [pkr-repricing.md](pkr-repricing.md) | Approving and applying the first PKR catalogue prices |
 | [incident-response.md](incident-response.md) | Production is down or degraded |
 
 Governing standard: **Document B — *E-commerce maintenance and operations runbook*, Rev 1.0**.
@@ -35,7 +36,7 @@ minutes.
 |---|---|
 | On-call contact | app@digitaiz.com |
 | Escalation | _not defined_ |
-| Hosting provider | _not chosen_ |
+| Hosting provider | Render selected; account and services not connected |
 | Supabase project | _see `Backend/.env`, do not paste the value here_ |
 | DNS registrar | _not defined_ |
 | Status page | _none_ |

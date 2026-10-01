@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added a PKR repricing tool with a blank proposal template and whole-catalogue validation.
+  It leaves current IDR prices untouched until an approved PKR proposal is applied.
+
 - The catalogue now declares its current IDR currency once and includes it on every product
   API response. Storefront prices require that currency when formatted, so a future PKR
   migration cannot change the label without changing the catalogue data.

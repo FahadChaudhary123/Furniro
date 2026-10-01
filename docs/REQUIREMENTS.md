@@ -148,6 +148,11 @@ a catalogue-wide gap rather than as forty identical per-product failures. They a
 invented: a weight or a tax class guessed by an agent is worse than a blank, because it
 looks authoritative to whoever rates the shipment.
 
+The first checkout market is Pakistan in PKR. The existing catalogue is still IDR; the
+[PKR repricing runbook](runbooks/pkr-repricing.md) provides a blank worksheet and a
+whole-catalogue validation step. `CAT-01` stays partial until approved PKR amounts and the
+missing tax, weight and SEO fields are supplied.
+
 **`CAT-08` is partial.** A product leaves the catalogue by failing the publish gate or by
 carrying `"discontinued": true`. Its slug is retained rather than dropped — a slug the server
 has forgotten can only 404, and §15 is explicit that an indexed URL should never land on one.

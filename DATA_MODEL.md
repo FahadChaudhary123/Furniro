@@ -129,6 +129,9 @@ formatter or checkout changes currency. Do not relabel the IDR amounts. `2_500_0
 rupiah is currently stored as `250000000`; the fixed 2-decimal integer representation
 can also hold future PKR prices after explicit repricing. The formatter keeps two decimal
 places for PKR so paise are never hidden; IDR continues to display whole rupiah.
+The [PKR repricing runbook](docs/runbooks/pkr-repricing.md) generates a blank proposal and
+validates all slugs before changing the canonical catalogue. No exchange-rate conversion is
+performed.
 
 Floats are disqualified outright: `0.1 + 0.2 !== 0.3`, and money that does not add up is a
 defect a customer notices.
