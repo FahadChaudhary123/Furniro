@@ -86,7 +86,7 @@ const Cart = () => {
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4 text-gray-500">
                         <span className="md:hidden text-xs text-gray-600 mr-2">Price</span>
-                        {formatPrice(product.price)}
+                        {formatPrice(product.price, product.currency)}
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4">
                         <label className="sr-only" htmlFor={`qty-${slug}`}>
@@ -106,7 +106,7 @@ const Cart = () => {
                         <span className="md:hidden text-xs text-gray-600 font-normal mr-2">
                           Subtotal
                         </span>
-                        {formatPrice(lineTotal)}
+                        {formatPrice(lineTotal, product.currency)}
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4">
                         <button
@@ -143,7 +143,7 @@ const Cart = () => {
               <div className="flex justify-between mb-8">
                 <span className="text-gray-600">Subtotal</span>
                 <span className="font-semibold text-[#B88E2F]" data-testid="cart-subtotal">
-                  {formatPrice(subtotal)}
+                  {hydrating ? 'Loading…' : (formatPrice(subtotal, items[0]?.product.currency) || 'Unavailable')}
                 </span>
               </div>
 

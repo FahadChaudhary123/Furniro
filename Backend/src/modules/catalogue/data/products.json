@@ -1,5 +1,6 @@
 {
-  "_generated": "by scripts/generate-catalogue.mjs from the front end catalogue — do not edit by hand",
+  "_note": "Canonical catalogue data. Edit here; do not make a front-end copy.",
+  "currency": "IDR",
   "categories": [
     "Living Room",
     "Bedroom",

@@ -157,6 +157,7 @@ async function main() {
   const item = listBody.data[0];
   check('item has a slug', typeof item?.slug === 'string');
   check('price is an integer, not a string', Number.isInteger(item?.price));
+  check('product declares the catalogue currency', item?.currency === 'IDR');
   check('category is embedded as an object', typeof item?.category === 'object' && !!item.category?.slug);
   check('no stored badge field', !('badge' in (item ?? {})));
 
@@ -208,6 +209,7 @@ async function main() {
   const oneBody = await one.json();
   check('single product returns 200', one.status === 200, `got ${one.status}`);
   check('single product is returned bare', oneBody.slug === 'syltherine' && !oneBody.data);
+  check('single product carries the same currency', oneBody.currency === item.currency);
 
   const gone = await fetch(`${BASE}/api/products/does-not-exist`);
   check('unknown slug returns 404', gone.status === 404, `got ${gone.status}`);

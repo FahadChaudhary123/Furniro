@@ -154,14 +154,15 @@ GET /api/products?page=1&limit=16&category=living-room&sort=price:asc
   "data": [
     {
       "id": 1,
-      "slug": "nordic-wooden-chair",
-      "name": "Nordic Wooden Chair",
+      "slug": "syltherine",
+      "name": "Syltherine",
       "description": "Stylish cafe chair",
-      "category": { "id": 3, "slug": "living-room", "name": "Living Room" },
+      "category": { "id": 1, "slug": "living-room", "name": "Living Room" },
       "price": 250000000,
       "old_price": 350000000,
+      "currency": "IDR",
       "image": "products/product1.jpg",
-      "created_at": "2026-02-16T09:00:00Z"
+      "created_at": "2025-11-04"
     }
   ],
   "meta": { "page": 1, "limit": 16, "total": 40, "total_pages": 3 }
@@ -170,6 +171,9 @@ GET /api/products?page=1&limit=16&category=living-room&sort=price:asc
 
 `category` is embedded as an object, not an id — it avoids an N+1 round trip for a grid
 that always renders the category label.
+`currency` comes from the catalogue's single top-level currency field. All current prices
+are IDR minor units; the planned Pakistan checkout needs approved PKR prices before this
+field and its amounts change together.
 
 **No `badge` field.** The client derives it from `price`, `old_price` and `created_at` via
 `badgeFor()`. A stored badge drifts from the prices it describes.

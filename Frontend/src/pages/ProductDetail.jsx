@@ -112,12 +112,12 @@ const ProductDetail = () => {
 
               <div className="mt-4 flex items-center gap-3">
                 <span className="text-2xl font-semibold text-gray-900">
-                  {formatPrice(product.price)}
+                  {formatPrice(product.price, product.currency)}
                 </span>
                 {/* PROMO-05 — see ProductCard.jsx. */}
                 {discount && (
                   <span className="text-lg text-gray-600 line-through">
-                    {formatPrice(discount.oldPrice)}
+                    {formatPrice(discount.oldPrice, product.currency)}
                   </span>
                 )}
               </div>

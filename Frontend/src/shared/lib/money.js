@@ -13,21 +13,25 @@
 
 const MINOR_UNITS_PER_MAJOR = 100;
 
-const IDR = new Intl.NumberFormat('id-ID', {
-  style: 'currency',
-  currency: 'IDR',
-  minimumFractionDigits: 0,
-  maximumFractionDigits: 0,
-});
+const FORMATTERS = {
+  IDR: new Intl.NumberFormat('id-ID', {
+    style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0,
+  }),
+  PKR: new Intl.NumberFormat('en-PK', {
+    style: 'currency', currency: 'PKR', currencyDisplay: 'code',
+    minimumFractionDigits: 2, maximumFractionDigits: 2,
+  }),
+};
 
 /**
  * Format a price for display.
  * @param {number} minorUnits - integer minor units
+ * @param {'IDR'|'PKR'} currency - sent by the catalogue API, not inferred from locale
  * @returns {string} e.g. "Rp 2.500.000"
  */
-export function formatPrice(minorUnits) {
-  if (typeof minorUnits !== 'number' || !Number.isFinite(minorUnits)) return '';
-  return IDR.format(minorUnits / MINOR_UNITS_PER_MAJOR);
+export function formatPrice(minorUnits, currency) {
+  if (!Number.isSafeInteger(minorUnits) || !FORMATTERS[currency]) return '';
+  return FORMATTERS[currency].format(minorUnits / MINOR_UNITS_PER_MAJOR);
 }
 
 /**

@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { evaluateAll, ABSENT_FIELDS, RULE_COUNT } from '../src/modules/catalogue/publishGate.js';
+import { assertCurrency } from '../src/modules/catalogue/currency.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const DATA = join(HERE, '..', 'src', 'modules', 'catalogue', 'data', 'products.json');
@@ -27,6 +28,7 @@ const asJson = args.has('--json');
 const strict = args.has('--strict');
 
 const raw = JSON.parse(readFileSync(DATA, 'utf8'));
+const currency = assertCurrency(raw.currency);
 const gate = evaluateAll(raw.products, { categoryNames: new Set(raw.categories) });
 
 const total = raw.products.length;
@@ -52,6 +54,7 @@ if (asJson) {
       {
         generated_at: new Date().toISOString(),
         total,
+        currency,
         publishable: gate.publishable.length,
         blocked: gate.blocked.length,
         warned: gate.warned.length,
@@ -69,6 +72,7 @@ if (asJson) {
   console.log('\nCatalogue completeness report  (CAT-04)');
   console.log('='.repeat(62));
   console.log(`  products            ${total}`);
+  console.log(`  currency            ${currency}`);
   console.log(`  publishable         ${gate.publishable.length}  (${pct}%)`);
   console.log(`  blocked             ${gate.blocked.length}`);
   console.log(`  with warnings       ${gate.warned.length}`);

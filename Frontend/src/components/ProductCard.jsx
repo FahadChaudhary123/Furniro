@@ -74,14 +74,14 @@ const ProductCard = ({ product }) => {
 
         <div className="mt-2 flex items-center gap-2">
           <span className="font-semibold text-gray-900">
-            {formatPrice(product.price)}
+            {formatPrice(product.price, product.currency)}
           </span>
           {/* PROMO-05: the struck-through price is the promotional claim, so it is
               driven by the same `discountFor` the badge uses. Checking `old_price`
               directly would keep promoting an offer whose expiry has passed. */}
           {discount && (
             <span className="text-sm text-gray-600 line-through">
-              {formatPrice(discount.oldPrice)}
+              {formatPrice(discount.oldPrice, product.currency)}
             </span>
           )}
         </div>

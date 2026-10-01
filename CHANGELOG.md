@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- The catalogue now declares its current IDR currency once and includes it on every product
+  API response. Storefront prices require that currency when formatted, so a future PKR
+  migration cannot change the label without changing the catalogue data.
+
 ### Deployment preparation (2026-10-01)
 
 - Added a Render Blueprint for the JSON-backed API and static storefront, with the SPA

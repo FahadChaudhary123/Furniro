@@ -70,11 +70,11 @@ const ProductsSection = () => {
                 <p className="text-sm text-gray-600 mb-2">{item.description}</p>
 
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold">{formatPrice(item.price)}</span>
+                  <span className="font-semibold">{formatPrice(item.price, item.currency)}</span>
                   {/* PROMO-05 — see ProductCard.jsx. */}
                   {discount && (
                     <span className="text-sm text-gray-600 line-through">
-                      {formatPrice(discount.oldPrice)}
+                      {formatPrice(discount.oldPrice, item.currency)}
                     </span>
                   )}
                 </div>

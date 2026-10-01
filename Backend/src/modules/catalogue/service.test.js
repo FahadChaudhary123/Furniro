@@ -11,6 +11,13 @@ import { listProducts, getBySlug, listCategories, categoryExists, SORT, MAX_LIMI
 
 const TOTAL = 40;
 
+describe('currency', () => {
+  it('labels every served product with the catalogue currency', () => {
+    expect(listProducts({ limit: MAX_LIMIT }).data.every((p) => p.currency === 'IDR')).toBe(true);
+    expect(getBySlug('syltherine').currency).toBe('IDR');
+  });
+});
+
 describe('pagination', () => {
   it('defaults to the first page at the grid page size', () => {
     const { data, meta } = listProducts();

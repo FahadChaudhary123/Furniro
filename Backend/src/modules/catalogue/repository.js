@@ -18,10 +18,12 @@ import { fileURLToPath } from 'node:url';
 import { logger } from '../../platform/logger.js';
 import { evaluateAll } from './publishGate.js';
 import { findUnpublished as computeUnpublished } from './redirects.js';
+import { assertCurrency } from './currency.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 
 const raw = JSON.parse(readFileSync(join(HERE, 'data', 'products.json'), 'utf8'));
+const currency = assertCurrency(raw.currency);
 
 /** Categories get stable ids from their position, so the API can embed `{id, slug, name}`. */
 const categories = raw.categories.map((name, index) => ({
@@ -70,7 +72,11 @@ const products = Object.freeze(
     // `discontinued` removes a product from sale without deleting the row, so the redirect
     // above still has a category to work from.
     .filter((p) => p.discontinued !== true)
-    .map((p) => Object.freeze({ ...p, category: categoryByName.get(p.category) ?? null })),
+    .map((p) => Object.freeze({
+      ...p,
+      currency,
+      category: categoryByName.get(p.category) ?? null,
+    })),
 );
 
 const featuredSlugs = raw.featured;

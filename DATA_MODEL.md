@@ -96,6 +96,8 @@ format at the render boundary rather than in the data. Concretely:
   category: "Living Room",
   price: 250000000,                // minor units — Rp 2.500.000
   old_price: 350000000,            // null when not discounted
+  // The JSON catalogue declares "currency": "IDR" once at the top level.
+  // The API adds currency: "IDR" to every served product.
   image: "products/product1.jpg",  // key, resolved by a helper
   created_at: "2026-02-16T00:00:00Z"
 }
@@ -125,7 +127,8 @@ The first planned checkout market is now Pakistan only, charged in PKR. These ex
 amounts are **not PKR prices**. Each product needs an approved PKR price before the
 formatter or checkout changes currency. Do not relabel the IDR amounts. `2_500_000.00`
 rupiah is currently stored as `250000000`; the fixed 2-decimal integer representation
-can also hold future PKR prices after explicit repricing.
+can also hold future PKR prices after explicit repricing. The formatter keeps two decimal
+places for PKR so paise are never hidden; IDR continues to display whole rupiah.
 
 Floats are disqualified outright: `0.1 + 0.2 !== 0.3`, and money that does not add up is a
 defect a customer notices.
@@ -133,10 +136,12 @@ defect a customer notices.
 Formatting belongs in exactly one helper:
 
 ```js
-const IDR = new Intl.NumberFormat("id-ID", {
-  style: "currency", currency: "IDR", minimumFractionDigits: 0,
-});
-export const formatPrice = (minorUnits) => IDR.format(minorUnits / 100);
+const FORMATTERS = {
+  IDR: new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }),
+  PKR: new Intl.NumberFormat("en-PK", { style: "currency", currency: "PKR" }),
+};
+export const formatPrice = (minorUnits, currency) =>
+  FORMATTERS[currency]?.format(minorUnits / 100) ?? "";
 ```
 
 ### Currency inconsistency (fixed)

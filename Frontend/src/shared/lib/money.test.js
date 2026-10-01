@@ -35,30 +35,30 @@ const plain = (str) => str.split(NBSP).join(' ');
 
 describe('formatPrice', () => {
   it('formats rupiah with the Indonesian grouping', () => {
-    expect(plain(formatPrice(250_000_000))).toBe('Rp 2.500.000');
-    expect(plain(formatPrice(15_000_000))).toBe('Rp 150.000');
+    expect(plain(formatPrice(250_000_000, 'IDR'))).toBe('Rp 2.500.000');
+    expect(plain(formatPrice(15_000_000, 'IDR'))).toBe('Rp 150.000');
   });
 
   it('separates the symbol with a non-breaking space', () => {
     // Deliberate, and worth pinning: it stops a price wrapping between "Rp" and the digits.
     // Anything comparing against a literal plain space will not match — Playwright's
     // toHaveText normalises whitespace, which is why the browser tests never noticed.
-    expect(formatPrice(250_000_000)).toBe(`Rp${NBSP}2.500.000`);
+    expect(formatPrice(250_000_000, 'IDR')).toBe(`Rp${NBSP}2.500.000`);
   });
 
   it('shows no decimal places', () => {
     // IDR has no minor unit in practice, so a trailing ",00" would be wrong on every price.
-    expect(formatPrice(250_000_050)).not.toMatch(/,\d\d/);
+    expect(formatPrice(250_000_050, 'IDR')).not.toMatch(/,\d\d/);
   });
 
   it('formats zero rather than an empty string', () => {
-    expect(plain(formatPrice(0))).toBe('Rp 0');
+    expect(plain(formatPrice(0, 'IDR'))).toBe('Rp 0');
   });
 
   it('returns an empty string for anything that is not a finite number', () => {
     // A missing price must not render "NaN" or "undefined" on a product card.
     for (const bad of [undefined, null, NaN, Infinity, '2500000', {}]) {
-      expect(formatPrice(bad)).toBe('');
+      expect(formatPrice(bad, 'IDR')).toBe('');
     }
   });
 
@@ -70,13 +70,23 @@ describe('formatPrice', () => {
       maximumFractionDigits: 0,
     });
     for (const major of [150_000, 500_000, 2_500_000, 13_500_000]) {
-      expect(formatPrice(toMinorUnits(major))).toBe(reference.format(major));
+      expect(formatPrice(toMinorUnits(major), 'IDR')).toBe(reference.format(major));
     }
   });
 
   it('never emits a currency other than rupiah', () => {
     // A stray "Rs" on the struck-through old price shipped to production once.
-    expect(formatPrice(100_000)).toMatch(/^Rp/);
-    expect(formatPrice(100_000)).not.toMatch(/\bRs\b/);
+    expect(formatPrice(100_000, 'IDR')).toMatch(/^Rp/);
+    expect(formatPrice(100_000, 'IDR')).not.toMatch(/\bRs\b/);
+  });
+
+  it('formats approved PKR amounts with an explicit currency code', () => {
+    expect(plain(formatPrice(250_000_000, 'PKR'))).toBe('PKR 2,500,000.00');
+    expect(plain(formatPrice(250_000_050, 'PKR'))).toBe('PKR 2,500,000.50');
+  });
+
+  it('does not guess a currency when the API omits or changes it', () => {
+    expect(formatPrice(250_000_000)).toBe('');
+    expect(formatPrice(250_000_000, 'USD')).toBe('');
   });
 });
