@@ -9,6 +9,7 @@
     "smoke": "node scripts/smoke.mjs",
     "completeness": "node scripts/completeness.mjs",
     "prices:pkr": "node scripts/pkr-prices.mjs",
+    "mapping": "node scripts/platform-mapping.mjs",
     "latency": "node scripts/latency.mjs",
     "test": "vitest run",
     "test:watch": "vitest"

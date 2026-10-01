@@ -30,6 +30,23 @@ amounts were authored as Indonesian rupiah (`IDR`), so they are not PKR price da
 Reprice every product in integer PKR minor units and approve the amounts before a PKR
 formatter or checkout is enabled. Relabelling the existing numbers would mislead buyers.
 
+### Payment provider decision gate
+
+Shopify's [provider setup guide](https://help.shopify.com/en/manual/payments/third-party-providers/configuring-providers)
+says the available providers appear in the store's Payments settings. A listing on the
+[country gateway page](https://help.shopify.com/en/manual/payments/third-party-providers/payment-gateway-availability)
+does not guarantee that a provider can be activated for a particular store. Before choosing
+Shopify, confirm a provider in a Pakistan-based merchant account and obtain the provider's
+written confirmation that it can onboard this business, charge PKR, and settle to its bank.
+Record supported customer methods, fees, refunds, test mode and dispute handling. A provider
+name found in a search result is insufficient evidence of merchant eligibility.
+
+If launch uses cash on delivery, Shopify documents it as a
+[manual payment method](https://help.shopify.com/en/manual/payments/manual-payments).
+Medusa's default [`system` payment provider](https://docs.medusajs.com/resources/commerce-modules/payment/payment-provider)
+can represent manual payment, but it does not process an online charge. Decide whether
+online payment is required at launch before treating either path as sufficient for `PAY-01`.
+
 ## Gates before selecting a provider
 
 1. Obtain approved PKR prices for the 40 products and confirm whether prices include tax.
@@ -40,12 +57,18 @@ formatter or checkout is enabled. Relabelling the existing numbers would mislead
    satisfy `INV`, `FUL`, `CHK` and `RET` requirements.
 3. Map each published Furniro slug to a platform product and variant, including currency,
    price, availability and image. No mapping exists today. Do not expose an enabled checkout
-   action for an unmapped cart.
+   action for an unmapped cart. Generate a blank worksheet with
+   `cd Backend; npm run mapping -- --template mapping.json`, then validate filled IDs with
+   `npm run mapping -- --check mapping.json`. This checks local coverage and duplicate
+   variants only; confirm currency, price, availability and image against the provider API
+   separately. Keep the filled worksheet private until its identifiers and access model are
+   reviewed; it is not a second product catalogue.
 4. Run a test purchase through payment, order creation, cancellation/refund and webhook
    delivery. Requirements stay open until this works in a non-production environment.
 
 **Provisional recommendation:** Shopify is the shorter implementation path if a suitable
 third-party gateway accepts this Pakistan merchant and target market. Medusa is a
 better candidate when required workflows cannot be represented in Shopify and the team can
-operate another backend. The country/currency and fulfilment decisions are missing, so this
-comparison is not a provider approval or an authorization to create an account.
+operate another backend. The launch market and currency are settled; payment methods,
+gateway eligibility and fulfilment remain open. This comparison is not a provider approval
+or an authorization to create an account.

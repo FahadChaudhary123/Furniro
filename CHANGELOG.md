@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added a provider-neutral product mapping worksheet and validator. It checks that every
+  catalogue slug has a unique platform variant ID without copying prices or enabling checkout.
+
 - Added a PKR repricing tool with a blank proposal template and whole-catalogue validation.
   It leaves current IDR prices untouched until an approved PKR proposal is applied.
 
