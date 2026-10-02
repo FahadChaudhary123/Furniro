@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added a read-only post-deployment smoke check for the API and storefront. It verifies
+  build identity, readiness, catalogue data, CORS and the `/shop` SPA rewrite.
+
 - Added Render deployment configuration checks: the API rejects invalid production CORS
   origins, and the storefront build rejects missing or placeholder public URLs.
 

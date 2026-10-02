@@ -141,8 +141,11 @@ At deploy time:
   `/health` reports them, which is how
   Doc B §2 keeps "what is actually running" from being guesswork — and how a rollback is
   confirmed to have taken effect.
-- Verify after deploy with `npm run smoke` against the deployed URL:
-  `BASE_URL=https://api.example npm run smoke`.
+- Verify after deploy with `npm run smoke:deploy` from `Backend/`, setting
+  `API_ORIGIN` and `STOREFRONT_ORIGIN` to the exact public HTTPS origins. This read-only
+  check covers health, build identity, readiness, a published product, CORS and a hard
+  request to `/shop`. The local `npm run smoke` suite sends test errors and malformed
+  requests, so use `smoke:deploy` for the live site.
 
 ---
 

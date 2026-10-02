@@ -7,6 +7,7 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:deploy": "node scripts/deployment-smoke.mjs",
     "completeness": "node scripts/completeness.mjs",
     "prices:pkr": "node scripts/pkr-prices.mjs",
     "mapping": "node scripts/platform-mapping.mjs",
