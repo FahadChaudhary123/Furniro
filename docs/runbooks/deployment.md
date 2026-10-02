@@ -149,6 +149,17 @@ At deploy time:
 
 ---
 
+## Cache policy
+
+| Surface | Current policy | Remaining host work |
+|---|---|---|
+| API and health | `Cache-Control: no-store` on every response, including errors, so catalogue amounts and future customer data are not retained by intermediaries | Verify the header through Render with `npm run smoke:deploy` |
+| Storefront HTML | Render host behavior has not been verified | Keep the app shell revalidated when a release changes |
+| Fingerprinted assets | Vite emits content-hashed filenames | Confirm long-lived immutable caching on Render after deployment |
+
+`PLAT-10` remains open: there is no deployed CDN, cache purge on publish or verified
+host-level policy yet. The current JSON catalogue is served fresh on each API request.
+
 ## Bundle size
 
 Enforced, not advisory. `npm run budgets` runs in CI as a blocking gate (Doc B §12) and

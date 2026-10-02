@@ -19,7 +19,11 @@ export async function checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl =
     return response;
   };
 
-  const health = await (await request(`${apiOrigin}/health`)).json();
+  const healthResponse = await request(`${apiOrigin}/health`);
+  if (healthResponse.headers.get('cache-control') !== 'no-store') {
+    throw new Error('/health can be cached');
+  }
+  const health = await healthResponse.json();
   if (health.status !== 'ok' || health.env !== 'production' ||
       !health.build?.sha || health.build.sha === 'unknown') {
     throw new Error('/health is not a traceable production build');
@@ -31,6 +35,9 @@ export async function checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl =
   const productsResponse = await request(`${apiOrigin}/api/products?limit=1`, {
     headers: { Origin: storefrontOrigin },
   });
+  if (productsResponse.headers.get('cache-control') !== 'no-store') {
+    throw new Error('/api/products can be cached');
+  }
   if (productsResponse.headers.get('access-control-allow-origin') !== storefrontOrigin) {
     throw new Error('The API does not allow the storefront origin');
   }

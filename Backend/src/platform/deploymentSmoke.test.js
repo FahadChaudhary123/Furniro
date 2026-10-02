@@ -11,11 +11,14 @@ function responses({ cors = storefrontOrigin, shopStatus = 200 } = {}) {
   const calls = [];
   const fetchImpl = async (url, options) => {
     calls.push({ url, method: options?.method ?? 'GET' });
-    if (url.endsWith('/health')) return json({ status: 'ok', env: 'production', build: { sha: 'abc123' } });
+    if (url.endsWith('/health')) return json({ status: 'ok', env: 'production', build: { sha: 'abc123' } }, {
+      'cache-control': 'no-store',
+    });
     if (url.endsWith('/health/ready')) return json({ status: 'ready' });
     if (url.includes('/api/products')) {
       return json({ data: [{ slug: 'chair' }], meta: { total: 40 } }, {
         'access-control-allow-origin': cors,
+        'cache-control': 'no-store',
       });
     }
     return new Response('<div id="root"></div><script type="module"></script>', {

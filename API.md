@@ -1,7 +1,7 @@
 # API
 
 **Status: catalogue, content and client-error reporting are live.** Product, category and
-blog reads plus `POST /api/client-errors` are implemented and covered by 85 smoke checks.
+blog reads plus `POST /api/client-errors` are implemented and covered by the smoke suite.
 Contact, identity and commerce endpoints below are proposed contracts.
 
 Conventions and error shapes here govern the implemented routes and guide future ones.
@@ -23,6 +23,10 @@ the only client is this repo's front end and both deploy together.
 
 **Format** — JSON in, JSON out, UTF-8. `Content-Type: application/json` required on any
 request with a body.
+
+**Caching** — all `/api` and health responses send `Cache-Control: no-store`, including
+errors. The catalogue currently reads from JSON and serves current prices per request;
+hosted static asset caching is documented in [deployment.md](docs/runbooks/deployment.md#cache-policy).
 
 **Casing** — `snake_case` field names, matching the Postgres columns. One casing convention
 end to end; no transform layer to forget.

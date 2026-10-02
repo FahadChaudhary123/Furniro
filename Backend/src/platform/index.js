@@ -6,6 +6,7 @@
  */
 
 export { config, validateConfig } from './config.js';
+export { cachePolicy } from './cachePolicy.js';
 export { logger } from './logger.js';
 export { correlationMiddleware, getCorrelationId, withCorrelationId } from './correlation.js';
 export { healthRouter } from './health.js';

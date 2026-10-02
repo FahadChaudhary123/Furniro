@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- API and health responses now send `Cache-Control: no-store`, including errors. The local
+  and post-deployment smoke checks verify this policy before checkout work begins.
+
 - Added a read-only post-deployment smoke check for the API and storefront. It verifies
   build identity, readiness, catalogue data, CORS and the `/shop` SPA rewrite.
 

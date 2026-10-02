@@ -48,6 +48,7 @@ async function main() {
   const health = await fetch(`${BASE}/health`);
   const healthBody = await health.json();
   check('GET /health returns 200', health.status === 200, `got ${health.status}`);
+  check('health responses are not cached', health.headers.get('cache-control') === 'no-store');
   check('reports status ok', healthBody.status === 'ok');
   check('reports build sha', typeof healthBody.build?.sha === 'string');
   if (healthBody.env === 'production') {
@@ -147,6 +148,7 @@ async function main() {
 
   // --- catalogue: list ------------------------------------------------------------------
   const list = await fetch(`${BASE}/api/products`);
+  check('catalogue responses are not cached', list.headers.get('cache-control') === 'no-store');
   const listBody = await list.json();
   check('GET /api/products returns 200', list.status === 200, `got ${list.status}`);
   check('returns { data, meta }', Array.isArray(listBody.data) && !!listBody.meta);

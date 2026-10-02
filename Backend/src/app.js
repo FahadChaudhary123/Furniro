@@ -19,6 +19,7 @@ import { productsRouter, categoriesRouter } from './modules/catalogue/index.js';
 import { postsRouter } from './modules/content/index.js';
 import {
   config,
+  cachePolicy,
   logger,
   correlationMiddleware,
   healthRouter,
@@ -39,6 +40,7 @@ export function createApp() {
 
   // Headers before anything can respond, so even an error carries them.
   app.use(securityHeaders());
+  app.use(cachePolicy);
 
   /**
    * Explicit allowlist. `cors()` with no arguments reflects ANY origin — see
