@@ -26,6 +26,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [docs/COMMERCE_PLATFORM_COMPARISON.md](docs/COMMERCE_PLATFORM_COMPARISON.md) | Shopify and Medusa comparison; provider decision still open |
 | [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md) | Document B (ops standard) mapped against reality, plus the staged roadmap |
 | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | External services, criticality, credentials location, fallbacks |
+| [docs/OWNERSHIP.md](docs/OWNERSHIP.md) | Current responsibilities, escalation and unassigned owners |
 | [docs/PROCESSING_REGISTER.md](docs/PROCESSING_REGISTER.md) | What personal data the system processes, why, and for how long (`PRIV-06`) |
 | [LICENSE](LICENSE) | Proprietary — all rights reserved |
 

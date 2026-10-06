@@ -7,7 +7,7 @@ const json = (body, headers = {}) => new Response(JSON.stringify(body), {
   headers: { 'content-type': 'application/json', ...headers },
 });
 
-function responses({ cors = storefrontOrigin, shopStatus = 200 } = {}) {
+function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'public, max-age=31536000, immutable' } = {}) {
   const calls = [];
   const fetchImpl = async (url, options) => {
     calls.push({ url, method: options?.method ?? 'GET' });
@@ -21,8 +21,23 @@ function responses({ cors = storefrontOrigin, shopStatus = 200 } = {}) {
         'cache-control': 'no-store',
       });
     }
-    return new Response('<div id="root"></div><script type="module"></script>', {
-      status: shopStatus, headers: { 'content-type': 'text/html' },
+    if (url.endsWith('/shop')) {
+      return new Response('<div id="root"></div><script type="module" src="/assets/index-abc123.js"></script>', {
+        status: shopStatus,
+        headers: {
+          'content-type': 'text/html',
+          'cache-control': 'no-cache',
+          'content-security-policy': "default-src 'self'; script-src 'self'; frame-ancestors 'none'",
+          'x-content-type-options': 'nosniff',
+          'x-frame-options': 'DENY',
+          'referrer-policy': 'no-referrer',
+          'strict-transport-security': 'max-age=31536000',
+        },
+      });
+    }
+    return new Response('export {}', {
+      headers: { 'content-type': 'text/javascript',
+        'cache-control': assetCache },
     });
   };
   return { fetchImpl, calls };
@@ -34,7 +49,7 @@ describe('deployment smoke', () => {
     await expect(checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl })).resolves.toEqual({
       buildSha: 'abc123', publishedProducts: 40,
     });
-    expect(calls).toHaveLength(4);
+    expect(calls).toHaveLength(5);
     expect(calls.every(({ method }) => method === 'GET')).toBe(true);
   });
 
@@ -48,6 +63,12 @@ describe('deployment smoke', () => {
     await expect(checkDeployment({ apiOrigin, storefrontOrigin,
       fetchImpl: responses({ shopStatus: 404 }).fetchImpl,
     })).rejects.toThrow('/shop returned 404');
+  });
+
+  it('fails if fingerprinted scripts lose immutable caching', async () => {
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin,
+      fetchImpl: responses({ assetCache: 'no-cache' }).fetchImpl,
+    })).rejects.toThrow('not cached immutably');
   });
 
   it('rejects local or placeholder targets before making a request', async () => {

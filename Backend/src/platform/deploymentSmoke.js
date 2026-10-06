@@ -52,9 +52,29 @@ export async function checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl =
   if (!shop.headers.get('content-type')?.includes('text/html')) {
     throw new Error('/shop did not return HTML');
   }
+  if (!shop.headers.get('cache-control')?.includes('no-cache')) {
+    throw new Error('/shop HTML does not revalidate');
+  }
+  const csp = shop.headers.get('content-security-policy') ?? '';
+  if (!csp.includes("script-src 'self'") || !csp.includes("frame-ancestors 'none'")) {
+    throw new Error('/shop is missing the storefront CSP');
+  }
+  if (shop.headers.get('x-content-type-options') !== 'nosniff' ||
+      shop.headers.get('x-frame-options') !== 'DENY' ||
+      shop.headers.get('referrer-policy') !== 'no-referrer' ||
+      !shop.headers.get('strict-transport-security')?.includes('max-age=31536000')) {
+    throw new Error('/shop is missing a storefront security header');
+  }
   const html = await shop.text();
   if (!html.includes('id="root"') || !html.includes('type="module"')) {
     throw new Error('/shop did not return the storefront app shell');
+  }
+  const assetPath = html.match(/<script\b[^>]*\bsrc="(\/assets\/[^\"]+\.js)"[^>]*>/)?.[1];
+  if (!assetPath) throw new Error('/shop has no fingerprinted entry script');
+  const asset = await request(`${storefrontOrigin}${assetPath}`);
+  const cache = asset.headers.get('cache-control') ?? '';
+  if (!cache.includes('immutable') || !cache.includes('max-age=31536000')) {
+    throw new Error('Fingerprinted entry script is not cached immutably');
   }
 
   return { buildSha: health.build.sha, publishedProducts: products.meta.total };

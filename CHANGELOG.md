@@ -14,6 +14,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Prepared Render security headers for the static storefront, with a browser CSP check and
+  post-deployment header assertions. Live delivery still awaits the first deployment.
+
+- Prepared Render static cache headers for revalidated HTML and immutable fingerprinted
+  assets, and extended the post-deployment smoke check to verify the entry script.
+
+- Documented the current one-person ownership and escalation gaps without claiming an
+  unstaffed on-call rota or assigning responsibility to an inbox.
+
 - API and health responses now send `Cache-Control: no-store`, including errors. The local
   and post-deployment smoke checks verify this policy before checkout work begins.
 

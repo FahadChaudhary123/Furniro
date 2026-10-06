@@ -50,9 +50,10 @@ repositories do not use them.
 
 The generated `dist/_redirects` file targets Netlify/Cloudflare Pages and is not a Render
 route configuration. Render's SPA rewrite is configured in `render.yaml`; discontinued
-product redirects currently fall back to client-side navigation there. Before public launch,
-configure equivalent host-level 301 rules or change hosting/redirect delivery and verify
-them against the live site.
+product redirects currently fall back to client-side navigation there. No product is
+discontinued today. Before marking one discontinued, add the corresponding Render `redirect`
+rule before the SPA rewrite and verify its live 301 response. The generated `_redirects`
+file alone does not configure Render.
 
 The front end is a static bundle. `npm run build` produces `Frontend/dist/`; anything that
 serves files can host it.
@@ -143,9 +144,10 @@ At deploy time:
   confirmed to have taken effect.
 - Verify after deploy with `npm run smoke:deploy` from `Backend/`, setting
   `API_ORIGIN` and `STOREFRONT_ORIGIN` to the exact public HTTPS origins. This read-only
-  check covers health, build identity, readiness, a published product, CORS and a hard
-  request to `/shop`. The local `npm run smoke` suite sends test errors and malformed
-  requests, so use `smoke:deploy` for the live site.
+  check covers health, build identity, readiness, a published product, CORS, a hard
+  request to `/shop`, storefront security headers and the entry script's cache policy.
+  The local `npm run smoke` suite sends test errors and malformed requests, so use
+  `smoke:deploy` for the live site.
 
 ---
 
@@ -154,30 +156,42 @@ At deploy time:
 | Surface | Current policy | Remaining host work |
 |---|---|---|
 | API and health | `Cache-Control: no-store` on every response, including errors, so catalogue amounts and future customer data are not retained by intermediaries | Verify the header through Render with `npm run smoke:deploy` |
-| Storefront HTML | Render host behavior has not been verified | Keep the app shell revalidated when a release changes |
-| Fingerprinted assets | Vite emits content-hashed filenames | Confirm long-lived immutable caching on Render after deployment |
+| Storefront HTML | `render.yaml` sets `Cache-Control: no-cache` on the known app routes; the browser must revalidate the shell | Verify through Render after deployment, including a hard `/shop` request |
+| Fingerprinted assets | Vite emits content-hashed filenames; `render.yaml` sets one-year immutable caching under `/assets/*` | Verify through Render with `npm run smoke:deploy` |
 
-`PLAT-10` remains open: there is no deployed CDN, cache purge on publish or verified
-host-level policy yet. The current JSON catalogue is served fresh on each API request.
+Render serves static sites through its CDN and [invalidates its cache after a successful
+deploy](https://render.com/docs/static-sites). `PLAT-10` remains open until this is deployed,
+verified and tied to the catalogue publish process. The current JSON catalogue is served
+fresh on each API request.
+
+### Storefront security headers
+
+`render.yaml` applies CSP, `nosniff`, frame denial, no-referrer and HSTS to all static
+responses. The CSP allows scripts and images from the storefront, inline styles used by
+the current components, and HTTPS API connections. Once the API's public origin is known,
+restrict `connect-src` to that origin and rerun the browser suite. The browser suite tests
+the proposed policy on `/shop` locally; `npm run smoke:deploy` checks the actual `/shop`
+response headers after Render is deployed. Neither local test establishes that Render has
+applied the Blueprint until the live smoke check passes.
 
 ## Bundle size
 
 Enforced, not advisory. `npm run budgets` runs in CI as a blocking gate (Doc B §12) and
 fails the build on regression.
 
-Current, from a production build:
+Current local production build (`npm run budgets`, 2026-10-06):
 
 | Metric | Value | Budget |
 |---|---|---|
-| Total assets, one visitor | 1.60 MB | 1.9 MB |
-| Of which images (JPEG path) | 1.26 MB | — |
-| Of which images (WebP path) | 0.97 MB | — |
-| Largest single asset | 266 kB (JS bundle) | 300 kB |
-| JS gzipped | 102 kB | 115 kB |
+| Total assets, one visitor | 1.61 MB | 1.90 MB |
+| Largest single asset | 264.6 kB (JS bundle) | 300.0 kB |
+| JS gzipped | 97.2 kB | 115.0 kB |
+| CSS gzipped | 4.7 kB | 25.0 kB |
+| Third-party scripts | 0 | 0 |
 
-The budget counts each image **once**, at its larger variant: `<picture>` ships both a JPEG
-and a WebP but a browser fetches one, so summing the directory would count both and make a
-modern format look like a regression.
+The budget counts each image **once**, at its largest variant: `<picture>` offers AVIF,
+WebP and JPEG but a browser fetches one, so summing the directory would count alternatives
+as simultaneous downloads.
 
 Remaining work, in order of payoff:
 
@@ -186,7 +200,8 @@ Remaining work, in order of payoff:
   resolution it asks for, and the originals are 285px too. This is the largest remaining
   image problem and no build step can fix it; it needs better source files.
   `npm run audit:images` lists them.
-- **A CDN**, once there is a host — Doc B §12 wants a documented per-surface cache strategy.
+- **Deploy and verify the Render CDN policy** above; the Blueprint defines the rules but no
+  live host has served them yet.
 
 Two former entries here are done or dropped:
 
@@ -207,6 +222,7 @@ silently is not a gate.
 - [ ] No console errors
 - [ ] Images load
 - [ ] Mobile layout and navbar drawer work
+- [ ] `npm run smoke:deploy` passes against the public API and storefront origins
 - [ ] Note the release in [CHANGELOG.md](../../CHANGELOG.md)
 
 If something is wrong: [rollback.md](rollback.md). Roll back first, diagnose after — a

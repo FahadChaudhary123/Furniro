@@ -227,11 +227,11 @@ Set on the front-end host:
 
 | Header | Value |
 |---|---|
-| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` |
+| `Strict-Transport-Security` | `max-age=31536000` |
 | `X-Content-Type-Options` | `nosniff` |
-| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Referrer-Policy` | `no-referrer` |
 | `X-Frame-Options` | `DENY` — or a CSP `frame-ancestors 'none'` |
-| `Content-Security-Policy` | Start in report-only, tighten, then enforce |
+| `Content-Security-Policy` | Enforced in the Render Blueprint; restrict `connect-src` to the assigned API origin after deployment |
 
 **The API now sends its own set** via `helmet` (`Backend/src/security/headers.js`): a
 `default-src 'none'` CSP, `nosniff`, `X-Frame-Options: DENY`, `no-referrer`, and HSTS in
@@ -247,8 +247,10 @@ configurable, with health probes exempt so a throttled probe cannot read as an o
 store is in-memory, so the limit is per-process: with two instances the real limit is
 double what it says, and a shared store is needed then.
 
-The table above still applies to whatever serves the front-end bundle, which sends none of
-these yet because no host has been chosen.
+The Render static-site Blueprint now configures these storefront headers. The CSP permits
+inline styles used by current components and HTTPS connections until the public API origin
+is assigned. The policy has a local browser check, but live delivery remains unverified
+until the first deployment and `npm run smoke:deploy` pass.
 
 ---
 

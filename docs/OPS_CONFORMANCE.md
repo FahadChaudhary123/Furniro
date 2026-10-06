@@ -62,7 +62,7 @@ passing it.
 
 | | Section | Status | Notes |
 |---|---|---|---|
-| §1 | Purpose and ownership | ◐ | Ten accountable roles collapse to one person. The register is still worth writing — Doc B's own rule is that "the team" is not an owner |
+| §1 | Purpose and ownership | ◐ | [Ownership register](OWNERSHIP.md) records the one-person operation and gaps; the accountable person and backup still need names |
 | §2 | Environments and configuration | ◐ | Config is env-driven and validated; the health endpoint reports build SHA, config version and flag state as §2 requires. Only `local` exists as an environment |
 | §3 | Release management | ◐ | CI gates now defined in `.github/workflows/ci.yml`; they activate on `git init` + push. The migration discipline (expand → backfill → switch → drop) is already recorded in [rollback.md](runbooks/rollback.md#when-a-migration-is-involved) |
 | §4 | Maintenance calendar | ◐ | 7 of 26 items are meaningful today — the catalogue completeness sweep (`CAT-04`) and the zero-result query review (`SRCH-05`) both have data to review now. The rest reference orders, payments, carriers or stock |
@@ -222,7 +222,8 @@ Everything here is doable this week and none of it is thrown away later.
 - [x] Compress images (§12, §15), serve AVIF/WebP derivatives and lazy-load below-the-fold
       images. The remaining image gap is low-resolution source photography for seven products.
 - [x] Third-party register started (§16)
-- [ ] Ownership register, honest about being one person (§1)
+- [ ] [Ownership register](OWNERSHIP.md) drafted; name the accountable maintainer and backup
+      before marking §1 complete
 - [x] Dependency vulnerabilities triaged to zero in both packages (§10)
 - [x] Platform module built — health endpoint, correlation ids, structured logging, error
       handling, CORS allowlist (`PLAT-01`–`04`, part of §2 and §5)
