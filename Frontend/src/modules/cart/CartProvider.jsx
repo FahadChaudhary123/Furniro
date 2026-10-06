@@ -31,7 +31,12 @@ export function CartProvider({ children }) {
     [lines],
   );
 
-  const hydration = useCartProducts(slugKey);
+  const removeMissing = useCallback((missing) => {
+    const unavailable = new Set(missing);
+    setLines((current) => current.filter((line) => !unavailable.has(line.slug)));
+  }, []);
+
+  const hydration = useCartProducts(slugKey, removeMissing);
 
   const add = useCallback((slug, quantity = 1) => {
     setLines((prev) => storage.addLine(prev, slug, quantity));
@@ -74,12 +79,13 @@ export function CartProvider({ children }) {
       subtotal: items.reduce((n, i) => n + i.lineTotal, 0),
       hydrating: hydration.hydrating,
       error: hydration.error,
+      retry: hydration.retry,
       add,
       setQuantity,
       remove,
       clear,
     }),
-    [lines, items, hydration.hydrating, hydration.error, add, setQuantity, remove, clear],
+    [lines, items, hydration.hydrating, hydration.error, hydration.retry, add, setQuantity, remove, clear],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

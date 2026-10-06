@@ -63,6 +63,64 @@ test.describe('cart', () => {
     await expect(page.getByTestId('cart-subtotal')).toHaveText('Rp 2.500.000');
   });
 
+  test('a failed cart refresh keeps the line and recovers on retry', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await expect(page.getByTestId('cart-badge')).toHaveText('1');
+
+    let offline = true;
+    await page.route('**/api/products?slugs=*', (route) =>
+      offline ? route.abort('failed') : route.continue(),
+    );
+    await page.goto('/cart');
+
+    await expect(page.getByRole('alert')).toContainText('Products could not be loaded');
+    await expect(page.getByTestId('cart-badge')).toHaveText('1');
+    expect(JSON.parse(await page.evaluate(() => localStorage.getItem('furniro.cart.v1'))))
+      .toEqual([{ slug: 'syltherine', quantity: 1 }]);
+
+    offline = false;
+    await page.getByRole('button', { name: 'Try again' }).click();
+    await expect(page.getByTestId('cart-line')).toHaveCount(1);
+    await expect(page.getByTestId('cart-subtotal')).toHaveText('Rp 2.500.000');
+  });
+
+  test('the cart uses a newly fetched price after a catalogue change', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+
+    await page.route('**/api/products?slugs=*', async (route) => {
+      const response = await route.fetch();
+      const payload = await response.json();
+      payload.data = payload.data.map((product) =>
+        product.slug === 'syltherine' ? { ...product, price: 300000000 } : product,
+      );
+      await route.fulfill({ response, json: payload });
+    });
+    await page.goto('/cart');
+
+    await expect(page.getByTestId('cart-subtotal')).toHaveText('Rp 3.000.000');
+    expect(JSON.parse(await page.evaluate(() => localStorage.getItem('furniro.cart.v1'))))
+      .toEqual([{ slug: 'syltherine', quantity: 1 }]);
+  });
+
+  test('a product no longer in the catalogue leaves no unusable cart line', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+
+    await page.route('**/api/products?slugs=*', async (route) => {
+      const response = await route.fetch();
+      const payload = await response.json();
+      await route.fulfill({ response, json: { ...payload, data: [] } });
+    });
+    await page.goto('/cart');
+
+    await expect(page.getByText('Your cart is empty')).toBeVisible();
+    await expect(page.getByTestId('cart-badge')).toHaveCount(0);
+    expect(JSON.parse(await page.evaluate(() => localStorage.getItem('furniro.cart.v1'))))
+      .toEqual([]);
+  });
+
   test('the subtotal multiplies by quantity', async ({ page }) => {
     await page.goto('/shop/syltherine');
     await page.getByRole('button', { name: 'Add to cart' }).click();

@@ -10,7 +10,7 @@
  */
 
 export { useProducts, useProduct, useFeaturedProducts, useCategories } from './hooks.js';
-export { fetchProduct, ApiError } from './api.js';
+export { fetchProduct, fetchProducts, ApiError } from './api.js';
 export { badgeFor, discountFor } from './lib/badge.js';
 
 /**

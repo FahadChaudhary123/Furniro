@@ -17,7 +17,7 @@ import Picture from '../shared/ui/Picture';
  * chose. See docs/API.md#cart-and-checkout.
  */
 const Cart = () => {
-  const { items, count, subtotal, hydrating, error, setQuantity, remove, clear } = useCart();
+  const { items, count, subtotal, hydrating, error, retry, setQuantity, remove, clear } = useCart();
   usePageMeta('/cart');
 
   return (
@@ -26,7 +26,7 @@ const Cart = () => {
 
       <section className="max-w-7xl mx-auto px-4 py-16">
         {error ? (
-          <CatalogueError error={error} />
+          <CatalogueError error={error} onRetry={retry} />
         ) : count === 0 ? (
           <div className="text-center py-16">
             <h2 className="text-2xl font-semibold text-gray-900">Your cart is empty</h2>

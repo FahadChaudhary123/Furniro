@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- The guest cart now offers a retry when product hydration fails, retains saved lines through
+  the failure, and removes products absent from a successful catalogue response. Playwright
+  checks recovery, repricing and discontinued products on desktop and mobile.
+
 - Prepared Render security headers for the static storefront, with a browser CSP check and
   post-deployment header assertions. Live delivery still awaits the first deployment.
 

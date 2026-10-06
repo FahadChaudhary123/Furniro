@@ -224,6 +224,11 @@ button works. Indexed full-text search (`SRCH-01`–`06`) is still a separate co
 | `CART-04` | Abandoned carts retained 90 days then deleted, by a monitored job | §9, §11 | 3 | ⭕ |
 | `CART-05`ⁱ | Cart persists across sessions for account holders | — | 3 | ⭕ |
 
+`CART-01` includes recovery from a failed catalogue read: the guest cart retains its saved
+lines, offers a retry, and refreshes prices from the API. A successful read removes lines
+whose products are no longer published. Browser tests cover these paths at desktop and mobile
+sizes. `CART-02` remains open because payments and checkout do not exist.
+
 ## 7. Checkout — `CHK`
 
 | ID | Requirement | Doc B | Stage | Status |
