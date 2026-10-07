@@ -56,6 +56,7 @@ const ProductGrid = () => {
   const total = meta?.total ?? 0;
   const totalPages = meta?.total_pages ?? 1;
   const start = (page - 1) * limit;
+  const pageOutOfRange = Boolean(meta && !loading && !error && page > totalPages);
   const activeCategory = categories.find((c) => c.slug === category);
   const hasFilters = Boolean(category || q);
 
@@ -125,9 +126,11 @@ const ProductGrid = () => {
       <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm text-gray-500">
-            {loading && !meta
-              ? 'Loading products…'
-              : `Showing ${total === 0 ? 0 : start + 1}–${Math.min(start + limit, total)} of ${total} results`}
+            {pageOutOfRange
+              ? `Page ${page} is out of range`
+              : loading && !meta
+                ? 'Loading products…'
+                : `Showing ${total === 0 ? 0 : start + 1}–${Math.min(start + limit, total)} of ${total} results`}
           </p>
 
           {hasFilters && (
@@ -173,6 +176,14 @@ const ProductGrid = () => {
         <CatalogueError error={error} onRetry={retry} />
       ) : loading && products.length === 0 ? (
         <ProductGridSkeleton count={Math.min(limit, 16)} />
+      ) : pageOutOfRange ? (
+        <CatalogueEmpty
+          message="This results page is no longer available."
+          actions={[{
+            label: 'Go to first page',
+            onClick: () => update({ page: null }, { resetPage: false }),
+          }]}
+        />
       ) : products.length === 0 ? (
         <CatalogueEmpty
           message={
@@ -214,7 +225,7 @@ const ProductGrid = () => {
       )}
 
       {/* Pagination */}
-      {!error && totalPages > 1 && (
+      {!error && !pageOutOfRange && totalPages > 1 && (
         <div className="flex justify-center mt-12 gap-2">
           {Array.from({ length: totalPages }).map((_, i) => {
             const n = i + 1;

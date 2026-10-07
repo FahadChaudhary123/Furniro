@@ -14,6 +14,12 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Guest cart changes now synchronize between open tabs of the same storefront, so badges
+  and cart lines update when another tab adds or removes an item.
+
+- Shop URLs with an out-of-range page now explain the missing results and offer a way back
+  to page one instead of displaying an impossible result range.
+
 - The guest cart now offers a retry when product hydration fails, retains saved lines through
   the failure, and removes products absent from a successful catalogue response. Playwright
   checks recovery, repricing and discontinued products on desktop and mobile.

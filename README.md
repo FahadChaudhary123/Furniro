@@ -132,6 +132,7 @@ npm run smoke
 - A guest cart at `/cart` with a live navbar badge, persisted across reloads. It stores only
   `{slug, quantity}`; prices always come from the API. A failed product refresh can be retried
   without losing the cart, and products no longer returned by the catalogue are removed.
+  Open tabs on the same storefront synchronize cart changes through browser storage.
 - Shop filtering, search, sorting and paging held in the URL, so a filtered view can be
   shared and the back button works.
 - Responsive navbar with a mobile drawer, and a shared footer.

@@ -11,6 +11,16 @@ import { test, expect } from '@playwright/test';
 const settled = (page) => expect(page.getByText(/of \d+ results/)).toBeVisible({ timeout: 15_000 });
 
 test.describe('filtering by URL', () => {
+  test('an out-of-range page offers a valid page without claiming impossible results', async ({ page }) => {
+    await page.goto('/shop?page=999');
+
+    await expect(page.getByText('This results page is no longer available.')).toBeVisible();
+    await expect(page.getByText(/Showing 15985/)).toHaveCount(0);
+    await page.getByRole('button', { name: 'Go to first page' }).click();
+    await expect(page).toHaveURL(/\/shop$/);
+    await expect(page.getByText(/of 40 results/)).toBeVisible();
+  });
+
   test('a category in the URL filters the grid on first load', async ({ page }) => {
     await page.goto('/shop?category=living-room');
     await expect(page.getByText(/of 12 results/)).toBeVisible({ timeout: 15_000 });

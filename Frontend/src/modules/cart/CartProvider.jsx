@@ -24,6 +24,21 @@ export function CartProvider({ children }) {
     storage.saveCart(lines);
   }, [lines]);
 
+  // A storage event fires in other tabs, not the tab that made the change. Reuse the
+  // storage validator and avoid writing an unchanged value back across tabs.
+  useEffect(() => {
+    const syncFromStorage = (event) => {
+      if (event.key !== storage.STORAGE_KEY && event.key !== null) return;
+      const updated = storage.loadCart();
+      setLines((current) => current.length === updated.length &&
+        current.every((line, index) =>
+          line.slug === updated[index].slug && line.quantity === updated[index].quantity)
+        ? current : updated);
+    };
+    window.addEventListener('storage', syncFromStorage);
+    return () => window.removeEventListener('storage', syncFromStorage);
+  }, []);
+
   // Re-read product detail whenever the set of slugs changes. Quantity changes do not
   // refetch — only which products are in the cart matters.
   const slugKey = useMemo(

@@ -212,7 +212,8 @@ error state already handles. That half becomes real when `SRCH-01`'s index exist
 
 `SRCH-07` is met. Category, search term, sort, page and page size all live in the URL and
 map onto parameters the API already validates, so a filtered view is shareable and the back
-button works. Indexed full-text search (`SRCH-01`–`06`) is still a separate concern.
+button works. An out-of-range page URL offers a return to the first page without claiming
+results that do not exist. Indexed full-text search (`SRCH-01`–`06`) is still a separate concern.
 
 ## 6. Cart — `CART`
 
@@ -227,7 +228,8 @@ button works. Indexed full-text search (`SRCH-01`–`06`) is still a separate co
 `CART-01` includes recovery from a failed catalogue read: the guest cart retains its saved
 lines, offers a retry, and refreshes prices from the API. A successful read removes lines
 whose products are no longer published. Browser tests cover these paths at desktop and mobile
-sizes. `CART-02` remains open because payments and checkout do not exist.
+sizes. Open tabs synchronize guest-cart changes through browser storage. `CART-02` remains
+open because payments and checkout do not exist.
 
 ## 7. Checkout — `CHK`
 

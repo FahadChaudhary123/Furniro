@@ -52,6 +52,22 @@ test.describe('cart', () => {
     await expect(page.getByTestId('cart-badge')).toHaveText('1');
   });
 
+  test('two open tabs keep the guest cart in sync', async ({ page, context }) => {
+    await page.goto('/shop/syltherine');
+    const other = await context.newPage();
+    await other.goto('/cart');
+    await expect(other.getByText('Your cart is empty')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await expect(other.getByTestId('cart-badge')).toHaveText('1');
+    await expect(other.getByTestId('cart-line')).toHaveCount(1);
+
+    await other.getByRole('button', { name: 'Remove Syltherine from cart' }).click();
+    await expect(page.getByTestId('cart-badge')).toHaveCount(0);
+    await expect(other.getByText('Your cart is empty')).toBeVisible();
+    await other.close();
+  });
+
   test('the cart page shows the line with a server price', async ({ page }) => {
     await page.goto('/shop/syltherine');
     await page.getByRole('button', { name: 'Add to cart' }).click();
