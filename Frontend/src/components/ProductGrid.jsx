@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { ProductGridSkeleton, CatalogueError, CatalogueEmpty } from './CatalogueState';
@@ -37,6 +37,7 @@ const parsePrice = (value) => {
  */
 const ProductGrid = () => {
   const [params, setParams] = useSearchParams();
+  const location = useLocation();
   const [priceError, setPriceError] = useState('');
 
   const category = params.get('category') ?? null;
@@ -282,7 +283,7 @@ const ProductGrid = () => {
           }`}
         >
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} shopReturnTo={`/shop${location.search}`} />
           ))}
         </div>
       )}

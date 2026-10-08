@@ -129,6 +129,27 @@ test.describe('filter controls', () => {
 });
 
 test.describe('browser history', () => {
+  test('product detail returns to the same filtered shop view', async ({ page }) => {
+    await page.goto('/shop?category=bedroom&sort=price%3Aasc&min_price=100000000');
+    await settled(page);
+    const shopUrl = page.url();
+
+    await page.locator('h3 a[href^="/shop/"]').first().click();
+    await expect(page).toHaveURL(/\/shop\/[^/?]+$/);
+    await expect(page.getByRole('link', { name: 'Back to shop' })).toHaveAttribute(
+      'href', '/shop?category=bedroom&sort=price%3Aasc&min_price=100000000',
+    );
+    await page.getByRole('link', { name: 'Back to shop' }).click();
+    await expect(page).toHaveURL(shopUrl);
+    await expect(page.getByLabel('Sort products')).toHaveValue('price:asc');
+    await expect(page.getByRole('button', { name: /^Bedroom/ })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('a directly opened product returns to the unfiltered shop', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await expect(page.getByRole('link', { name: 'Back to shop' })).toHaveAttribute('href', '/shop');
+  });
+
   test('the back button undoes a filter', async ({ page }) => {
     await page.goto('/shop');
     await settled(page);

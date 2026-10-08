@@ -4,7 +4,7 @@ import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
 import Picture from '../shared/ui/Picture';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, shopReturnTo }) => {
   const badge = badgeFor(product);
   const discount = discountFor(product);
   const { add } = useCart();
@@ -29,6 +29,7 @@ const ProductCard = ({ product }) => {
             is the accessible one. */}
         <Link
           to={`/shop/${product.slug}`}
+          state={{ shopReturnTo }}
           className="block h-full w-full"
           aria-hidden="true"
           tabIndex={-1}
@@ -63,7 +64,7 @@ const ProductCard = ({ product }) => {
       {/* Content */}
       <div className="p-4">
         <h3 className="font-medium text-gray-800">
-          <Link to={`/shop/${product.slug}`} className="hover:text-[#B88E2F] transition">
+          <Link to={`/shop/${product.slug}`} state={{ shopReturnTo }} className="hover:text-[#B88E2F] transition">
             {product.name}
           </Link>
         </h3>

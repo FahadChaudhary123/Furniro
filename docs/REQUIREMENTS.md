@@ -158,7 +158,9 @@ The cards use category slugs returned by the API; when that request fails, they 
 unfiltered shop instead of pointing to an unverified category URL.
 
 `CAT-07` product detail pages can be reached from both shop cards and featured products on
-the home page. The home page image and title link to the same stable product slug.
+the home page. The home page image and title link to the same stable product slug. When a
+shopper opens a product from a filtered shop, the breadcrumb and Back to shop link preserve
+the original listing URL; a directly opened product returns to the unfiltered shop.
 
 **`CAT-08` is partial.** A product leaves the catalogue by failing the publish gate or by
 carrying `"discontinued": true`. Its slug is retained rather than dropped — a slug the server

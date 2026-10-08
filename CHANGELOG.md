@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Opening a product from a filtered shop now preserves that shop URL for the detail page's
+  breadcrumb and Back to shop link. Direct product links still return to the main shop.
+
 - Featured product images and names on the home page now open their product detail pages;
   the hover cart action remains available.
 

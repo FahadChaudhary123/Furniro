@@ -1,4 +1,4 @@
-import { useParams, Link, Navigate } from 'react-router-dom';
+import { useParams, useLocation, Link, Navigate } from 'react-router-dom';
 import { useProduct, badgeFor, discountFor } from '../modules/catalogue';
 import { useCart } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
@@ -17,6 +17,11 @@ import Picture from '../shared/ui/Picture';
  */
 const ProductDetail = () => {
   const { slug } = useParams();
+  const location = useLocation();
+  const returnTo = typeof location.state?.shopReturnTo === 'string' &&
+    (location.state.shopReturnTo === '/shop' || location.state.shopReturnTo.startsWith('/shop?'))
+    ? location.state.shopReturnTo
+    : '/shop';
   const { product, notFound, gone, redirectTo, loading, error, retry } = useProduct(slug);
   const { add } = useCart();
 
@@ -46,7 +51,7 @@ const ProductDetail = () => {
    * engines treat it less reliably — but it works on a host with no redirect support, and
    * it works immediately after a product is discontinued without waiting for a deploy.
    */
-  if (gone && redirectTo) return <Navigate to={redirectTo} replace />;
+  if (gone && redirectTo) return <Navigate to={redirectTo} state={location.state} replace />;
 
   return (
     <div>
@@ -54,7 +59,7 @@ const ProductDetail = () => {
         title={product?.name ?? (notFound ? 'Not found' : 'Shop')}
         trail={[
           { label: 'Home', to: '/' },
-          { label: 'Shop', to: '/shop' },
+          { label: 'Shop', to: returnTo },
           { label: product?.name ?? slug },
         ]}
       />
@@ -69,7 +74,7 @@ const ProductDetail = () => {
               No product matches “{slug}”. It may have been discontinued.
             </p>
             <Link
-              to="/shop"
+              to={returnTo}
               className="mt-8 inline-block bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57f28] transition"
             >
               Back to shop
@@ -150,7 +155,7 @@ const ProductDetail = () => {
               </button>
 
               <p className="mt-8">
-                <Link to="/shop" className="text-sm text-gray-500 hover:text-[#B88E2F] transition">
+                <Link to={returnTo} className="text-sm text-gray-500 hover:text-[#B88E2F] transition">
                   ← Back to shop
                 </Link>
               </p>
