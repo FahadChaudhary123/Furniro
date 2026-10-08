@@ -8,6 +8,24 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('API failure handling', () => {
+  test('category failure can be retried without losing the product grid', async ({ page }) => {
+    let fail = true;
+    await page.route('**/api/categories', (route) =>
+      fail ? route.abort('failed') : route.continue(),
+    );
+
+    await page.goto('/shop');
+    await expect(page.getByText(/of 40 results/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole('alert')).toContainText('Categories could not be loaded');
+
+    fail = false;
+    await page.getByRole('button', { name: 'Try categories again' }).click();
+    await expect(page.getByRole('alert')).toHaveCount(0);
+    await page.getByRole('button', { name: /Bedroom \(/ }).click();
+    await expect(page).toHaveURL(/category=bedroom/);
+    await expect(page.getByText(/of 7 results/)).toBeVisible();
+  });
+
   test('a network failure shows an error, not a blank page', async ({ page }) => {
     await page.route('**/api/products*', (route) => route.abort('failed'));
     await page.goto('/shop');

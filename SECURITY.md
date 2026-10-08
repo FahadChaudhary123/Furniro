@@ -105,18 +105,23 @@ server, in an environment variable, and nowhere else — never in `Frontend/`, n
 
 ### 3. Dependency auditing — now enforced
 
-`npm audit --audit-level=high` runs in CI across both packages and blocks a merge, alongside
-a `gitleaks` secret scan and an explicit check that no `.env` is tracked
-(`.github/workflows/ci.yml`).
+`npm audit --audit-level=high` runs in CI across both packages on pushes, pull requests and
+a weekly Tuesday 03:17 UTC schedule. It blocks a merge on high or critical findings.
+Pushes and pull requests also run a `gitleaks` secret scan and an explicit check that no
+`.env` is tracked (`.github/workflows/ci.yml`).
 
 It found 23 vulnerabilities the first time it ran — 15 in `Frontend`, 8 in `Backend`,
 including `react-router-dom`, a runtime dependency that shipped to users. All were resolved.
 
 Still outstanding: `Frontend` runs a **beta** of Vite 8 pinned through `overrides`, which
-forces that version onto transitive dependents including any not tested against it. And
-there is no Dependabot or scheduled sweep — the gate only fires on a pull request, so a
-vulnerability disclosed between PRs goes unnoticed until the next one. Doc B §10 asks for a
-weekly full sweep.
+forces that version onto transitive dependents including any not tested against it.
+Dependabot is configured to propose weekly updates for both npm packages and GitHub Actions;
+its pull requests require the normal review and CI gates. In particular, review any Vite
+proposal against the beta pin and override rather than merging it automatically. Dependabot
+security update pull requests also require the repository's security updates setting to be
+enabled. The weekly scan and Dependabot have not run on GitHub with these changes yet, and
+no named owner or alert route is recorded for a failed scheduled run. Review the audit job
+and proposed updates in GitHub each week until ownership and notifications are assigned.
 
 ---
 

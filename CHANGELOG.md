@@ -14,6 +14,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- The shop now shows a category loading error with a retry button while keeping products
+  visible; category filters return when the request succeeds.
+
+- Configured weekly Dependabot update proposals for both npm packages and GitHub Actions.
+  Updates still require review and CI; Vite beta changes need deliberate compatibility review.
+
+- Scheduled the existing dependency audit for a weekly run, so new advisories can surface
+  even when no code change opens a pull request. First live run and alert routing await review.
+
 - Guest cart changes now synchronize between open tabs of the same storefront, so badges
   and cart lines update when another tab adds or removes an item.
 

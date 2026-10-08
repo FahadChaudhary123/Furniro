@@ -31,7 +31,7 @@ const ProductGrid = () => {
     : DEFAULT_LIMIT;
 
   const { products, meta, loading, error, retry } = useProducts({ page, limit, sort, category, q });
-  const { categories } = useCategories();
+  const { categories, error: categoriesError, retry: retryCategories } = useCategories();
 
   /**
    * Write params, dropping any that equal their default so the URL stays readable.
@@ -94,6 +94,14 @@ const ProductGrid = () => {
       </form>
 
       {/* Categories */}
+      {categoriesError && !error && (
+        <div role="alert" className="mb-8 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-900">
+          <p>Categories could not be loaded. Products are still available below.</p>
+          <button type="button" onClick={retryCategories} className="mt-2 font-medium underline">
+            Try categories again
+          </button>
+        </div>
+      )}
       {categories.length > 0 && (
         <div className="mb-8 flex flex-wrap gap-2">
           <button

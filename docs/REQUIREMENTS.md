@@ -484,6 +484,12 @@ it concerns — and it needs legal copy this project will not invent.
 | `SEC-05` | Dependency vulnerability scanning every build plus weekly sweep | §10 | 0 | ✅ |
 | `SEC-06` | Secret scanning in CI | §2, §3 | 0 | ✅ |
 
+`SEC-05` now has a weekly scheduled audit of both package lockfiles in addition to its
+push and pull-request gate. The schedule is configured in CI; its first GitHub run and
+failure notification route still need verification. Dependabot is configured to propose
+weekly npm and workflow-action version updates for review. Security update pull requests
+depend on the repository setting and are not claimed active yet.
+
 `PLAT-01`–`03` landed with the platform module.
 
 **`PLAT-04` is partial: tracking exists, alerting does not.** A crash in a visitor's browser

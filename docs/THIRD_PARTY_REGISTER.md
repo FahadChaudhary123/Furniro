@@ -36,7 +36,7 @@ Added because the project now depends on it operationally, not just for storage.
 
 | Field | Value |
 |---|---|
-| **Service & purpose** | Source hosting and CI (`.github/workflows/ci.yml`). Gates every merge: lint, build, performance budgets, end-to-end, API smoke, dependency audit, secret scan |
+| **Service & purpose** | Source hosting and CI (`.github/workflows/ci.yml`). Gates every merge: lint, build, performance budgets, end-to-end, API smoke, dependency audit, secret scan. Dependabot is configured to propose weekly npm and workflow-action updates |
 | **Criticality** | **Degrading.** An outage blocks merges and releases; it does not affect anything running |
 | **Support route** | Community support on the free plan. No SLA |
 | **Status page** | <https://www.githubstatus.com> — **not currently subscribed by anyone** |
