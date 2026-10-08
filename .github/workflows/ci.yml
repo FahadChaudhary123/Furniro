@@ -255,7 +255,7 @@ jobs:
       # Doc B §2: "Committing a secret is treated as a Sev 2 incident and the secret is
       # rotated, not just removed from history." This gate is what stops it reaching main.
       - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
