@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Featured product images and names on the home page now open their product detail pages;
+  the hover cart action remains available.
+
 - Home page room cards now open their matching shop categories. If category data is
   temporarily unavailable, the cards still lead to the unfiltered shop.
 

@@ -71,6 +71,31 @@ test.describe('home page', () => {
     await expect(page.getByRole('heading', { name: 'Potty' })).toBeVisible();
   });
 
+  test('a featured product opens its detail page from the name and image', async ({ page }) => {
+    const card = featuredGrid(page).locator('> div').filter({
+      has: page.getByRole('heading', { name: 'Syltherine' }),
+    });
+    await expect(card.getByRole('link', { name: 'Syltherine' })).toHaveAttribute('href', '/shop/syltherine');
+    await card.getByRole('link', { name: 'Syltherine' }).click();
+    await expect(page).toHaveURL(/\/shop\/syltherine$/);
+    await expect(page.getByRole('heading', { level: 1, name: 'Syltherine' })).toBeVisible();
+
+    await page.goto('/');
+    const imageLink = featuredGrid(page).locator('a[aria-hidden="true"][href="/shop/syltherine"]');
+    await imageLink.click({ position: { x: 10, y: 100 } });
+    await expect(page).toHaveURL(/\/shop\/syltherine$/);
+  });
+
+  test('the featured hover cart action still adds a product', async ({ page }) => {
+    const card = featuredGrid(page).locator('> div').filter({
+      has: page.getByRole('heading', { name: 'Syltherine' }),
+    });
+    await card.hover();
+    await card.getByRole('button', { name: 'Add Syltherine to cart' }).click();
+    await page.getByRole('link', { name: /Cart/ }).click();
+    await expect(page.getByRole('link', { name: 'Syltherine' })).toBeVisible();
+  });
+
   test('every featured image loads', async ({ page }) => {
     const images = featuredGrid(page).locator('img');
     await expect(images).toHaveCount(8);

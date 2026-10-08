@@ -40,22 +40,24 @@ const ProductsSection = () => {
                 </span>
               )}
 
-              {/* Image */}
-              <Picture
-                src={item.image.src}
-                webp={item.image.webp}
-                avif={item.image.avif}
-                alt={item.name}
-                loading="lazy"
-                className="w-full h-72 object-cover"
-              />
+              {/* The title is the keyboard link; the image shares its destination for pointers. */}
+              <Link to={`/shop/${item.slug}`} aria-hidden="true" tabIndex={-1}>
+                <Picture
+                  src={item.image.src}
+                  webp={item.image.webp}
+                  avif={item.image.avif}
+                  alt={item.name}
+                  loading="lazy"
+                  className="w-full h-72 object-cover"
+                />
+              </Link>
 
               {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition">
+              <div className="pointer-events-none absolute inset-0 bg-black/50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition">
                 <button
                   onClick={() => add(item.slug)}
                   aria-label={`Add ${item.name} to cart`}
-                  className="bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold"
+                  className="pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold"
                 >
                   Add to cart
                 </button>
@@ -66,7 +68,11 @@ const ProductsSection = () => {
 
               {/* Content */}
               <div className="p-4 bg-[#F4F5F7]">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
+                <h3 className="text-lg font-semibold">
+                  <Link to={`/shop/${item.slug}`} className="hover:text-[#B88E2F] focus-visible:underline">
+                    {item.name}
+                  </Link>
+                </h3>
                 <p className="text-sm text-gray-600 mb-2">{item.description}</p>
 
                 <div className="flex items-center gap-2">
