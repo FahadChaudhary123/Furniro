@@ -20,6 +20,40 @@ test.describe('blog listing', () => {
     await expect(page.locator('article')).toHaveCount(3);
   });
 
+  test('blog search filters posts and keeps the query in the URL', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search the blog' }).fill('creating spaces');
+    await page.getByRole('button', { name: 'Search blog posts' }).click();
+    await expect(page).toHaveURL(/q=creating\+spaces/);
+    await expect(page.locator('article')).toHaveCount(1);
+    await expect(page.getByRole('heading', { name: 'Creating spaces that inspire productivity' })).toBeVisible();
+  });
+
+  test('blog categories filter posts and can be cleared', async ({ page }) => {
+    await page.getByRole('button', { name: 'Wood', exact: true }).click();
+    await expect(page).toHaveURL(/tag=wood/);
+    await expect(page.locator('article')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Wood', exact: true }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.locator('article')).toHaveCount(3);
+  });
+
+  test('a blog search with no results offers to clear the filters', async ({ page }) => {
+    await page.getByRole('searchbox', { name: 'Search the blog' }).fill('nothingmatches');
+    await page.getByRole('button', { name: 'Search blog posts' }).click();
+    await expect(page.getByText('No posts match those filters.')).toBeVisible();
+    await page.getByRole('button', { name: 'Clear blog filters' }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.locator('article')).toHaveCount(3);
+  });
+
+  test('an out-of-range blog page offers the first page', async ({ page }) => {
+    await page.goto('/about?page=99');
+    await expect(page.getByText('This blog page is no longer available.')).toBeVisible();
+    await page.getByRole('button', { name: 'Go to first page' }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(page.locator('article')).toHaveCount(3);
+  });
+
   test('posts are newest first', async ({ page }) => {
     const dates = await page.locator('article time').evaluateAll((els) =>
       els.map((el) => el.getAttribute('datetime')),

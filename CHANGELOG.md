@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Blog search and category filters now work through the posts API and persist in the URL.
+  Searches with no matches offer a way back to all posts.
+
 - Opening a product from a filtered shop now preserves that shop URL for the detail page's
   breadcrumb and Back to shop link. Direct product links still return to the main shop.
 

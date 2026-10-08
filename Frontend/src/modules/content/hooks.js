@@ -30,10 +30,10 @@ function useAsync(run, deps) {
   return { ...state, retry };
 }
 
-export function usePosts({ page = 1, limit = 3, tag } = {}) {
+export function usePosts({ page = 1, limit = 3, tag, q } = {}) {
   const { data, loading, error, retry } = useAsync(
-    (opts) => fetchPosts({ page, limit, tag }, opts),
-    [page, limit, tag],
+    (opts) => fetchPosts({ page, limit, tag, q }, opts),
+    [page, limit, tag, q],
   );
   return { posts: data?.data ?? [], meta: data?.meta ?? null, loading, error, retry };
 }

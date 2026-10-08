@@ -271,6 +271,8 @@ Flat list, unpaginated — there are seven.
 > ✅ **Implemented.** `Backend/src/modules/content/`
 
 Paginated, `limit` default `3`. Sorted `published_at:desc`.
+Optional `q` searches title, excerpt and body for all query words (case-insensitive), and
+`tag` restricts results to one known tag. Both filters apply before pagination.
 
 `published_at` is a real timestamp in the JSON repository, formatted at render time.
 

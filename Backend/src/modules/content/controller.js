@@ -33,9 +33,13 @@ export function listPosts(req, res) {
   const tag = req.query.tag ?? null;
   if (tag && !service.tagExists(tag)) problems.push({ field: 'tag', issue: 'unknown tag' });
 
+  const search = typeof req.query.q === 'string' && req.query.q.trim()
+    ? req.query.q.trim().slice(0, 100)
+    : null;
+
   if (problems.length) throw validationFailed(problems);
 
-  res.json(service.listPosts({ page, limit, tag }));
+  res.json(service.listPosts({ page, limit, tag, search }));
 }
 
 export function listRecent(req, res) {

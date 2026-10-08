@@ -24,12 +24,12 @@ export const ProductGridSkeleton = ({ count = 8 }) => (
   </div>
 );
 
-export const CatalogueError = ({ error, onRetry }) => (
+export const CatalogueError = ({ error, onRetry, title = 'Products could not be loaded' }) => (
   <div
     role="alert"
     className="border border-red-200 bg-red-50 rounded-lg p-8 text-center max-w-xl mx-auto"
   >
-    <h3 className="font-semibold text-gray-900">Products could not be loaded</h3>
+    <h3 className="font-semibold text-gray-900">{title}</h3>
     <p className="mt-2 text-sm text-gray-600">
       {error?.message ?? 'Something went wrong.'}
     </p>

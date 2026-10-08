@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search, User, Calendar, Tag } from "lucide-react";
 import { usePosts, useRecentPosts, useTags, formatPostDate } from "../modules/content";
 import { CatalogueError } from "../components/CatalogueState";
@@ -24,9 +24,24 @@ const PostSkeleton = () => (
 );
 
 const BlogSection = () => {
-  const { posts, loading, error, retry } = usePosts({ limit: 3 });
+  const [params, setParams] = useSearchParams();
+  const q = params.get("q") ?? "";
+  const selectedTag = params.get("tag");
+  const page = Math.max(1, Number(params.get("page")) || 1);
+  const { posts, meta, loading, error, retry } = usePosts({ page, limit: 3, tag: selectedTag, q });
   const { posts: recent } = useRecentPosts();
   const { tags } = useTags();
+  const pageOutOfRange = Boolean(meta && page > meta.total_pages);
+
+  const update = (changes) => {
+    const next = new URLSearchParams(params);
+    for (const [key, value] of Object.entries(changes)) {
+      if (value === null || value === "") next.delete(key);
+      else next.set(key, String(value));
+    }
+    if (!Object.hasOwn(changes, "page")) next.delete("page");
+    setParams(next);
+  };
 
   return (
     <section className="bg-gray-100 py-16">
@@ -34,14 +49,28 @@ const BlogSection = () => {
         {/* ===== LEFT SIDE - Blog Posts ===== */}
         <div className="lg:col-span-2 space-y-10">
           {error ? (
-            <CatalogueError error={error} onRetry={retry} />
+            <CatalogueError title="Posts could not be loaded" error={error} onRetry={retry} />
           ) : loading ? (
             <>
               <PostSkeleton />
               <PostSkeleton />
             </>
+          ) : pageOutOfRange ? (
+            <div className="py-16 text-center text-gray-600">
+              <p>This blog page is no longer available.</p>
+              <button onClick={() => update({ page: null })} className="mt-4 underline">
+                Go to first page
+              </button>
+            </div>
           ) : posts.length === 0 ? (
-            <p className="text-gray-500 py-16 text-center">No posts yet.</p>
+            <div className="py-16 text-center text-gray-600">
+              <p>{q || selectedTag ? "No posts match those filters." : "No posts yet."}</p>
+              {(q || selectedTag) && (
+                <button onClick={() => update({ q: null, tag: null })} className="mt-4 underline">
+                  Clear blog filters
+                </button>
+              )}
+            </div>
           ) : (
             posts.map((post) => (
               <article
@@ -86,25 +115,40 @@ const BlogSection = () => {
               </article>
             ))
           )}
+          {!error && !loading && !pageOutOfRange && meta?.total_pages > 1 && (
+            <nav aria-label="Blog pages" className="flex justify-center gap-4">
+              <button disabled={page <= 1} onClick={() => update({ page: page - 1 === 1 ? null : page - 1 })}
+                className="rounded border px-4 py-2 disabled:opacity-50">Previous</button>
+              <span className="self-center">Page {page} of {meta.total_pages}</span>
+              <button disabled={page >= meta.total_pages} onClick={() => update({ page: page + 1 })}
+                className="rounded border px-4 py-2 disabled:opacity-50">Next</button>
+            </nav>
+          )}
         </div>
 
         {/* ===== RIGHT SIDE - Sidebar ===== */}
         <div className="space-y-10">
-          {/* Search — no handler yet; see CHANGELOG.md#known-issues */}
+          {/* Search and category filters share URL state for bookmarkable blog views. */}
           <div className="bg-white p-5 rounded-xl shadow-sm">
-            <div className="relative">
+            <form role="search" className="relative" onSubmit={(event) => {
+              event.preventDefault();
+              update({ q: new FormData(event.currentTarget).get("q")?.toString().trim() || null });
+            }}>
               <label className="sr-only" htmlFor="blog-search">Search the blog</label>
               <input
                 id="blog-search"
+                name="q"
                 type="search"
+                key={q}
+                defaultValue={q}
                 placeholder="Search..."
                 className="w-full border border-gray-300 rounded-lg py-2 px-4 pr-10 focus:outline-none focus:ring-1 focus:ring-black"
               />
-              <Search
-                size={18}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              />
-            </div>
+              <button type="submit" aria-label="Search blog posts"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-700 hover:bg-gray-100">
+                <Search size={18} aria-hidden="true" />
+              </button>
+            </form>
           </div>
 
           {/* Categories — counts derived from the posts, so they cannot be wrong */}
@@ -116,7 +160,11 @@ const BlogSection = () => {
               <ul className="space-y-4 text-gray-600">
                 {tags.map((tag) => (
                   <li key={tag.slug} className="flex justify-between">
-                    <span>{tag.name}</span>
+                    <button onClick={() => update({ tag: tag.slug === selectedTag ? null : tag.slug })}
+                      aria-pressed={tag.slug === selectedTag}
+                      className="text-left hover:underline aria-pressed:font-semibold">
+                      {tag.name}
+                    </button>
                     <span>{tag.count}</span>
                   </li>
                 ))}

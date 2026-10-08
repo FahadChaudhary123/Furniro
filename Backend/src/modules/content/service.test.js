@@ -20,6 +20,12 @@ describe('post listing', () => {
     expect(data.every((p) => p.tag.toLowerCase() === 'wood')).toBe(true);
   });
 
+  it('searches all query words and combines the search with a tag', () => {
+    const { data } = listPosts({ search: 'featured design', tag: 'wood' });
+    expect(data.map((post) => post.slug)).toEqual(['featured-design-trends-for-2022']);
+    expect(listPosts({ search: 'a-term-with-no-matches' }).meta.total).toBe(0);
+  });
+
   it('reports at least one page for a tag that matches nothing', () => {
     const { data, meta } = listPosts({ tag: 'nonexistent', limit: 50 });
     expect(data).toEqual([]);

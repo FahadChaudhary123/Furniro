@@ -5,9 +5,16 @@ import * as repo from './repository.js';
 export const DEFAULT_LIMIT = 3; // the blog page shows three
 export const MAX_LIMIT = 50;
 
-export function listPosts({ page = 1, limit = DEFAULT_LIMIT, tag = null } = {}) {
+export function listPosts({ page = 1, limit = DEFAULT_LIMIT, tag = null, search = null } = {}) {
   let items = repo.findAll();
   if (tag) items = items.filter((p) => p.tag.toLowerCase() === tag.toLowerCase());
+  if (search) {
+    const words = search.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+    items = items.filter((post) => {
+      const text = `${post.title} ${post.excerpt} ${post.body}`.toLocaleLowerCase();
+      return words.every((word) => text.includes(word));
+    });
+  }
 
   const total = items.length;
   const start = (page - 1) * limit;

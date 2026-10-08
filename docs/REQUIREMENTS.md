@@ -87,7 +87,7 @@ breaks both.** Retire an ID rather than reuse it.
 **Stage:** roadmap stage from [OPS_CONFORMANCE.md](OPS_CONFORMANCE.md#adoption-roadmap)
 **ⁱ** = inferred, no direct Doc B evidence
 
-Of the 134 requirements below: **19 built, 12 partial, 103 not built.** Counted from the
+Of the 134 requirements below: **18 built, 13 partial, 103 not built.** Counted from the
 tables in this file, not from memory. Almost everything not built needs a database, an
 authenticated user or a payment gateway — none of which exist yet — so the ratio reflects
 what the current architecture can reach, not a stalled project.
@@ -368,7 +368,7 @@ jurisdiction, which Doc B does not supply. See [Open decisions](#open-decisions)
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
-| `CONT-01` | CMS-managed content pages and blog | §8 "Document store / CMS content" | 2 | ✅ |
+| `CONT-01` | CMS-managed content pages and blog | §8 "Document store / CMS content" | 2 | ◐ |
 | `CONT-02` | Legal pages: terms, privacy, returns | §4 | 1 | ⭕ |
 | `CONT-03` | Broken-link, 404-spike and redirect-chain reporting | §4 | 2 | ◐ |
 | `CONT-04` | SEO health: index coverage, crawl errors, duplicate titles, orphaned pages | §15 | 2 | ◐ |
@@ -380,8 +380,9 @@ jurisdiction, which Doc B does not supply. See [Open decisions](#open-decisions)
 | `NOTIF-04` | SPF, DKIM and DMARC configured and monitored | §7 R10 | 3 | ⭕ |
 | `NOTIF-05` | Non-production environments route all mail to a catch-all mailbox | §2 | 1 | ⭕ |
 
-`CONT-01` is partial: a blog section exists, hardcoded in a component, with a display-string
-date that cannot be sorted.
+`CONT-01` is partial: the blog now reads dated posts from a JSON-backed API. Readers can
+search post text and filter by category, with shareable URLs. CMS-managed editing and finished
+editorial copy are still absent, so the content workflow in the requirement is not built.
 
 **`CONT-03` is partial.** Broken-link detection is built as browser checks
 (`Frontend/e2e/links.spec.js`): the suite crawls every page, collects every link instance and
@@ -653,15 +654,15 @@ complete and non-overlapping.
 
 | Domain | Reqs | ✅ | ◐ | ⭕ |
 |---|---|---|---|---|
-| Catalogue, search, content | 21 | 8 | 7 | 6 |
+| Catalogue, search, content | 21 | 7 | 8 | 6 |
 | Cart, checkout, payments | 27 | 1 | 0 | 26 |
 | Orders, inventory, fulfilment, returns | 24 | 0 | 0 | 24 |
 | Accounts, promotions, reviews, notifications | 17 | 1 | 1 | 15 |
 | Back office, support, privacy | 17 | 1 | 0 | 16 |
 | Platform, security, non-functional | 28 | 8 | 4 | 16 |
-| **Total** | **134** | **19** | **12** | **103** |
+| **Total** | **134** | **18** | **13** | **103** |
 
-**19 of 134 requirements are marked built** in the tables above; another 12 are partial.
+**18 of 134 requirements are marked built** in the tables above; another 13 are partial.
 The remaining 103 require capabilities such as a database, identity, or a payment gateway.
 
 This is the distance between the current storefront and the trading operation Document B
