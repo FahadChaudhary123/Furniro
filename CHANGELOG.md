@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Home page room cards now open their matching shop categories. If category data is
+  temporarily unavailable, the cards still lead to the unfiltered shop.
+
 - Added minimum and maximum price controls to the shop. Prices are converted to integer minor
   units for the catalogue API; filters persist in the URL and can be cleared together.
 

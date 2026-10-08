@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
+import { useCategories } from "../modules/catalogue";
 import { buildAssetPairs } from "../shared/lib/assetPairs";
 import Picture from "../shared/ui/Picture";
 
@@ -14,18 +16,21 @@ const img = buildAssetPairs(
 const categories = [
   {
     title: "Dining",
+    categoryName: "Dining",
     description:
       "Where moments are shared and future-ready design meets everyday functionality.",
     images: [img["dining-1"], img["dining-2"], img["dining-3"]],
   },
   {
     title: "Living",
+    categoryName: "Living Room",
     description:
       "Comfort reimagined with intelligent design crafted for modern lifestyles.",
     images: [img["living-1"], img["living-2"], img["living-3"]],
   },
   {
     title: "Bedroom",
+    categoryName: "Bedroom",
     description:
       "A calming sanctuary designed to help you rest, recharge, and dream ahead.",
     images: [img["bedroom-1"], img["bedroom-2"], img["bedroom-3"]],
@@ -33,6 +38,8 @@ const categories = [
 ];
 
 const BrowseRange = () => {
+  const { categories: shopCategories } = useCategories();
+  const categorySlugs = new Map(shopCategories.map((category) => [category.name, category.slug]));
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -63,14 +70,25 @@ const BrowseRange = () => {
         {/* Cards */}
         <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-10">
           {categories.map((cat, index) => (
-            <div
-              key={index}
-              className="group cursor-pointer"
+            <Link
+              key={cat.title}
+              to={categorySlugs.has(cat.categoryName)
+                ? `/shop?category=${categorySlugs.get(cat.categoryName)}`
+                : "/shop"}
+              className="group block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B88E2F]"
               onMouseEnter={() => {
                 setHoveredIndex(index);
                 setImageIndex(0);
               }}
               onMouseLeave={() => {
+                setHoveredIndex(null);
+                setImageIndex(0);
+              }}
+              onFocus={() => {
+                setHoveredIndex(index);
+                setImageIndex(0);
+              }}
+              onBlur={() => {
                 setHoveredIndex(null);
                 setImageIndex(0);
               }}
@@ -93,7 +111,7 @@ const BrowseRange = () => {
               <p className="mt-2 text-gray-500">
                 {cat.description}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -153,6 +153,10 @@ The first checkout market is Pakistan in PKR. The existing catalogue is still ID
 whole-catalogue validation step. `CAT-01` stays partial until approved PKR amounts and the
 missing tax, weight and SEO fields are supplied.
 
+`CAT-06` category browsing is available from the shop filters and the home page room cards.
+The cards use category slugs returned by the API; when that request fails, they link to the
+unfiltered shop instead of pointing to an unverified category URL.
+
 **`CAT-08` is partial.** A product leaves the catalogue by failing the publish gate or by
 carrying `"discontinued": true`. Its slug is retained rather than dropped — a slug the server
 has forgotten can only 404, and §15 is explicit that an indexed URL should never land on one.

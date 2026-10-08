@@ -33,6 +33,31 @@ test.describe('home page', () => {
     }
   });
 
+  test('room cards open their matching shop categories', async ({ page }) => {
+    for (const [name, slug, count] of [
+      ['Dining', 'dining', 5],
+      ['Living', 'living-room', 12],
+      ['Bedroom', 'bedroom', 7],
+    ]) {
+      const link = page.locator('a').filter({ has: page.getByRole('heading', { name, exact: true }) });
+      await expect(link).toHaveAttribute('href', `/shop?category=${slug}`);
+      await link.click();
+      await expect(page).toHaveURL(new RegExp(`category=${slug}`));
+      await expect(page.getByText(new RegExp(`of ${count} results`))).toBeVisible();
+      await page.goto('/');
+    }
+  });
+
+  test('room cards still open the shop when categories cannot load', async ({ page }) => {
+    await page.route('**/api/categories', (route) => route.abort('failed'));
+    await page.reload();
+    const link = page.locator('a').filter({ has: page.getByRole('heading', { name: 'Dining', exact: true }) });
+    await expect(link).toHaveAttribute('href', '/shop');
+    await link.click();
+    await expect(page).toHaveURL(/\/shop$/);
+    await expect(page.getByText(/of 40 results/)).toBeVisible();
+  });
+
   test('shows exactly 8 featured products from the API', async ({ page }) => {
     // HomePage wraps every section in a <motion.section>, so filtering `section` by the
     // heading matches the outer wrapper as well and spans the whole page. Target the grid
