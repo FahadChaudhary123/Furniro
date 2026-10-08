@@ -55,15 +55,15 @@ function useAsync(run, deps) {
  * holding all 40 rows and sorting locally would stop working the moment the catalogue
  * outgrows one page.
  */
-export function useProducts({ page = 1, limit = 16, sort, category, q } = {}) {
+export function useProducts({ page = 1, limit = 16, sort, category, q, minPrice, maxPrice } = {}) {
   const params = useMemo(
-    () => ({ page, limit, sort, category, q }),
-    [page, limit, sort, category, q],
+    () => ({ page, limit, sort, category, q, min_price: minPrice, max_price: maxPrice }),
+    [page, limit, sort, category, q, minPrice, maxPrice],
   );
 
   const { data, loading, error, retry } = useAsync(
     (opts) => fetchProducts(params, opts),
-    [page, limit, sort, category, q],
+    [page, limit, sort, category, q, minPrice, maxPrice],
   );
 
   return {

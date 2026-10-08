@@ -11,6 +11,13 @@ import { test, expect } from '@playwright/test';
 const settled = (page) => expect(page.getByText(/of \d+ results/)).toBeVisible({ timeout: 15_000 });
 
 test.describe('filtering by URL', () => {
+  test('a price range in the URL filters the grid on first load', async ({ page }) => {
+    await page.goto('/shop?min_price=250000000&max_price=250000000');
+    await expect(page.getByText(/of 4 results/)).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByLabel('Minimum price')).toHaveValue('2500000');
+    await expect(page.getByLabel('Maximum price')).toHaveValue('2500000');
+  });
+
   test('an out-of-range page offers a valid page without claiming impossible results', async ({ page }) => {
     await page.goto('/shop?page=999');
 
@@ -187,6 +194,34 @@ test.describe('a search that finds nothing offers a way out', () => {
     await expect(page.getByText(/No products match/)).toBeVisible();
     await expect(page.getByRole('button', { name: 'Clear search' })).toBeVisible();
     await expect(page.getByText(/browse by room/i)).toBeVisible();
+  });
+
+  test('price filters compose with categories and clear together', async ({ page }) => {
+    await page.goto('/shop');
+    await settled(page);
+    await page.getByLabel('Minimum price').fill('2500000');
+    await page.getByLabel('Maximum price').fill('2500000');
+    await page.getByRole('button', { name: 'Apply price' }).click();
+    await expect(page).toHaveURL(/min_price=250000000/);
+    await expect(page).toHaveURL(/max_price=250000000/);
+    await expect(page.getByText(/of 4 results/)).toBeVisible();
+
+    await page.getByRole('button', { name: /^Living Room/ }).click();
+    await expect(page).toHaveURL(/category=living-room/);
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await expect(page).toHaveURL(/\/shop$/);
+    await expect(page.getByText(/of 40 results/)).toBeVisible();
+  });
+
+  test('an invalid price range is explained without sending a bad request', async ({ page }) => {
+    await page.goto('/shop');
+    await settled(page);
+    await page.getByLabel('Minimum price').fill('10');
+    await page.getByLabel('Maximum price').fill('5');
+    await page.getByRole('button', { name: 'Apply price' }).click();
+    await expect(page.getByRole('alert')).toContainText('minimum no greater than the maximum');
+    await expect(page).toHaveURL(/\/shop$/);
+    await expect(page.getByText(/of 40 results/)).toBeVisible();
   });
 
   test('drops the narrower filter first when searching inside a category', async ({ page }) => {

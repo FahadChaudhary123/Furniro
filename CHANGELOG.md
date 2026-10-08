@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added minimum and maximum price controls to the shop. Prices are converted to integer minor
+  units for the catalogue API; filters persist in the URL and can be cleared together.
+
 - The shop now shows a category loading error with a retry button while keeping products
   visible; category filters return when the request succeeds.
 

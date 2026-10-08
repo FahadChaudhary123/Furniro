@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import ProductCard from './ProductCard';
@@ -7,6 +7,22 @@ import { useProducts, useCategories, SORT_OPTIONS, DEFAULT_SORT } from '../modul
 
 const PAGE_SIZE_OPTIONS = [16, 32, 48];
 const DEFAULT_LIMIT = PAGE_SIZE_OPTIONS[0];
+
+const displayPrice = (raw) => {
+  if (raw === null) return '';
+  const minor = Number(raw);
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(minor)) return raw;
+  return `${Math.floor(minor / 100)}${minor % 100 ? `.${String(minor % 100).padStart(2, '0')}` : ''}`;
+};
+
+const parsePrice = (value) => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (!/^\d+(?:\.\d{1,2})?$/.test(trimmed)) return NaN;
+  const [whole, fraction = ''] = trimmed.split('.');
+  const minor = Number(`${whole}${fraction.padEnd(2, '0')}`);
+  return Number.isSafeInteger(minor) ? minor : NaN;
+};
 
 /**
  * The shop.
@@ -21,16 +37,21 @@ const DEFAULT_LIMIT = PAGE_SIZE_OPTIONS[0];
  */
 const ProductGrid = () => {
   const [params, setParams] = useSearchParams();
+  const [priceError, setPriceError] = useState('');
 
   const category = params.get('category') ?? null;
   const q = params.get('q') ?? '';
+  const minPrice = params.get('min_price');
+  const maxPrice = params.get('max_price');
   const sort = params.get('sort') ?? DEFAULT_SORT;
   const page = Math.max(1, Number(params.get('page')) || 1);
   const limit = PAGE_SIZE_OPTIONS.includes(Number(params.get('limit')))
     ? Number(params.get('limit'))
     : DEFAULT_LIMIT;
 
-  const { products, meta, loading, error, retry } = useProducts({ page, limit, sort, category, q });
+  const { products, meta, loading, error, retry } = useProducts({
+    page, limit, sort, category, q, minPrice, maxPrice,
+  });
   const { categories, error: categoriesError, retry: retryCategories } = useCategories();
 
   /**
@@ -58,7 +79,7 @@ const ProductGrid = () => {
   const start = (page - 1) * limit;
   const pageOutOfRange = Boolean(meta && !loading && !error && page > totalPages);
   const activeCategory = categories.find((c) => c.slug === category);
-  const hasFilters = Boolean(category || q);
+  const hasFilters = Boolean(category || q || minPrice !== null || maxPrice !== null);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-16">
@@ -91,6 +112,40 @@ const ProductGrid = () => {
         >
           Search
         </button>
+      </form>
+
+      <form
+        className="mb-8 flex flex-wrap items-end gap-3"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const data = new FormData(e.currentTarget);
+          const min = parsePrice(String(data.get('min_price') ?? ''));
+          const max = parsePrice(String(data.get('max_price') ?? ''));
+          if (Number.isNaN(min) || Number.isNaN(max) || (min !== null && max !== null && min > max)) {
+            setPriceError('Enter valid prices with a minimum no greater than the maximum.');
+            return;
+          }
+          setPriceError('');
+          update({ min_price: min, max_price: max });
+        }}
+      >
+        <p className="w-full text-sm text-gray-600">Enter prices in the currency shown on products.</p>
+        <div>
+          <label htmlFor="min-price" className="block text-sm text-gray-700">Minimum price</label>
+          <input id="min-price" name="min_price" type="text" inputMode="decimal"
+            key={`min-${minPrice}`} defaultValue={displayPrice(minPrice)}
+            className="mt-1 w-36 rounded border border-gray-300 px-3 py-2" placeholder="0" />
+        </div>
+        <div>
+          <label htmlFor="max-price" className="block text-sm text-gray-700">Maximum price</label>
+          <input id="max-price" name="max_price" type="text" inputMode="decimal"
+            key={`max-${maxPrice}`} defaultValue={displayPrice(maxPrice)}
+            className="mt-1 w-36 rounded border border-gray-300 px-3 py-2" placeholder="Any" />
+        </div>
+        <button type="submit" className="rounded bg-[#B88E2F] px-5 py-2 font-medium text-gray-900 hover:bg-[#a57f28]">
+          Apply price
+        </button>
+        {priceError && <p role="alert" className="w-full text-sm text-red-700">{priceError}</p>}
       </form>
 
       {/* Categories */}
@@ -143,7 +198,7 @@ const ProductGrid = () => {
 
           {hasFilters && (
             <button
-              onClick={() => update({ category: null, q: null })}
+              onClick={() => { setPriceError(''); update({ category: null, q: null, min_price: null, max_price: null }); }}
               className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-[#B88E2F] transition"
             >
               <X size={14} /> Clear filters

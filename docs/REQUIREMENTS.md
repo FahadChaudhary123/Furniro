@@ -210,10 +210,11 @@ and is not currently meaningful. Search is an in-process filter over an array wi
 separate service to fail; if it is unavailable the whole catalogue is unavailable, which the
 error state already handles. That half becomes real when `SRCH-01`'s index exists.
 
-`SRCH-07` is met. Category, search term, sort, page and page size all live in the URL and
-map onto parameters the API already validates, so a filtered view is shareable and the back
-button works. An out-of-range page URL offers a return to the first page without claiming
-results that do not exist. Indexed full-text search (`SRCH-01`–`06`) is still a separate concern.
+`SRCH-07` is met. Category, search term, minimum and maximum price, sort, page and page size
+all live in the URL and map onto parameters the API already validates. A filtered view is
+shareable, and the back button works. An out-of-range page URL offers a return to the first
+page without claiming results that do not exist. Indexed full-text search (`SRCH-01`–`06`)
+is still a separate concern.
 
 ## 6. Cart — `CART`
 
