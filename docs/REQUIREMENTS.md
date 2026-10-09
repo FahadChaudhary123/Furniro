@@ -383,7 +383,8 @@ jurisdiction, which Doc B does not supply. See [Open decisions](#open-decisions)
 | `NOTIF-05` | Non-production environments route all mail to a catch-all mailbox | §2 | 1 | ⭕ |
 
 `CONT-01` is partial: the blog now reads dated posts from a JSON-backed API. Readers can
-search post text and filter by category, with shareable URLs. CMS-managed editing and finished
+search post text and filter by category, with shareable URLs. Article links preserve the
+filtered listing for a return visit. CMS-managed editing and finished
 editorial copy are still absent, so the content workflow in the requirement is not built.
 
 **`CONT-03` is partial.** Broken-link detection is built as browser checks

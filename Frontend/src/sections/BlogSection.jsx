@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { Search, User, Calendar, Tag } from "lucide-react";
 import { usePosts, useRecentPosts, useTags, formatPostDate } from "../modules/content";
 import { CatalogueError } from "../components/CatalogueState";
@@ -25,6 +25,8 @@ const PostSkeleton = () => (
 
 const BlogSection = () => {
   const [params, setParams] = useSearchParams();
+  const location = useLocation();
+  const blogReturnTo = `/about${location.search}`;
   const q = params.get("q") ?? "";
   const selectedTag = params.get("tag");
   const page = Math.max(1, Number(params.get("page")) || 1);
@@ -78,7 +80,7 @@ const BlogSection = () => {
                 className="bg-white rounded-xl overflow-hidden shadow-sm space-y-6 p-6"
               >
                 <h2 className="text-3xl font-semibold">
-                  <Link to={`/blog/${post.slug}`} className="hover:text-[#B88E2F] transition">
+                  <Link to={`/blog/${post.slug}`} state={{ blogReturnTo }} className="hover:text-[#B88E2F] transition">
                     {post.title}
                   </Link>
                 </h2>
@@ -86,6 +88,7 @@ const BlogSection = () => {
 
                 <Link
                   to={`/blog/${post.slug}`}
+                  state={{ blogReturnTo }}
                   className="inline-block border-b border-black pb-1 text-sm font-medium hover:text-[#B88E2F] hover:border-[#B88E2F] transition"
                 >
                   Read more
@@ -181,7 +184,7 @@ const BlogSection = () => {
               <ul className="space-y-6">
                 {recent.map((post) => (
                   <li key={post.id}>
-                    <Link to={`/blog/${post.slug}`} className="flex gap-4 items-center group">
+                    <Link to={`/blog/${post.slug}`} state={{ blogReturnTo }} className="flex gap-4 items-center group">
                       <Picture
                         src={post.image.src}
                         webp={post.image.webp}

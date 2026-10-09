@@ -113,6 +113,26 @@ test.describe('blog listing', () => {
 });
 
 test.describe('blog post', () => {
+  test('returns to the same filtered blog listing', async ({ page }) => {
+    await page.goto('/about?q=creating+spaces&tag=interior');
+    await expect(page.locator('article')).toHaveCount(1);
+    const listingUrl = page.url();
+    await page.locator('article h2 a').click();
+    await expect(page).toHaveURL(/\/blog\/creating-spaces-that-inspire-productivity$/);
+    await expect(page.getByRole('link', { name: 'Back to the blog' })).toHaveAttribute(
+      'href', '/about?q=creating+spaces&tag=interior',
+    );
+    await page.getByRole('link', { name: 'Back to the blog' }).click();
+    await expect(page).toHaveURL(listingUrl);
+    await expect(page.getByRole('searchbox', { name: 'Search the blog' })).toHaveValue('creating spaces');
+    await expect(page.getByRole('button', { name: 'Interior' })).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  test('a directly opened article returns to the main blog', async ({ page }) => {
+    await page.goto('/blog/featured-design-trends-for-2022');
+    await expect(page.getByRole('link', { name: 'Back to the blog' })).toHaveAttribute('href', '/about');
+  });
+
   test('renders the article', async ({ page }) => {
     await page.goto('/blog/featured-design-trends-for-2022');
 

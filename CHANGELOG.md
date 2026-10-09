@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Opening an article from a filtered blog now preserves the listing URL for the article
+  breadcrumb and Back to the blog link; direct article links return to the main blog.
+
 - Product detail pages now let shoppers choose a quantity before adding to the guest cart.
   The control respects the cart's per-product limit and explains when that limit is reached.
 

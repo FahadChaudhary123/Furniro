@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import { User, Calendar, Tag } from 'lucide-react';
 import { usePost, formatPostDate } from '../modules/content';
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
@@ -17,6 +17,11 @@ import Picture from '../shared/ui/Picture';
  */
 const BlogPost = () => {
   const { slug } = useParams();
+  const location = useLocation();
+  const returnTo = typeof location.state?.blogReturnTo === 'string' &&
+    (location.state.blogReturnTo === '/about' || location.state.blogReturnTo.startsWith('/about?'))
+    ? location.state.blogReturnTo
+    : '/about';
   const { post, notFound, loading, error, retry } = usePost(slug);
 
   // Placeholder posts are noindex, matching their exclusion from the sitemap. Excluding a
@@ -38,20 +43,20 @@ const BlogPost = () => {
         title={post?.title ?? (notFound ? 'Not found' : 'Blog')}
         trail={[
           { label: 'Home', to: '/' },
-          { label: 'Blog', to: '/about' },
+          { label: 'Blog', to: returnTo },
           { label: post?.title ?? slug },
         ]}
       />
 
       <section className="max-w-3xl mx-auto px-4 py-16">
         {error ? (
-          <CatalogueError error={error} onRetry={retry} />
+          <CatalogueError title="Post could not be loaded" error={error} onRetry={retry} />
         ) : notFound ? (
           <div className="text-center py-16" role="alert">
             <h2 className="text-2xl font-semibold text-gray-900">Post not found</h2>
             <p className="mt-3 text-gray-600">No article matches “{slug}”.</p>
             <Link
-              to="/about"
+              to={returnTo}
               className="mt-8 inline-block bg-[#B88E2F] text-white px-8 py-3 font-semibold hover:bg-[#a57f28] transition"
             >
               Back to the blog
@@ -96,7 +101,7 @@ const BlogPost = () => {
             </div>
 
             <p className="mt-12">
-              <Link to="/about" className="text-sm text-gray-500 hover:text-[#B88E2F] transition">
+              <Link to={returnTo} className="text-sm text-gray-500 hover:text-[#B88E2F] transition">
                 ← Back to the blog
               </Link>
             </p>
