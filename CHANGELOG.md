@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Shop product images now open their detail pages when clicked; the hover cart button remains
+  clickable, and keyboard focus reveals it.
+
 - Opening an article from a filtered blog now preserves the listing URL for the article
   breadcrumb and Back to the blog link; direct article links return to the main blog.
 

@@ -45,11 +45,11 @@ const ProductCard = ({ product, shopReturnTo }) => {
         </Link>
 
         {/* Hover actions */}
-        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center gap-2">
+        <div className="pointer-events-none absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition flex flex-col items-center justify-center gap-2">
           <button
             onClick={() => add(product.slug)}
             aria-label={`Add ${product.name} to cart`}
-            className="bg-white text-sm px-4 py-2 rounded hover:bg-gray-100"
+            className="pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-sm px-4 py-2 rounded hover:bg-gray-100"
           >
             Add to cart
           </button>

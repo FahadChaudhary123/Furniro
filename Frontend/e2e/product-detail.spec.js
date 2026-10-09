@@ -37,6 +37,26 @@ test.describe('product detail', () => {
     await expect(page.getByText('-29%')).toBeVisible();
   });
 
+  test('a shop card image opens its product despite the hover actions', async ({ page }) => {
+    await page.goto('/shop');
+    await expect(page.getByText(/of 40 results/)).toBeVisible({ timeout: 15_000 });
+    const imageLink = page.locator('a[aria-hidden="true"][href="/shop/nordic-wooden-chair"]');
+    await imageLink.click({ position: { x: 10, y: 100 }, timeout: 5_000 });
+    await expect(page).toHaveURL(/\/shop\/nordic-wooden-chair$/);
+  });
+
+  test('the shop card hover action still adds a product', async ({ page }) => {
+    await page.goto('/shop');
+    await expect(page.getByText(/of 40 results/)).toBeVisible({ timeout: 15_000 });
+    const card = page.locator('.group').filter({
+      has: page.getByRole('link', { name: 'Nordic Wooden Chair' }),
+    });
+    await card.hover();
+    await card.getByRole('button', { name: 'Add Nordic Wooden Chair to cart' }).click();
+    await page.goto('/cart');
+    await expect(page.getByRole('link', { name: 'Nordic Wooden Chair' })).toBeVisible();
+  });
+
   test('adds the chosen quantity and shows the remaining cart limit', async ({ page }) => {
     await page.goto('/shop/syltherine');
     await page.getByLabel('Quantity').fill('3');
