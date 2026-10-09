@@ -37,6 +37,29 @@ test.describe('product detail', () => {
     await expect(page.getByText('-29%')).toBeVisible();
   });
 
+  test('adds the chosen quantity and shows the remaining cart limit', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await page.getByLabel('Quantity').fill('3');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await expect(page.getByText('3 in cart. You can add 96 more.')).toBeVisible();
+    await page.goto('/cart');
+    await expect(page.getByLabel('Quantity for Syltherine')).toHaveValue('3');
+  });
+
+  test('rejects invalid quantities and stops at the per-product limit', async ({ page }) => {
+    await page.goto('/shop/syltherine');
+    await page.getByLabel('Quantity').fill('0');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await expect(page.getByRole('alert')).toContainText('Choose a whole quantity from 1 to 99.');
+
+    await page.getByLabel('Quantity').fill('99');
+    await page.getByRole('button', { name: 'Add to cart' }).click();
+    await expect(page.getByText('Maximum quantity in cart.')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add to cart' })).toBeDisabled();
+    await page.goto('/cart');
+    await expect(page.getByLabel('Quantity for Syltherine')).toHaveValue('99');
+  });
+
   test('the product image loads', async ({ page }) => {
     await page.goto('/shop/lolito');
     const img = page.getByAltText('Lolito');

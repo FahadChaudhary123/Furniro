@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useParams, useLocation, Link, Navigate } from 'react-router-dom';
 import { useProduct, badgeFor, discountFor } from '../modules/catalogue';
-import { useCart } from '../modules/cart';
+import { useCart, MAX_LINE_QUANTITY } from '../modules/cart';
 import { formatPrice } from '../shared/lib/money';
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 import PageBanner from '../components/PageBanner';
@@ -17,13 +18,16 @@ import Picture from '../shared/ui/Picture';
  */
 const ProductDetail = () => {
   const { slug } = useParams();
+  const [invalidQuantitySlug, setInvalidQuantitySlug] = useState(null);
   const location = useLocation();
   const returnTo = typeof location.state?.shopReturnTo === 'string' &&
     (location.state.shopReturnTo === '/shop' || location.state.shopReturnTo.startsWith('/shop?'))
     ? location.state.shopReturnTo
     : '/shop';
   const { product, notFound, gone, redirectTo, loading, error, retry } = useProduct(slug);
-  const { add } = useCart();
+  const { add, lines } = useCart();
+  const inCart = lines.find((line) => line.slug === slug)?.quantity ?? 0;
+  const remaining = MAX_LINE_QUANTITY - inCart;
 
   // A product page that 404s must not stay indexed, and a page still loading has nothing
   // worth indexing either — both emit noindex until there is a real product to describe.
@@ -147,12 +151,36 @@ const ProductDetail = () => {
                 </div>
               </dl>
 
-              <button
-                onClick={() => add(product.slug)}
-                className="mt-10 border border-[#B88E2F] text-[#B88E2F] px-10 py-3 font-semibold hover:bg-[#B88E2F] hover:text-white transition"
-              >
-                Add to cart
-              </button>
+              <form className="mt-10 flex flex-wrap items-end gap-3" noValidate onSubmit={(event) => {
+                event.preventDefault();
+                const quantity = Number(new FormData(event.currentTarget).get('quantity'));
+                if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > remaining) {
+                  setInvalidQuantitySlug(slug);
+                  return;
+                }
+                add(product.slug, quantity);
+                setInvalidQuantitySlug(null);
+                event.currentTarget.reset();
+              }}>
+                <div>
+                  <label htmlFor="product-quantity" className="block text-sm text-gray-700">Quantity</label>
+                  <input id="product-quantity" name="quantity" type="number" min="1" max={remaining}
+                    step="1" defaultValue="1" disabled={remaining === 0}
+                    className="mt-1 w-20 rounded border border-gray-300 px-3 py-2 disabled:opacity-50" />
+                </div>
+                <button type="submit" disabled={remaining === 0}
+                  className="border border-[#B88E2F] text-[#B88E2F] px-10 py-3 font-semibold hover:bg-[#B88E2F] hover:text-white transition disabled:cursor-not-allowed disabled:opacity-50">
+                  Add to cart
+                </button>
+                <p className="w-full text-sm text-gray-600">
+                  {remaining === 0 ? 'Maximum quantity in cart.' : `${inCart} in cart. You can add ${remaining} more.`}
+                </p>
+                {invalidQuantitySlug === slug && (
+                  <p role="alert" className="w-full text-sm text-red-700">
+                    Choose a whole quantity from 1 to {remaining}.
+                  </p>
+                )}
+              </form>
 
               <p className="mt-8">
                 <Link to={returnTo} className="text-sm text-gray-500 hover:text-[#B88E2F] transition">

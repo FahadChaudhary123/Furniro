@@ -235,7 +235,9 @@ is still a separate concern.
 | `CART-04` | Abandoned carts retained 90 days then deleted, by a monitored job | §9, §11 | 3 | ⭕ |
 | `CART-05`ⁱ | Cart persists across sessions for account holders | — | 3 | ⭕ |
 
-`CART-01` includes recovery from a failed catalogue read: the guest cart retains its saved
+`CART-01` lets shoppers add a chosen quantity from a product page, up to the cart's per-line
+limit, and adjust quantities in the cart. It includes recovery from a failed catalogue read:
+the guest cart retains its saved
 lines, offers a retry, and refreshes prices from the API. A successful read removes lines
 whose products are no longer published. Browser tests cover these paths at desktop and mobile
 sizes. Open tabs synchronize guest-cart changes through browser storage. `CART-02` remains

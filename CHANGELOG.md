@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Product detail pages now let shoppers choose a quantity before adding to the guest cart.
+  The control respects the cart's per-product limit and explains when that limit is reached.
+
 - Blog search and category filters now work through the posts API and persist in the URL.
   Searches with no matches offer a way back to all posts.
 
