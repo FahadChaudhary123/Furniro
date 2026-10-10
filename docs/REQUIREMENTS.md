@@ -427,6 +427,9 @@ directive, and 22 browser checks assert what a crawler actually receives after R
 including that `noindex` is cleaned up on unmount, a leak that would deindex the whole site.
 `sitemap.xml` and `robots.txt` are generated into `dist/` at build time from the catalogue
 the API serves, so they cannot drift from it.
+The blog listing now uses `/blog` for its route, navigation label and canonical URL;
+`npm run seo` reports no local findings. Its former `/about` URL has a Render 301 rule,
+which still needs live verification after deployment.
 
 *Not built:* index coverage and crawl errors. Both are field measurements — they need a
 live domain, a verified Search Console property and real crawler traffic. None of the three

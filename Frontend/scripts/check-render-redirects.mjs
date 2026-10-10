@@ -34,7 +34,7 @@ export function checkRenderRedirects(products, categories, source) {
   }
 
   const errors = [];
-  const expected = listRedirects(products, categories);
+  const expected = [...listRedirects(products, categories), { from: '/about', to: '/blog' }];
   for (const { from, to } of expected) {
     const match = rules.findIndex((rule) => rule.from === from);
     if (match < 0) errors.push(`${from} -> ${to}: missing Render 301`);
@@ -51,7 +51,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1
   const blueprint = readFileSync(join(ROOT, 'render.yaml'), 'utf8');
   try {
     const count = checkRenderRedirects(catalogue.products, catalogue.categories, blueprint);
-    console.log(`Render redirects match catalogue: ${count} discontinued product(s)`);
+    console.log(`Render redirects match required routes: ${count} HTTP 301 rule(s)`);
   } catch (error) {
     console.error(`Render redirect check failed:\n${error.message}`);
     process.exitCode = 1;

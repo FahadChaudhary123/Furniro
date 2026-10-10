@@ -20,7 +20,7 @@ import { test, expect } from '@playwright/test';
 const CRAWL = [
   '/',
   '/shop',
-  '/about',
+  '/blog',
   '/contact',
   '/cart',
   '/shop/syltherine',

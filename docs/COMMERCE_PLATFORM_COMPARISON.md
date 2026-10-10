@@ -1,6 +1,7 @@
 # Commerce platform comparison
 
-**Status:** evaluation, 2026-10-01. [ADR 0012](decisions/0012-adopt-commerce-platform.md)
+**Status:** evaluation, 2026-10-01; payment evidence rechecked 2026-10-10.
+[ADR 0012](decisions/0012-adopt-commerce-platform.md)
 selects a platform approach; it does not select a provider.
 
 The first release needs a provider-owned checkout, order record, payment handling and
@@ -46,6 +47,15 @@ If launch uses cash on delivery, Shopify documents it as a
 Medusa's default [`system` payment provider](https://docs.medusajs.com/resources/commerce-modules/payment/payment-provider)
 can represent manual payment, but it does not process an online charge. Decide whether
 online payment is required at launch before treating either path as sufficient for `PAY-01`.
+
+For a cash-on-delivery launch, Shopify's manual method creates an order marked unpaid;
+an operator marks it paid after collecting the money. Shopify says its third-party
+transaction fee does not apply to manual payments. This removes the need to activate an
+online gateway for the first order, but it does not establish that the merchant can open
+the required store or that shipping, tax and returns are configured correctly. An online
+payment option still requires a confirmed eligible gateway in the merchant account.
+Medusa's `system` provider likewise leaves collection to the merchant and requires an
+operated Medusa service. These are provider capabilities, not an approved COD policy.
 
 ## Gates before selecting a provider
 

@@ -49,9 +49,9 @@ export const ROUTES = [
     changefreq: 'daily',
   },
   {
-    path: '/about',
+    path: '/blog',
     title: 'Blog',
-    navLabel: 'About',
+    navLabel: 'Blog',
     description:
       'Guides, ideas and inspiration for furnishing your home, from the Furniro team.',
     priority: 0.6,

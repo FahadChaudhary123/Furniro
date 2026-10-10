@@ -31,8 +31,8 @@ const Navbar = () => {
             </Link>
           </li>
           <li>
-            <Link to="/about" className="hover:text-[#B88E2F] transition">
-              About
+            <Link to="/blog" className="hover:text-[#B88E2F] transition">
+              Blog
             </Link>
           </li>
           <li>
@@ -122,11 +122,11 @@ const Navbar = () => {
           </li>
           <li>
             <Link
-              to="/about"
+              to="/blog"
               onClick={() => setIsOpen(false)}
               className="hover:text-[#B88E2F] transition"
             >
-              About
+              Blog
             </Link>
           </li>
           <li>

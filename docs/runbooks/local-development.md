@@ -37,7 +37,7 @@ npm run dev
 **Verify:** the terminal prints a `Local:` line and the page loads. It is `5173` unless that
 port is taken, in which case Vite says which one it chose — that is normal, not a failure.
 
-Click through `/`, `/shop`, a product from the grid, `/about`, a blog post, `/cart` and
+Click through `/`, `/shop`, a product from the grid, `/blog`, a blog post, `/cart` and
 `/contact`. An unknown path such as `/nope` should show a 404 page, not a blank one.
 
 **Start the API too.** The shop grid and the home-page product strip fetch from it. Without

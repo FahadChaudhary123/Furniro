@@ -85,7 +85,7 @@ cd Frontend && npm ci && npm run build
 ## 4. Verify
 
 - [ ] The original symptom is gone
-- [ ] The affected route and core storefront routes load (`/`, `/shop`, `/cart`, `/about`, `/contact`)
+- [ ] The affected route and core storefront routes load (`/`, `/shop`, `/cart`, `/blog`, `/contact`)
 - [ ] Hard refresh on `/shop` works
 - [ ] No console errors
 - [ ] The deployed version is the one you intended

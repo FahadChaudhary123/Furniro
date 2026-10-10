@@ -106,7 +106,7 @@ this is worth checking before the first deploy rather than after.
    npm run preview
    ```
 
-   Load `/`, `/shop`, `/shop/syltherine`, `/cart`, `/about`, `/contact` and a blog post.
+   Load `/`, `/shop`, `/shop/syltherine`, `/cart`, `/blog`, `/contact` and a blog post.
    Then **reload the page while on `/shop`** — this
    is the check that catches a missing SPA rewrite.
 
@@ -153,8 +153,9 @@ At deploy time:
   check covers health, build identity, readiness, a published product, CORS, a hard
   request to `/shop`, storefront security headers, the entry script's cache policy,
   `sitemap.xml` coverage and origin, the sitemap URL in `robots.txt`, and every
-  discontinued-product HTTP 301 derived from the local catalogue. Run it from the
-  revision actually deployed, so its expected redirect map matches the release.
+  discontinued-product HTTP 301 derived from the local catalogue. It also verifies
+  `/about` returns HTTP 301 to `/blog`. Run it from the revision actually deployed, so
+  its expected redirect map matches the release.
   The local `npm run smoke` suite sends test errors and malformed requests, so use
   `smoke:deploy` for the live site.
 

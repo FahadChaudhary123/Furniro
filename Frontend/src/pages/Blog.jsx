@@ -5,8 +5,8 @@ import FeaturesSection from '../sections/FeaturesSection'
 import { usePageMeta } from '../shared/lib/usePageMeta.js';
 
 
-function About() {
-  usePageMeta('/about');
+function Blog() {
+  usePageMeta('/blog');
   return (
     <div>
       <PageBanner title="Blog" trail={[{ label: 'Home', to: '/' }, { label: 'Blog' }]} />
@@ -16,4 +16,4 @@ function About() {
   )
 }
 
-export default About
+export default Blog

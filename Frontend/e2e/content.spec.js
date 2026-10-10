@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('blog listing', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/about');
+    await page.goto('/blog');
     await expect(page.getByRole('heading', { name: 'Featured Design Trends for 2022' }))
       .toBeVisible({ timeout: 15_000 });
   });
@@ -33,7 +33,7 @@ test.describe('blog listing', () => {
     await expect(page).toHaveURL(/tag=wood/);
     await expect(page.locator('article')).toHaveCount(1);
     await page.getByRole('button', { name: 'Wood', exact: true }).click();
-    await expect(page).toHaveURL(/\/about$/);
+    await expect(page).toHaveURL(/\/blog$/);
     await expect(page.locator('article')).toHaveCount(3);
   });
 
@@ -42,15 +42,15 @@ test.describe('blog listing', () => {
     await page.getByRole('button', { name: 'Search blog posts' }).click();
     await expect(page.getByText('No posts match those filters.')).toBeVisible();
     await page.getByRole('button', { name: 'Clear blog filters' }).click();
-    await expect(page).toHaveURL(/\/about$/);
+    await expect(page).toHaveURL(/\/blog$/);
     await expect(page.locator('article')).toHaveCount(3);
   });
 
   test('an out-of-range blog page offers the first page', async ({ page }) => {
-    await page.goto('/about?page=99');
+    await page.goto('/blog?page=99');
     await expect(page.getByText('This blog page is no longer available.')).toBeVisible();
     await page.getByRole('button', { name: 'Go to first page' }).click();
-    await expect(page).toHaveURL(/\/about$/);
+    await expect(page).toHaveURL(/\/blog$/);
     await expect(page.locator('article')).toHaveCount(3);
   });
 
@@ -114,13 +114,13 @@ test.describe('blog listing', () => {
 
 test.describe('blog post', () => {
   test('returns to the same filtered blog listing', async ({ page }) => {
-    await page.goto('/about?q=creating+spaces&tag=interior');
+    await page.goto('/blog?q=creating+spaces&tag=interior');
     await expect(page.locator('article')).toHaveCount(1);
     const listingUrl = page.url();
     await page.locator('article h2 a').click();
     await expect(page).toHaveURL(/\/blog\/creating-spaces-that-inspire-productivity$/);
     await expect(page.getByRole('link', { name: 'Back to the blog' })).toHaveAttribute(
-      'href', '/about?q=creating+spaces&tag=interior',
+      'href', '/blog?q=creating+spaces&tag=interior',
     );
     await page.getByRole('link', { name: 'Back to the blog' }).click();
     await expect(page).toHaveURL(listingUrl);
@@ -130,7 +130,7 @@ test.describe('blog post', () => {
 
   test('a directly opened article returns to the main blog', async ({ page }) => {
     await page.goto('/blog/featured-design-trends-for-2022');
-    await expect(page.getByRole('link', { name: 'Back to the blog' })).toHaveAttribute('href', '/about');
+    await expect(page.getByRole('link', { name: 'Back to the blog' })).toHaveAttribute('href', '/blog');
   });
 
   test('renders the article', async ({ page }) => {
@@ -169,7 +169,7 @@ test.describe('blog post', () => {
 
   test('the blog degrades without taking the page down', async ({ page }) => {
     await page.route('**/api/posts?*', (route) => route.abort('failed'));
-    await page.goto('/about');
+    await page.goto('/blog');
 
     await expect(page.getByRole('heading', { level: 1, name: 'Blog' })).toBeVisible();
     await expect(page.getByRole('alert')).toBeVisible({ timeout: 15_000 });

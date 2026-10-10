@@ -26,7 +26,7 @@ const PostSkeleton = () => (
 const BlogSection = () => {
   const [params, setParams] = useSearchParams();
   const location = useLocation();
-  const blogReturnTo = `/about${location.search}`;
+  const blogReturnTo = `/blog${location.search}`;
   const q = params.get("q") ?? "";
   const selectedTag = params.get("tag");
   const page = Math.max(1, Number(params.get("page")) || 1);

@@ -152,7 +152,7 @@ test.describe('no control promises something it cannot do', () => {
    * A visitor cannot tell the difference between a control that is broken and one that was
    * never wired up. Both read as "this site is broken".
    */
-  const PAGES = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/about'];
+  const PAGES = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/blog'];
 
   for (const path of PAGES) {
     test(`${path} has no button without a handler`, async ({ page }) => {

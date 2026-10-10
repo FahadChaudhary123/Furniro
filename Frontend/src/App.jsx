@@ -18,7 +18,7 @@ import HomePage from "./pages/HomePage";
  */
 const Shop = lazy(() => import("./pages/Shop"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const About = lazy(() => import("./pages/About"));
+const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Cart = lazy(() => import("./pages/Cart"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -52,7 +52,7 @@ function App() {
             <Route path="/shop" element={<Shop />} />
             {/* Slug, not id, so the URL survives a reseed and reads as something shareable. */}
             <Route path="/shop/:slug" element={<ProductDetail />} />
-            <Route path="/about" element={<About />} />
+            <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/contact" element={<Contact />} />

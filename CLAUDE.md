@@ -103,7 +103,7 @@ before any authorized commit. See [SECURITY.md](SECURITY.md#-current-exposure--a
 
 ### Structure
 
-Routes: `/`, `/shop`, `/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact`, and a
+Routes: `/`, `/shop`, `/shop/:slug`, `/blog`, `/blog/:slug`, `/cart`, `/contact`, and a
 `*` catch-all. Every page sets its head — title, meta description, canonical, robots —
 with `usePageMeta`, and every static route is declared once in `shared/lib/routes.js`.
 Add a route there or the sitemap and the SEO check will not know it exists.

@@ -52,6 +52,26 @@ routing.
 
 ---
 
+## Render
+
+| Field | Value |
+|---|---|
+| **Service & purpose** | Selected host for the static storefront and Node API; `render.yaml` defines both services |
+| **Criticality** | Store-stopping once deployed; neither service is live yet |
+| **Support route** | Dashboard support; account plan and escalation path have not been confirmed |
+| **Status page** | Subscription and alert recipient have not been confirmed |
+| **Credentials** | Repository connection and account access in Render; the Blueprint requests only public origins and the API CORS allowlist. Dashboard settings have not been verified |
+| **API version** | Blueprint defined in `render.yaml`; no Render API integration |
+| **Limits** | Account plan, quotas and usage have not been confirmed |
+| **Contract** | Account plan and any data-processing terms have not been reviewed |
+| **Fallback** | Roll back to a prior deploy after the first successful release; no alternate host is configured |
+
+**Before first deployment:** confirm the account owner and backup, connect the repository,
+set the public origins, verify live smoke checks and route uptime/error alerts to a person.
+See [deployment.md](runbooks/deployment.md) and [OWNERSHIP.md](OWNERSHIP.md).
+
+---
+
 ## Not yet chosen
 
 Document B assumes these exist. Each needs a register row before it goes live, not after.
@@ -61,7 +81,6 @@ Document B assumes these exist. Each needs a register row before it goes live, n
 | Payment gateway (primary) | §5, §7 R3, §10, §14 | Checkout |
 | Payment gateway (secondary) | §7 R3 — assumes a failover target | Checkout resilience |
 | Transactional email provider | §5, §7 R10 | Order confirmations, contact form replies |
-| Hosting / CDN | §2, §7 R4, §12, §14 | Any deployment |
 | Error tracking | §5, §6 | Knowing an incident happened |
 | Uptime monitoring | §5 | Knowing before a customer tells you |
 | Carrier / fulfilment API | §7 R9, §15 | Shipping |

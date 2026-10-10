@@ -125,7 +125,7 @@ npm run smoke
 
 ### What works
 
-- Routes `/`, `/shop`, `/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact` and a `*` catch-all —
+- Routes `/`, `/shop`, `/shop/:slug`, `/blog`, `/blog/:slug`, `/cart`, `/contact` and a `*` catch-all —
   wired through React Router in [App.jsx](Frontend/src/App.jsx), each setting its own
   document title.
 - Product detail pages backed by `GET /api/products/:slug`, distinguishing a missing
@@ -237,7 +237,7 @@ Furniro/
 │   │   ├── modules/        Domain modules: catalogue, content, cart
 │   │   ├── shared/         Cross-cutting helpers: money, routes, page meta
 │   │   ├── components/     Navbar, Footer, ProductCard, ProductGrid, PageBanner
-│   │   ├── pages/          Route targets: HomePage, Shop, About, Contact, ...
+│   │   ├── pages/          Route targets: HomePage, Shop, Blog, Contact, ...
 │   │   ├── sections/       Page-level blocks composed by pages
 │   │   ├── assets/         Images imported by the bundler
 │   │   ├── App.jsx         Route table

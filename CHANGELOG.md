@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Moved the blog listing to `/blog`, aligned its navigation label and canonical URL, and
+  prepared an HTTP 301 from `/about` for Render. The build and live smoke checks cover the
+  redirect.
+
 - The post-deployment smoke check now verifies that the live sitemap uses the storefront
   origin, covers the published catalogue, and is advertised by `robots.txt`.
 
@@ -832,10 +836,6 @@ are now fixed rather than dropped.
   large text, not for body text or button labels, on primary buttons across the whole site.
   An open design decision, capped so it cannot spread: see
   [ADR 0011](docs/decisions/0011-automated-accessibility-checks.md).
-- **The blog lives at `/about`.** The nav says "About", the URL says `/about`, and the page's
-  heading, breadcrumb and title all say "Blog". `npm run seo` reports it as two warnings.
-  Fixing it means either routing the blog at `/blog` with a redirect, or writing About
-  content — a product decision, not a defect repair.
 
 ### Back end
 

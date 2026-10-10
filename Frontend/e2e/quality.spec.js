@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const ROUTES = ['/', '/shop', '/about', '/contact'];
+const ROUTES = ['/', '/shop', '/blog', '/contact'];
 
 test.describe('page quality', () => {
   for (const route of ROUTES) {
@@ -82,8 +82,8 @@ test.describe('page quality', () => {
     await expect(page.locator('form input, form textarea')).not.toHaveCount(0);
   });
 
-  test('the blog renders on /about', async ({ page }) => {
-    await page.goto('/about');
+  test('the blog renders on /blog', async ({ page }) => {
+    await page.goto('/blog');
     await expect(page.locator('img').first()).toBeVisible();
     const images = page.locator('img');
     for (let i = 0; i < Math.min(await images.count(), 6); i++) {

@@ -32,7 +32,7 @@ const expectMeta = (page, name) => expect.poll(() => meta(page, name));
 const PAGES = [
   { path: '/', title: 'Furniro', indexable: true },
   { path: '/shop', title: 'Shop — Furniro', indexable: true },
-  { path: '/about', title: 'Blog — Furniro', indexable: true },
+  { path: '/blog', title: 'Blog — Furniro', indexable: true },
   { path: '/contact', title: 'Contact — Furniro', indexable: true },
   { path: '/cart', title: 'Cart — Furniro', indexable: false },
 ];

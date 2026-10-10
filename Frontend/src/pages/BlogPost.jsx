@@ -19,9 +19,9 @@ const BlogPost = () => {
   const { slug } = useParams();
   const location = useLocation();
   const returnTo = typeof location.state?.blogReturnTo === 'string' &&
-    (location.state.blogReturnTo === '/about' || location.state.blogReturnTo.startsWith('/about?'))
+    (location.state.blogReturnTo === '/blog' || location.state.blogReturnTo.startsWith('/blog?'))
     ? location.state.blogReturnTo
-    : '/about';
+    : '/blog';
   const { post, notFound, loading, error, retry } = usePost(slug);
 
   // Placeholder posts are noindex, matching their exclusion from the sitemap. Excluding a

@@ -50,7 +50,7 @@ test.describe('code splitting', () => {
     const scripts = [];
     page.on('request', (r) => r.resourceType() === 'script' && scripts.push(r.url()));
 
-    await page.goto('/about');
+    await page.goto('/blog');
     await expect(page.getByRole('heading', { level: 1, name: 'Blog' })).toBeVisible();
     expect(scripts.some((u) => /\/assets\/Cart-/.test(u))).toBe(false);
 

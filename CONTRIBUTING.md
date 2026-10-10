@@ -114,7 +114,7 @@ had typed it. See [CLAUDE.md](CLAUDE.md).
 **Before opening:**
 
 - [ ] `npm run verify` passes in `Frontend/` (lint + build + performance budgets)
-- [ ] Clicked through every route your change touches — `/`, `/shop`, `/about`, `/contact`
+- [ ] Clicked through every route your change touches — `/`, `/shop`, `/blog`, `/contact`
 - [ ] Checked mobile width; the navbar has a drawer that is easy to break
 - [ ] No secrets, no `.env`, no `console.log` left behind
 - [ ] Docs updated if behaviour, API or schema changed
@@ -360,7 +360,5 @@ Small, self-contained, and each fixes something real:
 `Rs` instead of `Rp`, the missing `*` route. A stale list of "good first issues" wastes the
 time of exactly the person it is meant to help, so they were removed rather than left.*
 
-1. **Give `/blog` its own route.** The blog currently lives at `/about`: the nav says
-   "About", the URL says `/about`, and the heading, breadcrumb and title all say "Blog".
-   `npm run seo` reports it as two warnings. Needs a decision on whether About content
-   should exist too — ask before starting.
+There are no curated good first issues at the moment. Check the requirement ledger for
+current gaps and confirm the intended scope before taking one on.

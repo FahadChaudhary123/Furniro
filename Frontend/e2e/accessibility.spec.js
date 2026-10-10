@@ -23,7 +23,7 @@ import { AxeBuilder } from '@axe-core/playwright';
  */
 
 /** The purchase path, plus the pages a visitor reaches from it. */
-const PATHS = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/about'];
+const PATHS = ['/', '/shop', '/shop/syltherine', '/cart', '/contact', '/blog'];
 
 const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 

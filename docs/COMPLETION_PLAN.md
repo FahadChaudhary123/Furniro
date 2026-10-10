@@ -50,6 +50,12 @@ their live HTTP responses. Product pages also support validated optional SEO cop
 catalogue. The deployment smoke check now covers live sitemap and robots delivery.
 Credential rotation, first deployment, actual live verification, approved product
 metadata, alert routing, owner assignment and reviewed legal copy remain open.
+The blog listing now has a matching `/blog` URL and navigation label; its former `/about`
+URL has a Render 301 rule that still needs live verification after deployment.
+On 2026-10-10, a local Git check found `Backend/.env` ignored by
+`Backend/.gitignore`, absent from tracked files and absent from available Git history.
+This does not establish that the credentials are safe or rotated; the account-side
+rotation remains the next required step.
 
 ## Milestone 2 — settle the trading design and data
 

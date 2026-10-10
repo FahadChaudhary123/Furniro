@@ -51,12 +51,15 @@ recommends publishable keys in place of legacy `anon` keys.
 
 1. **Supabase dashboard → Database → Settings → reset the database password.** See
    [Supabase's reset guide](https://supabase.com/docs/guides/troubleshooting/how-do-i-reset-my-supabase-database-password-oTs5sB).
-2. Copy the new connection string.
-3. Update `Backend/.env` locally.
-4. Update it in every deployed environment's configuration.
-5. Restart anything holding a connection pool — pooled connections survive a password
+2. Inventory other applications and tools that use this database. Give each actual consumer
+   the new connection string through its secret store; do not paste it into chat or docs.
+   The current Furniro API does not connect to this database, so do not add the new password
+   to Render or keep it in `Backend/.env` solely for Furniro.
+3. Remove the obsolete `DATABASE_URL` from `Backend/.env` once any real local consumer has
+   migrated. Do not leave the old password there after rotation.
+4. Restart anything holding a connection pool — pooled connections survive a password
    change and mask whether the rotation worked.
-6. **Verify:** the app connects with the new value, and confirm the old one fails.
+5. **Verify:** every actual consumer connects with the new value, and the old one fails.
 
 **Consequence:** every consumer of the old string loses access immediately. Know what those
 are before you start. Today the answer is still "nothing" — the API reads from JSON files

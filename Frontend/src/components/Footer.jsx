@@ -21,7 +21,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="hover:text-black">Home</Link></li>
               <li><Link to="/shop" className="hover:text-black">Shop</Link></li>
-              <li><Link to="/about" className="hover:text-black">Blog</Link></li>
+              <li><Link to="/blog" className="hover:text-black">Blog</Link></li>
               <li><Link to="/contact" className="hover:text-black">Contact</Link></li>
             </ul>
           </div>

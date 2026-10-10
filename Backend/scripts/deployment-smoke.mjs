@@ -8,7 +8,8 @@ import { listRedirects } from '../src/modules/catalogue/redirects.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const catalogue = JSON.parse(readFileSync(join(here, '../src/modules/catalogue/data/products.json'), 'utf8'));
-const redirects = listRedirects(catalogue.products, catalogue.categories);
+const redirects = [...listRedirects(catalogue.products, catalogue.categories),
+  { from: '/about', to: '/blog' }];
 
 try {
   const result = await checkDeployment({

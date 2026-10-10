@@ -5,7 +5,7 @@ test.describe('routing and navigation', () => {
   // so a text match would pass on the wrong route.
   for (const [path, heading] of [
     ['/shop', 'Shop'],
-    ['/about', 'Blog'],
+    ['/blog', 'Blog'],
     ['/contact', 'Contact'],
   ]) {
     test(`${path} renders its banner`, async ({ page }) => {
@@ -38,7 +38,7 @@ test.describe('routing and navigation', () => {
   test('navbar links reach every route', async ({ page, isMobile }) => {
     test.skip(isMobile, 'desktop navbar only — mobile uses the drawer');
     await page.goto('/');
-    for (const [name, url] of [['Shop', /\/shop$/], ['About', /\/about$/], ['Contact', /\/contact$/]]) {
+    for (const [name, url] of [['Shop', /\/shop$/], ['Blog', /\/blog$/], ['Contact', /\/contact$/]]) {
       await page.getByRole('link', { name, exact: true }).first().click();
       await expect(page).toHaveURL(url);
     }
@@ -99,7 +99,7 @@ test.describe('document titles', () => {
   for (const [path, expected] of [
     ['/', /^Furniro/],
     ['/shop', /^Shop — Furniro$/],
-    ['/about', /^Blog — Furniro$/],
+    ['/blog', /^Blog — Furniro$/],
     ['/contact', /^Contact — Furniro$/],
     ['/no-such-page', /^Page not found — Furniro$/],
   ]) {

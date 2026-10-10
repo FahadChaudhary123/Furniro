@@ -101,7 +101,7 @@ from the API, so a repricing is reflected immediately and no stale price can be 
 
 [main.jsx](Frontend/src/main.jsx) mounts `BrowserRouter`; [App.jsx](Frontend/src/App.jsx)
 renders `Navbar`, the route tree and one shared `Footer`. The routes are `/`, `/shop`,
-`/shop/:slug`, `/about`, `/blog/:slug`, `/cart`, `/contact`, plus `*` for `NotFound`.
+`/shop/:slug`, `/blog`, `/blog/:slug`, `/cart`, `/contact`, plus `*` for `NotFound`.
 Each route sets its own document head — title, meta description, canonical and robots —
 through `shared/lib/usePageMeta`, driven by `shared/lib/routes.js`.
 
