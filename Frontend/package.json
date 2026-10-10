@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && npm run seo:generate",
+    "build": "vite build && npm run seo:generate && npm run redirects:check",
+    "redirects:check": "node scripts/check-render-redirects.mjs",
     "deploy:check": "node scripts/check-deploy-config.mjs",
     "lint": "eslint .",
     "preview": "vite preview",

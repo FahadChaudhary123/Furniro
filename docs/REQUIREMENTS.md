@@ -174,12 +174,13 @@ real `301`.
 category, then the category listing, then `/shop`. Without a successor field in the data,
 recency is the best available proxy for "the thing that replaced it".
 
-**What is missing is the `301` itself.** A static host serves it only if `_redirects` is
-deployed and the host understands that format; otherwise the SPA redirects client-side,
-which costs a round trip and which search engines treat less reliably. That is a deployment
-capability, not code. **No product is currently discontinued**, so the redirect map is empty
-by design — `redirect.test.js` asserts that explicitly, so setting the flag changes a test
-result rather than changing the live sitemap silently.
+**What is missing is a live `301`.** Render does not read `dist/_redirects`; its Blueprint
+must contain a redirect before the SPA rewrite. `npm run build` now checks every expected
+catalogue redirect against `render.yaml` and fails when a rule is missing or wrong. This
+prevents a silent configuration mismatch, but only a deployed HTTP check proves the host
+serves a 301. **No product is currently discontinued**, so the map is empty by design.
+`redirect.test.js` also asserts that explicitly, so setting the flag changes a test result
+rather than changing the live sitemap silently.
 
 **Note on `CAT-09`:** Doc B treats an ERP/PIM as the source of truth for price and stock,
 making the storefront a downstream consumer. That is a significant architectural constraint

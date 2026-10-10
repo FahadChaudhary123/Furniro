@@ -44,8 +44,10 @@ integration satisfy its acceptance criteria in a working environment.
 the storefront can be operated without claiming it can take orders.
 
 **Progress (2026-10-10):** Removed unverified public contact details and inert footer help
-items; footer navigation now reaches real pages. Credential rotation, first deployment,
-alert routing, owner assignment and reviewed legal copy remain open.
+items; footer navigation now reaches real pages. The build now checks Render's required
+discontinued-product redirects against the catalogue. Credential rotation, first deployment,
+live redirect verification, alert routing, owner assignment and reviewed legal copy remain
+open.
 
 ## Milestone 2 — settle the trading design and data
 

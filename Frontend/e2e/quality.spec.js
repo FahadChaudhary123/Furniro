@@ -76,9 +76,9 @@ test.describe('page quality', () => {
 
   test('the contact form exposes its fields', async ({ page }) => {
     await page.goto('/contact');
-    await expect(page.getByRole('heading', { name: 'Get In Touch With Us' })).toBeVisible();
-    // The form has no submit handler yet — see CHANGELOG.md#known-issues. This only checks
-    // the fields are present and reachable.
+    await expect(page.getByRole('heading', { name: 'Contact form' })).toBeVisible();
+    // Fields stay visible so visitors understand the current unavailable state; the
+    // privacy suite verifies they cannot submit data.
     await expect(page.locator('form input, form textarea')).not.toHaveCount(0);
   });
 

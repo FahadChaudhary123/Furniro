@@ -52,8 +52,14 @@ The generated `dist/_redirects` file targets Netlify/Cloudflare Pages and is not
 route configuration. Render's SPA rewrite is configured in `render.yaml`; discontinued
 product redirects currently fall back to client-side navigation there. No product is
 discontinued today. Before marking one discontinued, add the corresponding Render `redirect`
-rule before the SPA rewrite and verify its live 301 response. The generated `_redirects`
-file alone does not configure Render.
+rule before the SPA rewrite. For example, use `type: redirect`, `source: /shop/old-slug`
+and `destination: /shop/live-slug` under the storefront's `routes:` block. The front-end
+build now runs `npm run redirects:check` against the canonical catalogue and fails if a
+required rule is missing, stale or after the catch-all rewrite. It cannot confirm what
+Render actually serves: after deployment, request the old product URL without following
+redirects and verify `301` and its `Location` header. Render preserves Dashboard routing
+rules omitted from a Blueprint, so also review old Dashboard rules when removing a
+redirect. The generated `_redirects` file alone does not configure Render.
 
 The front end is a static bundle. `npm run build` produces `Frontend/dist/`; anything that
 serves files can host it.

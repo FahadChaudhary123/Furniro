@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- The storefront build now checks Render redirects for discontinued products and fails when
+  a required HTTP 301 is missing, stale or ordered behind the SPA rewrite.
+
 - Replaced unverified US contact details and non-working footer help items with truthful
   availability information; footer navigation now links to the existing pages.
 
