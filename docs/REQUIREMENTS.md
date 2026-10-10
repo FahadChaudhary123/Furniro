@@ -413,6 +413,11 @@ and a deployed site with redirects to chain. Neither exists.
 **`CONT-04` stays partial, deliberately.** Two of its four parts are built and enforced;
 two cannot be built yet, and marking the whole thing ✅ would be a lie of rounding.
 
+The post-deployment smoke check now verifies that the live sitemap has the configured
+storefront origin, contains the published product count and a current product, and is
+advertised by `robots.txt`. It still needs a real deployment to run against; search-engine
+index coverage and crawl-error data remain external checks.
+
 *Built:* duplicate titles and orphaned pages. Every static route is declared once in
 `Frontend/src/shared/lib/routes.js`; `npm run seo` audits that manifest against `App.jsx`
 and the generated sitemap and fails the build on a duplicate title, a page routed but

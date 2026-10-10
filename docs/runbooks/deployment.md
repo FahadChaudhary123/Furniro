@@ -151,8 +151,9 @@ At deploy time:
 - Verify after deploy with `npm run smoke:deploy` from `Backend/`, setting
   `API_ORIGIN` and `STOREFRONT_ORIGIN` to the exact public HTTPS origins. This read-only
   check covers health, build identity, readiness, a published product, CORS, a hard
-  request to `/shop`, storefront security headers, the entry script's cache policy, and
-  every discontinued-product HTTP 301 derived from the local catalogue. Run it from the
+  request to `/shop`, storefront security headers, the entry script's cache policy,
+  `sitemap.xml` coverage and origin, the sitemap URL in `robots.txt`, and every
+  discontinued-product HTTP 301 derived from the local catalogue. Run it from the
   revision actually deployed, so its expected redirect map matches the release.
   The local `npm run smoke` suite sends test errors and malformed requests, so use
   `smoke:deploy` for the live site.

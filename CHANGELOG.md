@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- The post-deployment smoke check now verifies that the live sitemap uses the storefront
+  origin, covers the published catalogue, and is advertised by `robots.txt`.
+
 - Product pages now use optional catalogue SEO titles and descriptions when approved copy is
   present, while retaining their existing metadata fallback. The publish gate warns on
   malformed or overlong SEO copy.

@@ -8,7 +8,8 @@ const json = (body, headers = {}) => new Response(JSON.stringify(body), {
 });
 
 function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'public, max-age=31536000, immutable',
-  redirectStatus = 301, redirectLocation = '/shop/new-chair' } = {}) {
+  redirectStatus = 301, redirectLocation = '/shop/new-chair', sitemapOrigin = storefrontOrigin,
+  sitemapProducts = 40, robotsOrigin = storefrontOrigin } = {}) {
   const calls = [];
   const fetchImpl = async (url, options) => {
     calls.push({ url, method: options?.method ?? 'GET', redirect: options?.redirect });
@@ -40,6 +41,15 @@ function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'pu
         },
       });
     }
+    if (url.endsWith('/sitemap.xml')) {
+      const urls = [`${sitemapOrigin}/`,
+        ...Array.from({ length: sitemapProducts }, (_, i) =>
+          `${sitemapOrigin}/shop/${i === 0 ? 'chair' : `chair-${i}`}`)];
+      return new Response(`<urlset>${urls.map((loc) => `<url><loc>${loc}</loc></url>`).join('')}</urlset>`);
+    }
+    if (url.endsWith('/robots.txt')) {
+      return new Response(`User-agent: *\nSitemap: ${robotsOrigin}/sitemap.xml\n`);
+    }
     return new Response('export {}', {
       headers: { 'content-type': 'text/javascript',
         'cache-control': assetCache },
@@ -54,7 +64,7 @@ describe('deployment smoke', () => {
     await expect(checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl })).resolves.toEqual({
       buildSha: 'abc123', publishedProducts: 40, redirectsChecked: 0,
     });
-    expect(calls).toHaveLength(5);
+    expect(calls).toHaveLength(7);
     expect(calls.every(({ method }) => method === 'GET')).toBe(true);
   });
 
@@ -74,6 +84,21 @@ describe('deployment smoke', () => {
     await expect(checkDeployment({ apiOrigin, storefrontOrigin,
       fetchImpl: responses({ assetCache: 'no-cache' }).fetchImpl,
     })).rejects.toThrow('not cached immutably');
+  });
+
+  it('rejects a sitemap with the wrong origin or missing product URLs', async () => {
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin,
+      fetchImpl: responses({ sitemapOrigin: 'https://wrong.onrender.com' }).fetchImpl,
+    })).rejects.toThrow('wrong-origin URLs');
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin,
+      fetchImpl: responses({ sitemapProducts: 39 }).fetchImpl,
+    })).rejects.toThrow('does not match the published catalogue');
+  });
+
+  it('rejects a robots file advertising the wrong sitemap', async () => {
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin,
+      fetchImpl: responses({ robotsOrigin: 'https://wrong.onrender.com' }).fetchImpl,
+    })).rejects.toThrow('wrong sitemap origin');
   });
 
   it('rejects local or placeholder targets before making a request', async () => {

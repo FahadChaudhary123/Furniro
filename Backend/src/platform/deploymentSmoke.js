@@ -77,6 +77,33 @@ export async function checkDeployment({ apiOrigin, storefrontOrigin, redirects =
     throw new Error('Fingerprinted entry script is not cached immutably');
   }
 
+  const sitemapResponse = await request(`${storefrontOrigin}/sitemap.xml`);
+  if (sitemapResponse.redirected) throw new Error('/sitemap.xml redirected');
+  const sitemap = await sitemapResponse.text();
+  if (!sitemap.includes('<urlset') || !sitemap.includes('</urlset>')) {
+    throw new Error('/sitemap.xml is not a sitemap');
+  }
+  const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, loc]) => loc);
+  if (locations.length === 0 || new Set(locations).size !== locations.length ||
+      locations.some((loc) => {
+        try { return new URL(loc).origin !== storefrontOrigin; } catch { return true; }
+      })) {
+    throw new Error('/sitemap.xml has missing, duplicate or wrong-origin URLs');
+  }
+  const productLocations = locations.filter((loc) => new URL(loc).pathname.startsWith('/shop/'));
+  if (!locations.includes(`${storefrontOrigin}/`) ||
+      !locations.includes(`${storefrontOrigin}/shop/${products.data[0].slug}`) ||
+      productLocations.length !== products.meta.total) {
+    throw new Error('/sitemap.xml does not match the published catalogue');
+  }
+
+  const robotsResponse = await request(`${storefrontOrigin}/robots.txt`);
+  if (robotsResponse.redirected) throw new Error('/robots.txt redirected');
+  const robots = await robotsResponse.text();
+  if (!robots.split(/\r?\n/).includes(`Sitemap: ${storefrontOrigin}/sitemap.xml`)) {
+    throw new Error('/robots.txt advertises the wrong sitemap origin');
+  }
+
   // Fetch without following: a final 200 from the SPA cannot prove that Render sent a 301.
   for (const { from, to } of redirects) {
     const source = `${storefrontOrigin}${from}`;

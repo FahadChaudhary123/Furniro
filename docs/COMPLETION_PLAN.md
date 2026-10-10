@@ -47,7 +47,8 @@ the storefront can be operated without claiming it can take orders.
 items; footer navigation now reaches real pages. The build checks Render's required
 discontinued-product redirects against the catalogue, and the deployment smoke check verifies
 their live HTTP responses. Product pages also support validated optional SEO copy from the
-catalogue. Credential rotation, first deployment, actual live verification, approved product
+catalogue. The deployment smoke check now covers live sitemap and robots delivery.
+Credential rotation, first deployment, actual live verification, approved product
 metadata, alert routing, owner assignment and reviewed legal copy remain open.
 
 ## Milestone 2 — settle the trading design and data
