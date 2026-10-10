@@ -1,5 +1,5 @@
 /** Read-only verification of a deployed storefront and API. */
-export async function checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl = fetch }) {
+export async function checkDeployment({ apiOrigin, storefrontOrigin, redirects = [], fetchImpl = fetch }) {
   for (const [name, value] of Object.entries({ apiOrigin, storefrontOrigin })) {
     let url;
     try {
@@ -77,5 +77,21 @@ export async function checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl =
     throw new Error('Fingerprinted entry script is not cached immutably');
   }
 
-  return { buildSha: health.build.sha, publishedProducts: products.meta.total };
+  // Fetch without following: a final 200 from the SPA cannot prove that Render sent a 301.
+  for (const { from, to } of redirects) {
+    const source = `${storefrontOrigin}${from}`;
+    const response = await fetchImpl(source, {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(10_000),
+    });
+    const location = response.headers.get('location');
+    const expected = new URL(to, storefrontOrigin).href;
+    const actual = location ? new URL(location, source).href : null;
+    if (response.status !== 301 || actual !== expected) {
+      throw new Error(`${from} must return 301 to ${to}; got ${response.status} to ${location ?? '(none)'}`);
+    }
+  }
+
+  return { buildSha: health.build.sha, publishedProducts: products.meta.total,
+    redirectsChecked: redirects.length };
 }

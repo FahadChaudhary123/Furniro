@@ -177,8 +177,10 @@ recency is the best available proxy for "the thing that replaced it".
 **What is missing is a live `301`.** Render does not read `dist/_redirects`; its Blueprint
 must contain a redirect before the SPA rewrite. `npm run build` now checks every expected
 catalogue redirect against `render.yaml` and fails when a rule is missing or wrong. This
-prevents a silent configuration mismatch, but only a deployed HTTP check proves the host
-serves a 301. **No product is currently discontinued**, so the map is empty by design.
+prevents a silent configuration mismatch. `npm run smoke:deploy` now tests the HTTP `301`
+and exact `Location` for each discontinued product; it must run against the deployed
+revision. **No product is currently discontinued**, so the map is empty by design and no
+live redirect can be verified yet.
 `redirect.test.js` also asserts that explicitly, so setting the flag changes a test result
 rather than changing the live sitemap silently.
 

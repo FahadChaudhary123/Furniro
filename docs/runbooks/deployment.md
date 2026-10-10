@@ -54,10 +54,10 @@ product redirects currently fall back to client-side navigation there. No produc
 discontinued today. Before marking one discontinued, add the corresponding Render `redirect`
 rule before the SPA rewrite. For example, use `type: redirect`, `source: /shop/old-slug`
 and `destination: /shop/live-slug` under the storefront's `routes:` block. The front-end
-build now runs `npm run redirects:check` against the canonical catalogue and fails if a
-required rule is missing, stale or after the catch-all rewrite. It cannot confirm what
-Render actually serves: after deployment, request the old product URL without following
-redirects and verify `301` and its `Location` header. Render preserves Dashboard routing
+build runs `npm run redirects:check` against the canonical catalogue and fails if a
+required rule is missing, stale or after the catch-all rewrite. After deployment,
+`npm run smoke:deploy` requests every discontinued product URL without following redirects
+and verifies HTTP `301` plus the exact `Location` destination. Render preserves Dashboard routing
 rules omitted from a Blueprint, so also review old Dashboard rules when removing a
 redirect. The generated `_redirects` file alone does not configure Render.
 
@@ -151,7 +151,9 @@ At deploy time:
 - Verify after deploy with `npm run smoke:deploy` from `Backend/`, setting
   `API_ORIGIN` and `STOREFRONT_ORIGIN` to the exact public HTTPS origins. This read-only
   check covers health, build identity, readiness, a published product, CORS, a hard
-  request to `/shop`, storefront security headers and the entry script's cache policy.
+  request to `/shop`, storefront security headers, the entry script's cache policy, and
+  every discontinued-product HTTP 301 derived from the local catalogue. Run it from the
+  revision actually deployed, so its expected redirect map matches the release.
   The local `npm run smoke` suite sends test errors and malformed requests, so use
   `smoke:deploy` for the live site.
 

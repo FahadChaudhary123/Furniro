@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Post-deployment smoke checks now verify each discontinued product's live HTTP 301 and
+  destination without following the redirect.
+
 - The storefront build now checks Render redirects for discontinued products and fails when
   a required HTTP 301 is missing, stale or ordered behind the SPA rewrite.
 

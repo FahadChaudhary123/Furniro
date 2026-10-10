@@ -7,10 +7,11 @@ const json = (body, headers = {}) => new Response(JSON.stringify(body), {
   headers: { 'content-type': 'application/json', ...headers },
 });
 
-function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'public, max-age=31536000, immutable' } = {}) {
+function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'public, max-age=31536000, immutable',
+  redirectStatus = 301, redirectLocation = '/shop/new-chair' } = {}) {
   const calls = [];
   const fetchImpl = async (url, options) => {
-    calls.push({ url, method: options?.method ?? 'GET' });
+    calls.push({ url, method: options?.method ?? 'GET', redirect: options?.redirect });
     if (url.endsWith('/health')) return json({ status: 'ok', env: 'production', build: { sha: 'abc123' } }, {
       'cache-control': 'no-store',
     });
@@ -20,6 +21,10 @@ function responses({ cors = storefrontOrigin, shopStatus = 200, assetCache = 'pu
         'access-control-allow-origin': cors,
         'cache-control': 'no-store',
       });
+    }
+    if (url.endsWith('/shop/old-chair')) {
+      return new Response(null, { status: redirectStatus,
+        headers: redirectLocation ? { location: redirectLocation } : {} });
     }
     if (url.endsWith('/shop')) {
       return new Response('<div id="root"></div><script type="module" src="/assets/index-abc123.js"></script>', {
@@ -47,7 +52,7 @@ describe('deployment smoke', () => {
   it('checks a production API and the storefront deep link with GET requests only', async () => {
     const { fetchImpl, calls } = responses();
     await expect(checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl })).resolves.toEqual({
-      buildSha: 'abc123', publishedProducts: 40,
+      buildSha: 'abc123', publishedProducts: 40, redirectsChecked: 0,
     });
     expect(calls).toHaveLength(5);
     expect(calls.every(({ method }) => method === 'GET')).toBe(true);
@@ -77,5 +82,25 @@ describe('deployment smoke', () => {
       fetchImpl,
     })).rejects.toThrow('HTTPS origin');
     expect(calls).toHaveLength(0);
+  });
+
+  it('checks live HTTP 301 status and destination without following it', async () => {
+    const { fetchImpl, calls } = responses();
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin, fetchImpl,
+      redirects: [{ from: '/shop/old-chair', to: '/shop/new-chair' }],
+    })).resolves.toMatchObject({ redirectsChecked: 1 });
+    expect(calls.at(-1)).toMatchObject({
+      url: `${storefrontOrigin}/shop/old-chair`, method: 'GET', redirect: 'manual',
+    });
+  });
+
+  it('rejects a missing or incorrect host redirect', async () => {
+    const redirects = [{ from: '/shop/old-chair', to: '/shop/new-chair' }];
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin, redirects,
+      fetchImpl: responses({ redirectStatus: 200, redirectLocation: null }).fetchImpl,
+    })).rejects.toThrow('must return 301');
+    await expect(checkDeployment({ apiOrigin, storefrontOrigin, redirects,
+      fetchImpl: responses({ redirectLocation: '/shop/wrong-chair' }).fetchImpl,
+    })).rejects.toThrow('must return 301');
   });
 });
