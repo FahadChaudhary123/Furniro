@@ -148,6 +148,10 @@ a catalogue-wide gap rather than as forty identical per-product failures. They a
 invented: a weight or a tax class guessed by an agent is worse than a blank, because it
 looks authoritative to whoever rates the shipment.
 
+The publish gate now validates optional SEO copy, and the product page uses it when present.
+Approved title and description text still needs to be supplied in the canonical catalogue;
+until then, the page falls back to its product name and derived description.
+
 The first checkout market is Pakistan in PKR. The existing catalogue is still IDR; the
 [PKR repricing runbook](runbooks/pkr-repricing.md) provides a blank worksheet and a
 whole-catalogue validation step. `CAT-01` stays partial until approved PKR amounts and the

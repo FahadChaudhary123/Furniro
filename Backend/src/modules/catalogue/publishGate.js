@@ -90,6 +90,22 @@ const WARNING_RULES = [
     test: (p) => typeof p.created_at === 'string' && !Number.isNaN(Date.parse(p.created_at)),
     why: 'the "New" badge is derived from it; an unparseable date silently suppresses the badge',
   },
+  {
+    id: 'seo_title',
+    describe: 'an optional SEO title of 1 to 60 characters',
+    test: (p) => p.seo_title === undefined ||
+      (typeof p.seo_title === 'string' && p.seo_title.trim().length > 0 &&
+        p.seo_title.trim().length <= 60),
+    why: 'an empty or overlong title gives the product page a poor search result',
+  },
+  {
+    id: 'seo_description',
+    describe: 'an optional SEO description of 1 to 155 characters',
+    test: (p) => p.seo_description === undefined ||
+      (typeof p.seo_description === 'string' && p.seo_description.trim().length > 0 &&
+        p.seo_description.trim().length <= 155),
+    why: 'an empty or overlong description makes search snippets misleading or truncated',
+  },
 ];
 
 /**
@@ -102,7 +118,7 @@ export const ABSENT_FIELDS = [
   { id: 'tax_class', why: 'CAT-01; needed before checkout can compute tax' },
   { id: 'weight', why: 'CAT-01; needed before fulfilment can rate a shipment' },
   { id: 'seo_title', why: 'CAT-01; the detail page falls back to the product name' },
-  { id: 'seo_description', why: 'CAT-01; no meta description is emitted' },
+  { id: 'seo_description', why: 'CAT-01; the detail page currently derives a fallback description' },
 ];
 
 /**

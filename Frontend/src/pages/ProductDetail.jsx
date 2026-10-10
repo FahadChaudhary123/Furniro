@@ -28,13 +28,17 @@ const ProductDetail = () => {
   const { add, lines } = useCart();
   const inCart = lines.find((line) => line.slug === slug)?.quantity ?? 0;
   const remaining = MAX_LINE_QUANTITY - inCart;
+  const seoTitle = typeof product?.seo_title === 'string' ? product.seo_title.trim() : null;
+  const seoDescription = typeof product?.seo_description === 'string'
+    ? product.seo_description.trim() : null;
 
   // A product page that 404s must not stay indexed, and a page still loading has nothing
   // worth indexing either — both emit noindex until there is a real product to describe.
   usePageMeta({
-    title: product?.name ?? (notFound ? 'Product not found' : 'Shop'),
+    title: seoTitle || product?.name || (notFound ? 'Product not found' : 'Shop'),
     description: product
-      ? `${product.description} — ${product.name} from Furniro. ${product.category?.name ?? ''}`.trim()
+      ? seoDescription ||
+        `${product.description} — ${product.name} from Furniro. ${product.category?.name ?? ''}`.trim()
       : undefined,
     path: `/shop/${slug}`,
     index: Boolean(product),

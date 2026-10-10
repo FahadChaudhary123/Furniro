@@ -178,6 +178,10 @@ that always renders the category label.
 `currency` comes from the catalogue's single top-level currency field. All current prices
 are IDR minor units; the planned Pakistan checkout needs approved PKR prices before this
 field and its amounts change together.
+Optional `seo_title` and `seo_description` fields pass through from the canonical product
+row. Product pages use them for the document title and meta description when present, and
+otherwise derive metadata from the existing name and description. No current product has
+approved SEO copy in these fields.
 
 **No `badge` field.** The client derives it from `price`, `old_price` and `created_at` via
 `badgeFor()`. A stored badge drifts from the prices it describes.

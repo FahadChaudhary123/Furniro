@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Product pages now use optional catalogue SEO titles and descriptions when approved copy is
+  present, while retaining their existing metadata fallback. The publish gate warns on
+  malformed or overlong SEO copy.
+
 - Post-deployment smoke checks now verify each discontinued product's live HTTP 301 and
   destination without following the redirect.
 

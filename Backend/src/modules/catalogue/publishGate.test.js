@@ -96,6 +96,15 @@ describe('blocking rules', () => {
 });
 
 describe('warning rules', () => {
+  it('accepts approved SEO copy and flags invalid optional fields', () => {
+    expect(evaluate(good({ seo_title: 'Cafe seating',
+      seo_description: 'A chair for relaxed dining spaces.' }), ctx).warnings).toEqual([]);
+    expect(ids(evaluate(good({ seo_title: ' '.repeat(2) }), ctx).warnings))
+      .toContain('seo_title');
+    expect(ids(evaluate(good({ seo_description: 'x'.repeat(156) }), ctx).warnings))
+      .toContain('seo_description');
+  });
+
   it('warns but still publishes when the description is empty', () => {
     const report = evaluate(good({ description: '' }), ctx);
     expect(report.publishable).toBe(true);

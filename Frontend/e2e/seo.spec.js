@@ -111,6 +111,22 @@ test.describe('noindex does not leak between routes', () => {
 });
 
 test.describe('data-driven pages', () => {
+  test('a product uses approved SEO copy from the catalogue API', async ({ page }) => {
+    await page.route('**/api/products/syltherine', async (route) => {
+      const response = await route.fetch();
+      const product = await response.json();
+      await route.fulfill({ response, json: {
+        ...product,
+        seo_title: 'Cafe seating',
+        seo_description: 'A chair for relaxed dining spaces.',
+      } });
+    });
+    await page.goto('/shop/syltherine');
+    await expect(page).toHaveTitle('Cafe seating — Furniro');
+    await expectMeta(page, 'description').toBe('A chair for relaxed dining spaces.');
+    await expect(page.getByRole('heading', { level: 1, name: 'Syltherine' })).toBeVisible();
+  });
+
   test('a product page describes the product, not the shop', async ({ page }) => {
     await page.goto('/shop/syltherine');
     await expect(page).toHaveTitle('Syltherine — Furniro');
