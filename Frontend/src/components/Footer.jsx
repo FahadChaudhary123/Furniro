@@ -1,18 +1,17 @@
+import { Link } from 'react-router-dom';
+
 const Footer = () => {
   return (
     <footer className="bg-white text-gray-700">
       <div className="max-w-6xl mx-auto py-12 px-6 md:flex md:justify-between md:items-start gap-8">
         
-        {/* Left Section: Logo & Address */}
+        {/* The business has not approved a public postal address yet. */}
         <div className="mb-8 md:mb-0 md:w-1/3">
           {/* Not an <h1>: a footer brand mark is not the page's main heading, and having
               one on every page gave every page two h1s. "Jump to main heading" then lands
               in the footer half the time. Styled the same, announced correctly. */}
           <p className="text-xl font-bold mb-4">Furniro.</p>
-          <p className="text-sm text-gray-600">
-            400 University Drive Suite 200 Coral Gables,<br />
-            FL 33134 USA
-          </p>
+          <p className="text-sm text-gray-600">Explore our furniture collection. Ordering is not available yet.</p>
         </div>
 
         {/* Middle Section: Links */}
@@ -20,19 +19,15 @@ const Footer = () => {
           <div>
             <h3 className="text-gray-600 text-sm mb-4">Links</h3>
             <ul className="space-y-2 text-sm">
-              <li className="hover:text-black cursor-pointer">Home</li>
-              <li className="hover:text-black cursor-pointer">Shop</li>
-              <li className="hover:text-black cursor-pointer">About</li>
-              <li className="hover:text-black cursor-pointer">Contact</li>
+              <li><Link to="/" className="hover:text-black">Home</Link></li>
+              <li><Link to="/shop" className="hover:text-black">Shop</Link></li>
+              <li><Link to="/about" className="hover:text-black">Blog</Link></li>
+              <li><Link to="/contact" className="hover:text-black">Contact</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="text-gray-600 text-sm mb-4">Help</h3>
-            <ul className="space-y-2 text-sm">
-              <li className="hover:text-black cursor-pointer">Payment Options</li>
-              <li className="hover:text-black cursor-pointer">Returns</li>
-              <li className="hover:text-black cursor-pointer">Privacy Policies</li>
-            </ul>
+            <p className="text-sm text-gray-600">Payment, returns and privacy information will be published before ordering opens.</p>
           </div>
         </div>
 
@@ -69,7 +64,7 @@ const Footer = () => {
 
       {/* Bottom Line */}
       <div className="border-t border-gray-200 text-gray-600 text-xs text-center py-4">
-        2023 Furniro. All rights reserved
+        © {new Date().getFullYear()} Furniro. All rights reserved.
       </div>
     </footer>
   );

@@ -62,7 +62,7 @@ export const ROUTES = [
     title: 'Contact',
     navLabel: 'Contact',
     description:
-      'Get in touch with Furniro. Find our address, phone number and working hours, or send us a message.',
+      'Contact options for Furniro. The contact form and customer support are not available yet.',
     priority: 0.5,
     changefreq: 'monthly',
   },

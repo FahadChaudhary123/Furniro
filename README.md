@@ -23,6 +23,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [docs/runbooks/](docs/runbooks/) | Operational procedures (deploy, rollback, secret rotation) |
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Document A (derived) — 134 functional requirements with IDs, reconstructed from Document B |
 | [docs/MODULES.md](docs/MODULES.md) | The 134 requirements divided into 20 modules — boundaries, dependencies, build order |
+| [docs/COMPLETION_PLAN.md](docs/COMPLETION_PLAN.md) | Ordered milestones for completing the documented scope |
 | [docs/COMMERCE_PLATFORM_COMPARISON.md](docs/COMMERCE_PLATFORM_COMPARISON.md) | Shopify and Medusa comparison; provider decision still open |
 | [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md) | Document B (ops standard) mapped against reality, plus the staged roadmap |
 | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | External services, criticality, credentials location, fallbacks |

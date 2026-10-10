@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Replaced unverified US contact details and non-working footer help items with truthful
+  availability information; footer navigation now links to the existing pages.
+
 - Shop product images now open their detail pages when clicked; the hover cart button remains
   clickable, and keyboard focus reveals it.
 

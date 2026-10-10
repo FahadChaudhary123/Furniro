@@ -56,13 +56,13 @@ test.describe('mobile', () => {
 
   test('the drawer opens and navigates', async ({ page }) => {
     await page.goto('/');
-    // Desktop links are hidden at this width; the drawer is the only way through.
-    const shopLink = page.getByRole('link', { name: 'Shop', exact: true });
+    // The header links are hidden at this width; the footer has its own Shop link.
+    const shopLink = page.locator('header').getByRole('link', { name: 'Shop', exact: true });
     await expect(shopLink).toBeHidden();
 
     // The only <button> in the header is the hamburger.
     await page.locator('header button').click();
-    await expect(page.getByRole('link', { name: 'Shop', exact: true })).toBeVisible();
+    await expect(shopLink).toBeVisible();
   });
 
   test('the layout does not scroll horizontally', async ({ page }) => {

@@ -154,7 +154,9 @@ Both forms solicited a name, an email address and a message, and **discarded eve
 The contact form had no submit handler, so pressing Submit triggered a native GET, reloaded
 the page and lost the message; a customer had every reason to believe it had been sent.
 
-They are now **disabled with a visible explanation**, so no personal data is collected. This
+They are now **disabled with a visible explanation**, so no personal data is collected. The
+contact page also no longer presents unverified postal addresses, phone numbers or opening
+hours as working alternatives. This
 row stays in the register as the record of what changed, and because re-enabling either one
 adds a genuine processing activity that needs a row of its own, a retention period, and a
 consent record.

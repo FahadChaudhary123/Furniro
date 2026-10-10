@@ -23,7 +23,8 @@ test.describe('the contact form does not collect what it cannot deliver', () => 
     await expect(notice).toBeVisible();
     await expect(notice).toContainText(/not available/i);
     // A dead form with no explanation is the same failure wearing a different hat.
-    await expect(notice).toContainText(/phone|address/i);
+    await expect(notice).toContainText(/verified contact method/i);
+    await expect(page.getByText(/United States|Hotline:|Mobile:/i)).toHaveCount(0);
   });
 
   test('every field and the submit button are disabled', async ({ page }) => {
