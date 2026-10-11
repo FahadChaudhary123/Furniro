@@ -78,7 +78,7 @@ rotation remains the next required step.
 - Configure products/variants in the platform and validate the complete slug-to-variant
   mapping with `npm run mapping -- --check <file>`. Compare currency, price, image and
   availability against the provider API separately; the local validator checks mapping
-  coverage and duplicate IDs only.
+  coverage, duplicate variants and Shopify ID shape only.
 - Define the data boundary: which system owns prices, availability, customer records and
   orders; how updates reach the storefront; and how deletion/export requests cross it.
   The [draft data boundary](COMMERCE_DATA_BOUNDARY.md) records the settled ownership rules

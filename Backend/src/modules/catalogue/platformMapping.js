@@ -8,7 +8,7 @@ const publishedProducts = (catalogue) => evaluateAll(catalogue.products, {
 /** A blank mapping worksheet derived from the only product catalogue. */
 export function platformMappingTemplate(catalogue) {
   return {
-    provider: null,
+    provider: 'shopify',
     products: publishedProducts(catalogue).map(({ slug }) => ({
       slug,
       product_id: null,
@@ -19,9 +19,8 @@ export function platformMappingTemplate(catalogue) {
 
 /** Validate coverage and uniqueness before any platform checkout can use a mapping. */
 export function validatePlatformMapping(catalogue, mapping) {
-  if (!mapping || typeof mapping.provider !== 'string' || !mapping.provider.trim() ||
-      !Array.isArray(mapping.products)) {
-    throw new Error('Mapping needs a provider and products array');
+  if (!mapping || mapping.provider !== 'shopify' || !Array.isArray(mapping.products)) {
+    throw new Error('Mapping needs provider "shopify" and products array');
   }
   if (Object.keys(mapping).sort().join(',') !== 'products,provider') {
     throw new Error('Mapping contains unexpected top-level fields');
@@ -40,6 +39,12 @@ export function validatePlatformMapping(catalogue, mapping) {
       if (typeof row[field] !== 'string' || !row[field].trim() || row[field] !== row[field].trim()) {
         throw new Error(`Invalid ${field} for ${row.slug}`);
       }
+    }
+    if (!/^gid:\/\/shopify\/Product\/[1-9]\d*$/.test(row.product_id)) {
+      throw new Error(`Invalid Shopify product_id for ${row.slug}`);
+    }
+    if (!/^gid:\/\/shopify\/ProductVariant\/[1-9]\d*$/.test(row.variant_id)) {
+      throw new Error(`Invalid Shopify variant_id for ${row.slug}`);
     }
     if (seenVariants.has(row.variant_id)) {
       throw new Error(`Duplicate variant_id: ${row.variant_id}`);

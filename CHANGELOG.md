@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Shopify mapping worksheets now use the selected provider and reject malformed product
+  or variant IDs before store verification.
+
 - Platform mapping templates and validation now follow the catalogue publish gate, excluding
   discontinued and blocked products from the required variant list.
 

@@ -10,17 +10,17 @@ const catalogue = {
     product('broken-chair', { image: null })],
 };
 const mapping = {
-  provider: 'example',
+  provider: 'shopify',
   products: [
-    { slug: 'chair', product_id: 'p1', variant_id: 'v1' },
-    { slug: 'table', product_id: 'p2', variant_id: 'v2' },
+    { slug: 'chair', product_id: 'gid://shopify/Product/1', variant_id: 'gid://shopify/ProductVariant/11' },
+    { slug: 'table', product_id: 'gid://shopify/Product/2', variant_id: 'gid://shopify/ProductVariant/22' },
   ],
 };
 
 describe('platform mapping', () => {
   it('makes a blank worksheet without product prices', () => {
     expect(platformMappingTemplate(catalogue)).toEqual({
-      provider: null,
+      provider: 'shopify',
       products: [
         { slug: 'chair', product_id: null, variant_id: null },
         { slug: 'table', product_id: null, variant_id: null },
@@ -34,8 +34,19 @@ describe('platform mapping', () => {
       ...mapping, products: mapping.products.slice(0, 1),
     })).toThrow('Missing mapping');
     expect(() => validatePlatformMapping(catalogue, {
-      ...mapping, products: [mapping.products[0], { ...mapping.products[1], variant_id: 'v1' }],
+      ...mapping, products: [mapping.products[0], { ...mapping.products[1], variant_id: mapping.products[0].variant_id }],
     })).toThrow('Duplicate variant_id');
+  });
+
+  it('rejects IDs that Shopify cannot use as products or cart variants', () => {
+    expect(() => validatePlatformMapping(catalogue, { ...mapping, provider: 'example' }))
+      .toThrow('provider "shopify"');
+    expect(() => validatePlatformMapping(catalogue, {
+      ...mapping, products: [{ ...mapping.products[0], product_id: '123' }, mapping.products[1]],
+    })).toThrow('Invalid Shopify product_id');
+    expect(() => validatePlatformMapping(catalogue, {
+      ...mapping, products: [{ ...mapping.products[0], variant_id: 'gid://shopify/Product/11' }, mapping.products[1]],
+    })).toThrow('Invalid Shopify variant_id');
   });
 
   it('excludes discontinued and blocked products from required mapping', () => {

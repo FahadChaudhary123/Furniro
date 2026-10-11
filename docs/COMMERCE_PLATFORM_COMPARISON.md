@@ -72,7 +72,8 @@ operated Medusa service. These are provider capabilities, not an approved COD po
    `cd Backend; npm run mapping -- --template mapping.json`, then validate filled IDs with
    `npm run mapping -- --check mapping.json`. This checks local coverage and duplicate
    variants only; confirm currency, price, availability and image against the provider API
-   separately. Keep the filled worksheet private until its identifiers and access model are
+   separately. The worksheet now sets `provider: "shopify"` and requires Shopify Product
+   and ProductVariant global IDs; it does not verify them against the store. Keep the filled worksheet private until its identifiers and access model are
    reviewed; it is not a second product catalogue.
 4. Run a test purchase through payment, order creation, cancellation/refund and webhook
    delivery. Requirements stay open until this works in a non-production environment.
