@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Platform mapping templates and validation now follow the catalogue publish gate, excluding
+  discontinued and blocked products from the required variant list.
+
 - Moved the blog listing to `/blog`, aligned its navigation label and canonical URL, and
   prepared an HTTP 301 from `/about` for Render. The build and live smoke checks cover the
   redirect.

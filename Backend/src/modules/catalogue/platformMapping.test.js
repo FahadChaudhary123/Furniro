@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { platformMappingTemplate, validatePlatformMapping } from './platformMapping.js';
 
-const catalogue = { products: [{ slug: 'chair' }, { slug: 'table' }] };
+const product = (slug, extra = {}) => ({
+  slug, name: slug, price: 100, image: `${slug}.jpg`, category: 'Living Room', ...extra,
+});
+const catalogue = {
+  categories: ['Living Room'],
+  products: [product('chair'), product('table'), product('old-chair', { discontinued: true }),
+    product('broken-chair', { image: null })],
+};
 const mapping = {
   provider: 'example',
   products: [
@@ -29,5 +36,18 @@ describe('platform mapping', () => {
     expect(() => validatePlatformMapping(catalogue, {
       ...mapping, products: [mapping.products[0], { ...mapping.products[1], variant_id: 'v1' }],
     })).toThrow('Duplicate variant_id');
+  });
+
+  it('excludes discontinued and blocked products from required mapping', () => {
+    expect(platformMappingTemplate(catalogue).products.map(({ slug }) => slug))
+      .toEqual(['chair', 'table']);
+    expect(() => validatePlatformMapping(catalogue, {
+      ...mapping,
+      products: [...mapping.products, { slug: 'old-chair', product_id: 'p3', variant_id: 'v3' }],
+    })).toThrow('Unknown or duplicate slug: old-chair');
+    expect(() => validatePlatformMapping(catalogue, {
+      ...mapping,
+      products: [...mapping.products, { slug: 'broken-chair', product_id: 'p4', variant_id: 'v4' }],
+    })).toThrow('Unknown or duplicate slug: broken-chair');
   });
 });

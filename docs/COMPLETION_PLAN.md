@@ -78,6 +78,8 @@ rotation remains the next required step.
   coverage and duplicate IDs only.
 - Define the data boundary: which system owns prices, availability, customer records and
   orders; how updates reach the storefront; and how deletion/export requests cross it.
+  The [draft data boundary](COMMERCE_DATA_BOUNDARY.md) records the settled ownership rules
+  and the provider-specific decisions still open.
 
 **Exit:** A selected provider is demonstrably usable for a Pakistan-only PKR checkout;
 all published products have approved PKR prices and verified provider variants; tax,

@@ -1,8 +1,15 @@
+import { evaluateAll } from './publishGate.js';
+
+/** Match the products served by the repository, including its publish gate. */
+const publishedProducts = (catalogue) => evaluateAll(catalogue.products, {
+  categoryNames: new Set(catalogue.categories),
+}).publishable.filter((product) => product.discontinued !== true);
+
 /** A blank mapping worksheet derived from the only product catalogue. */
 export function platformMappingTemplate(catalogue) {
   return {
     provider: null,
-    products: catalogue.products.map(({ slug }) => ({
+    products: publishedProducts(catalogue).map(({ slug }) => ({
       slug,
       product_id: null,
       variant_id: null,
@@ -19,7 +26,7 @@ export function validatePlatformMapping(catalogue, mapping) {
   if (Object.keys(mapping).sort().join(',') !== 'products,provider') {
     throw new Error('Mapping contains unexpected top-level fields');
   }
-  const expected = new Set(catalogue.products.map(({ slug }) => slug));
+  const expected = new Set(publishedProducts(catalogue).map(({ slug }) => slug));
   const seenSlugs = new Set();
   const seenVariants = new Set();
   for (const row of mapping.products) {
