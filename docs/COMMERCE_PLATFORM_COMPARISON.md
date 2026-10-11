@@ -1,8 +1,8 @@
 # Commerce platform comparison
 
-**Status:** evaluation, 2026-10-01; payment evidence rechecked 2026-10-10.
-[ADR 0012](decisions/0012-adopt-commerce-platform.md)
-selects a platform approach; it does not select a provider.
+**Status:** Shopify selected in [ADR 0014](decisions/0014-select-shopify-for-commerce.md),
+2026-10-11; merchant account and gateway unverified. [ADR 0012](decisions/0012-adopt-commerce-platform.md)
+selected the platform approach.
 
 The first release needs a provider-owned checkout, order record, payment handling and
 inventory. Furniro keeps the React storefront, JSON-backed read API and `{slug, quantity}`
@@ -31,13 +31,13 @@ amounts were authored as Indonesian rupiah (`IDR`), so they are not PKR price da
 Reprice every product in integer PKR minor units and approve the amounts before a PKR
 formatter or checkout is enabled. Relabelling the existing numbers would mislead buyers.
 
-### Payment provider decision gate
+### Payment provider verification gate
 
 Shopify's [provider setup guide](https://help.shopify.com/en/manual/payments/third-party-providers/configuring-providers)
 says the available providers appear in the store's Payments settings. A listing on the
 [country gateway page](https://help.shopify.com/en/manual/payments/third-party-providers/payment-gateway-availability)
-does not guarantee that a provider can be activated for a particular store. Before choosing
-Shopify, confirm a provider in a Pakistan-based merchant account and obtain the provider's
+does not guarantee that a provider can be activated for a particular store. Before building
+online checkout, confirm a provider in a Pakistan-based merchant account and obtain the provider's
 written confirmation that it can onboard this business, charge PKR, and settle to its bank.
 Record supported customer methods, fees, refunds, test mode and dispute handling. A provider
 name found in a search result is insufficient evidence of merchant eligibility.
@@ -45,19 +45,20 @@ name found in a search result is insufficient evidence of merchant eligibility.
 If launch uses cash on delivery, Shopify documents it as a
 [manual payment method](https://help.shopify.com/en/manual/payments/manual-payments).
 Medusa's default [`system` payment provider](https://docs.medusajs.com/resources/commerce-modules/payment/payment-provider)
-can represent manual payment, but it does not process an online charge. Decide whether
-online payment is required at launch before treating either path as sufficient for `PAY-01`.
+can represent manual payment, but it does not process an online charge. The merchant chose
+both COD and online payment for launch in
+[ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md); neither manual path
+alone satisfies the chosen launch scope or `PAY-01`.
 
-For a cash-on-delivery launch, Shopify's manual method creates an order marked unpaid;
+For a cash-on-delivery order, Shopify's manual method creates an order marked unpaid;
 an operator marks it paid after collecting the money. Shopify says its third-party
-transaction fee does not apply to manual payments. This removes the need to activate an
-online gateway for the first order, but it does not establish that the merchant can open
-the required store or that shipping, tax and returns are configured correctly. An online
-payment option still requires a confirmed eligible gateway in the merchant account.
+transaction fee does not apply to manual payments. The merchant still needs to establish
+that the store can be opened and shipping, tax and returns configured correctly. The online
+payment option requires a confirmed eligible gateway in the merchant account.
 Medusa's `system` provider likewise leaves collection to the merchant and requires an
 operated Medusa service. These are provider capabilities, not an approved COD policy.
 
-## Gates before selecting a provider
+## Gates before enabling checkout
 
 1. Obtain approved PKR prices for the 40 products and confirm whether prices include tax.
    Shopify's [payment availability](https://help.shopify.com/en/manual/payments/third-party-providers/payment-gateway-availability)
@@ -76,9 +77,9 @@ operated Medusa service. These are provider capabilities, not an approved COD po
 4. Run a test purchase through payment, order creation, cancellation/refund and webhook
    delivery. Requirements stay open until this works in a non-production environment.
 
-**Provisional recommendation:** Shopify is the shorter implementation path if a suitable
-third-party gateway accepts this Pakistan merchant and target market. Medusa is a
-better candidate when required workflows cannot be represented in Shopify and the team can
-operate another backend. The launch market and currency are settled; payment methods,
-gateway eligibility and fulfilment remain open. This comparison is not a provider approval
-or an authorization to create an account.
+**Decision:** Shopify is the target commerce platform. [Safepay advertises Shopify
+payment apps](https://safepay.pk/pricing) and is the first online gateway candidate;
+its card app and PKR settlement must be verified for this merchant in the Shopify admin
+and with Safepay. COD uses Shopify's manual payment method. Gateway eligibility,
+approved PKR prices and fulfilment remain open. This decision does not activate a store
+or authorize a purchase flow.

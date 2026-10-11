@@ -288,6 +288,10 @@ the client is a number the buyer chose. It is cheap now and expensive to retrofi
 
 `PAY-12` implies a hosted checkout or client-side payment element. That is a PCI scope
 decision with architectural consequences, and it should be made before `PAY-01` is built.
+The first launch is intended to offer COD and online payment
+([ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md)). This is a product
+choice, not implemented payment behavior: gateway eligibility, the online method and
+working test orders are still missing, so the `PAY-*` and `CHK-03` statuses stay open.
 
 ## 9. Orders — `ORD`
 

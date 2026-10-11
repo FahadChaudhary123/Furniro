@@ -61,14 +61,17 @@ rotation remains the next required step.
 
 **Modules:** `catalogue`, `pricing`, `inventory`, `fulfilment`, `privacy`.
 
-- Decide whether launch requires online payment or permits cash on delivery; confirm the
+- Offer both cash on delivery and online payment at launch, as decided in
+  [ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md). Confirm the
   merchant's eligible PKR gateway, settlement, refunds and test mode in a real account.
-  Recheck the evidence in [provider comparison](COMMERCE_PLATFORM_COMPARISON.md) before
-  choosing Shopify or Medusa. Record the provider decision and actual fees/limits.
+  Shopify is selected in [ADR 0014](decisions/0014-select-shopify-for-commerce.md);
+  Safepay is the first gateway candidate. Verify the gateway in the merchant's Shopify
+  account and record actual fees/limits before building the payment path.
 - Decide stocked versus made-to-order versus dropship goods, shipping regions/rates,
   tax treatment, returns policy, and whether an ERP/PIM is authoritative. Stocked goods
   require inventory reservation before checkout; made-to-order goods still need an honest
-  availability and lead-time policy.
+  availability and lead-time policy. Default all products to unavailable for purchase
+  until their real stock or lead time is verified.
 - Obtain approved PKR prices for every published product and apply them using the
   [PKR repricing runbook](runbooks/pkr-repricing.md). Record tax inclusion and approved
   comparison prices. Do not relabel IDR numbers.
@@ -154,10 +157,10 @@ requirement counts, module status, runbooks and changelog before declaring compl
 | Accountable maintainer and backup; credential rotation | Live deployment | Open |
 | Approved PKR price list and tax treatment | Product migration, checkout | Open; validator/runbook ready |
 | Fulfilment and inventory model | Provider setup, checkout stock rules | Open |
-| Online gateway or cash-on-delivery launch; eligible provider account | Platform choice, checkout | Open |
-| Commerce platform and verified variant mapping | Purchase integration | Platform approach accepted; provider open |
+| COD and online payment at launch; eligible online gateway account | Checkout | Methods chosen; Safepay candidate, account unverified |
+| Commerce platform and verified variant mapping | Purchase integration | Shopify selected; store and mapping open |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-The immediate implementation sequence is **Milestone 1**, followed by the decisions and
-data work in **Milestone 2**. Milestones 3–5 depend on those inputs and should be broken into
-small reviewable changes once the provider and fulfilment model are known.
+The immediate implementation sequence is **Milestone 1**, followed by the remaining
+account and data work in **Milestone 2**. Milestones 3–5 depend on those inputs and should
+be broken into small reviewable changes once the gateway and fulfilment model are verified.

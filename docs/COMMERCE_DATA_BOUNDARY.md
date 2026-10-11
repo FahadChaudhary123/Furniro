@@ -1,6 +1,6 @@
 # Commerce data boundary
 
-**Status:** draft for Milestone 2, 2026-10-11. No commerce provider is selected or connected.
+**Status:** draft for Milestone 2, 2026-10-11. Shopify is selected but not connected.
 This describes the intended boundary from [ADR 0012](decisions/0012-adopt-commerce-platform.md);
 it does not mark any purchase requirement complete.
 
@@ -51,10 +51,13 @@ person's data; the platform's export or deletion button alone is not a complete 
 
 ## Decisions still required
 
-- Cash on delivery, online payment or both; eligible Pakistan PKR provider and real account
-  access if online payment is included.
+- Both cash on delivery and online payment are required at launch by
+  [ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md). An eligible
+  Pakistan PKR online gateway and real merchant account are still needed.
 - Stocked, made-to-order or dropship fulfilment; reservation and lead-time rules.
 - Approved PKR prices, tax treatment, shipping regions/rates and returns policy.
-- Shopify or Medusa, plus whether an ERP/PIM owns long-term product and stock updates.
+- Whether an ERP/PIM owns long-term product and stock updates. Shopify is selected in
+  [ADR 0014](decisions/0014-select-shopify-for-commerce.md), but its store and gateway
+  have not been verified.
 - Provider-specific data sync, failure behavior, reconciliation interval, webhook events
   and subject-request procedure. Verify these in a working environment before checkout.
