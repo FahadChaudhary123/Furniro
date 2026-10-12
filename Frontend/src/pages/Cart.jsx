@@ -7,6 +7,7 @@ import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
 import Picture from '../shared/ui/Picture';
+import TradingNotice from '../components/TradingNotice';
 
 /**
  * The cart.
@@ -25,6 +26,7 @@ const Cart = () => {
       <PageBanner title="Cart" trail={[{ label: 'Home', to: '/' }, { label: 'Cart' }]} />
 
       <section className="max-w-7xl mx-auto px-4 py-16">
+        <TradingNotice className="mb-8" />
         {error ? (
           <CatalogueError error={error} onRetry={retry} />
         ) : count === 0 ? (
@@ -147,8 +149,8 @@ const Cart = () => {
                 </span>
               </div>
 
-              <p className="text-xs text-gray-500 mb-6">
-                Shipping and tax are calculated at checkout.
+              <p className="text-xs text-gray-600 mb-6">
+                This subtotal is for browsing only. Shipping and tax are not configured.
               </p>
 
               {/* No checkout exists — see docs/MODULES.md#build-order. Disabled rather than

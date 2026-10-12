@@ -4,6 +4,7 @@ import { useCart } from "../modules/cart";
 import { formatPrice } from "../shared/lib/money";
 import { ProductGridSkeleton, CatalogueError } from "../components/CatalogueState";
 import Picture from "../shared/ui/Picture";
+import TradingNotice from "../components/TradingNotice";
 
 const ProductsSection = () => {
   const { products, loading, error, retry } = useFeaturedProducts();
@@ -14,6 +15,7 @@ const ProductsSection = () => {
       <h2 className="text-3xl font-semibold text-center mb-12">
         Our Products
       </h2>
+      <TradingNotice className="mb-8" />
 
       {error ? (
         <CatalogueError error={error} onRetry={retry} />

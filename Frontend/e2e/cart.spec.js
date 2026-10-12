@@ -223,6 +223,8 @@ test.describe('cart', () => {
     await page.goto('/cart');
 
     await expect(page.getByRole('button', { name: /Checkout/ })).toBeDisabled();
+    await expect(page.getByText(/Catalogue prices are shown in IDR/)).toBeVisible();
+    await expect(page.getByText(/Shipping and tax are not configured/)).toBeVisible();
   });
 
   test('logs no console errors', async ({ page }) => {

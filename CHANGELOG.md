@@ -14,6 +14,9 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Storefront catalogue and cart pages now explain that current prices are IDR browsing data,
+  PKR prices and ordering are unavailable, and shipping and tax are not configured.
+
 - Shopify mapping worksheets now use the selected provider and reject malformed product
   or variant IDs before store verification.
 

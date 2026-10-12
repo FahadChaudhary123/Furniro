@@ -8,6 +8,7 @@ import PageBanner from '../components/PageBanner';
 import { CatalogueError } from '../components/CatalogueState';
 import FeaturesSection from '../sections/FeaturesSection';
 import Picture from '../shared/ui/Picture';
+import TradingNotice from '../components/TradingNotice';
 
 /**
  * Product detail — `CAT-07`, a stable indexable URL per product.
@@ -73,6 +74,7 @@ const ProductDetail = () => {
       />
 
       <section className="max-w-7xl mx-auto px-4 py-16">
+        {product && <TradingNotice className="mb-8" />}
         {error ? (
           <CatalogueError error={error} onRetry={retry} />
         ) : notFound ? (
