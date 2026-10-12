@@ -1,5 +1,9 @@
 # Runbook: prepare Shopify for Furniro
 
+**Historical; no longer required.** [ADR 0015](../decisions/0015-build-commerce-in-furniro.md)
+replaces Shopify with Furniro-owned commerce. The procedure below is retained as a record
+of the abandoned approach, not the current setup path.
+
 **Status:** preparation only, 2026-10-12. No store, gateway or API connection has been
 verified. Deployment remains deferred. This procedure prepares Milestone 2; completing
 it does not enable checkout or complete the purchase requirements.

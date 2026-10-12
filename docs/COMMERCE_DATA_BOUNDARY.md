@@ -1,63 +1,60 @@
 # Commerce data boundary
 
-**Status:** draft for Milestone 2, 2026-10-11. Shopify is selected but not connected.
-This describes the intended boundary from [ADR 0012](decisions/0012-adopt-commerce-platform.md);
-it does not mark any purchase requirement complete.
+**Status:** planned Furniro-owned commerce, 2026-10-12.
+[ADR 0015](decisions/0015-build-commerce-in-furniro.md) replaces the Shopify approach.
+There is still no running database, checkout, payment or order implementation.
 
 ## Authority by data type
 
 | Data | Current authority | Intended trading authority |
 |---|---|---|
-| Product slug, name, description, category and local media key | `Backend/src/modules/catalogue/data/products.json` | Furniro catalogue until an ERP/PIM decision deliberately changes it |
-| Display price | IDR amount in the same JSON file | Approved PKR value projected from the commerce platform; never inferred from IDR |
-| Checkout price, discounts, tax, shipping and amount charged | None | Commerce platform, calculated for the current cart and destination |
-| Availability and reservations | None | Commerce platform inventory rules, according to the chosen fulfilment model |
-| Guest cart | Browser storage containing only `{slug, quantity}` | Same until checkout; the server resolves slugs to verified provider variants |
-| Customer identity, addresses, payments and orders | None | Commerce platform and its configured payment provider; Furniro must not create a second order ledger |
-| Blog posts | `Backend/src/modules/content/data/posts.json` | Furniro content until a CMS decision changes it |
+| Product description, slug, category and media key | Canonical catalogue JSON | Furniro catalogue; migrate deliberately if database ownership is introduced |
+| Display price | IDR integer amounts in the canonical catalogue | Approved PKR prices owned by Furniro pricing/catalogue |
+| Discounts, tax, shipping and amount charged | None | Furniro server pricing and checkout calculation |
+| Stock and reservations | None | Furniro inventory, with transactional concurrency control |
+| Guest cart | Browser storage with `{slug, quantity}` only | Same input; validated and repriced by the server at checkout |
+| Customer and delivery details | None | Protected Furniro order records; account records only when identity is built |
+| Orders and immutable item/total snapshots | None | Furniro orders in transactional storage |
+| Payment attempts and order payment state | None | Furniro payments, reconciled with verified processor events; COD collection recorded by an authorized operator |
+| Card details | None | Hosted payment processor; never Furniro forms, storage or logs |
+| Blog posts | Canonical content JSON | Furniro content until a deliberate CMS decision |
 
-The local JSON file remains the only Furniro product definition. A slug-to-variant mapping
-will link that catalogue to the selected provider, but is not a second price list. Provider
-IDs and any API credentials must stay server-side. Mapping coverage follows the catalogue
-publish gate and excludes discontinued products. The browser must never submit a price,
-trust a cached amount for checkout, or receive a private provider credential.
+The only current product definition remains
+`Backend/src/modules/catalogue/data/products.json`. Do not create a second mutable copy.
+An immutable order-item snapshot records what was bought; it does not become a catalogue.
+No Shopify mapping is needed. ERP/PIM ownership remains a separate open decision.
 
-## Trading data flow to build after provider selection
+## Purchase flow to implement
 
-1. Approve PKR prices and the fulfilment model. Configure each published product and
-   variant in the platform; validate mapping coverage, currency, price, image and
-   availability against its API. Do not infer PKR from the current IDR amounts.
-2. Before showing an enabled purchase action, replace or reconcile the storefront's local
-   display price and availability with provider data. If reconciliation fails or the
-   provider is unavailable, suppress purchase actions for affected items rather than
-   displaying a stale amount as a purchasable offer.
-3. At checkout, send `{slug, quantity}` to Furniro's server. The server resolves each slug
-   to a verified variant, rejects missing or unavailable lines, and asks the platform to
-   calculate the current total. The platform owns the checkout session and order record.
-4. Preserve the browser cart when checkout creation fails. Clear it only after a verified
-   successful order outcome; a redirect or browser return alone is insufficient proof.
-5. Treat provider webhooks as untrusted input until signatures are verified. Handle retries
-   idempotently and reconcile order and payment state with the provider. Do not log card
-   details, raw customer payloads or provider secrets.
+1. Validate `{slug, quantity}` against published products and approved PKR prices, tax,
+   shipping and real availability. Do not infer PKR values from IDR or trust browser totals.
+2. Atomically create the order, immutable item/total snapshots and required stock
+   reservations under a durable idempotency key. A repeated request must not create a
+   second order; reject incompatible reuse of the same key.
+3. COD begins unpaid. Record collection through a protected, audited operator action.
+   For online payment, persist a payment attempt before contacting the processor using
+   the server's immutable order amount. Handle uncertain outcomes through reconciliation.
+4. Verify processor signatures and deduplicate events before changing payment state.
+   A browser return alone cannot establish payment. Do not retain raw card data or log
+   raw customer/provider payloads. Use durable retry/event records where required.
+5. Preserve the cart on failure. Clear only the successfully ordered lines after a verified
+   order outcome, including an accepted unpaid COD order. Support cancellation, stock
+   release and refunds with explicit transitions and audit records.
 
-## Privacy and operations boundary
+## Privacy and operating responsibilities
 
-Before collecting customer data, record the selected platform and payment processor in
-[THIRD_PARTY_REGISTER.md](THIRD_PARTY_REGISTER.md) and add their actual processing,
-retention, access and deletion/export paths to
-[PROCESSING_REGISTER.md](PROCESSING_REGISTER.md). Publish reviewed privacy and legal copy.
-Subject requests must cover Furniro logs/browser storage and every provider that holds the
-person's data; the platform's export or deletion button alone is not a complete process.
+Furniro owns database access, backups, recovery, retention and customer export/deletion
+workflows. Before collecting new customer data, update
+[PROCESSING_REGISTER.md](PROCESSING_REGISTER.md) and publish reviewed privacy/terms.
+Record the actual database, payment and notification services in
+[THIRD_PARTY_REGISTER.md](THIRD_PARTY_REGISTER.md), including access and support ownership.
 
-## Decisions still required
+## Remaining inputs
 
-- Both cash on delivery and online payment are required at launch by
-  [ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md). An eligible
-  Pakistan PKR online gateway and real merchant account are still needed.
-- Stocked, made-to-order or dropship fulfilment; reservation and lead-time rules.
-- Approved PKR prices, tax treatment, shipping regions/rates and returns policy.
-- Whether an ERP/PIM owns long-term product and stock updates. Shopify is selected in
-  [ADR 0014](decisions/0014-select-shopify-for-commerce.md), but its store and gateway
-  have not been verified.
-- Provider-specific data sync, failure behavior, reconciliation interval, webhook events
-  and subject-request procedure. Verify these in a working environment before checkout.
+- Database schema, migrations, repository interfaces and verified transactions.
+- Approved PKR prices, tax, shipping rates, returns and fulfilment rules.
+- Real stock or lead times; unverified availability must not permit purchase.
+- Protected operator identity, permissions and audit behavior.
+- Eligible direct PKR payment processor and verified merchant account; Safepay is a candidate.
+- Notification delivery and operational ownership. No requirement becomes complete from
+  this design alone; verify behavior against the completion plan.

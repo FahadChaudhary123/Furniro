@@ -72,7 +72,11 @@ See [deployment.md](runbooks/deployment.md) and [OWNERSHIP.md](OWNERSHIP.md).
 
 ---
 
-## Shopify — selected, not connected
+## Shopify — historical selection, superseded
+
+[ADR 0015](decisions/0015-build-commerce-in-furniro.md) removes Shopify from the active
+plan. The row below records the previous proposal; no account was connected and none is
+required. The existing mapping CLI is an unused experiment.
 
 | Field | Value |
 |---|---|
@@ -87,15 +91,15 @@ See [deployment.md](runbooks/deployment.md) and [OWNERSHIP.md](OWNERSHIP.md).
 
 | Field | Value |
 |---|---|
-| Service and purpose | First candidate for Pakistan PKR online payments through Shopify; ADR 0014 |
+| Service and purpose | Candidate for direct Pakistan PKR online payment integration under ADR 0015; no merchant account verified |
 | Criticality | Online-payment stopping once integrated; no runtime dependency today |
 | Account, support and status alerts | Merchant eligibility, settlement, supported methods, test mode and escalation route unverified |
-| Credentials and API | No configured integration or credentials required by Furniro today; intended Shopify payment app must be verified in the merchant account |
+| Credentials and API | No configured direct integration. Direct API access, authentication, webhooks and hosted payment collection must be reviewed before implementation |
 | Limits and contract | Actual fees, settlement terms, dispute/refund rules and processing arrangements unreviewed |
 | Fallback | COD is a separate chosen method, not automatic payment failover; never retry an uncertain charge through another method |
 
-Complete [Shopify onboarding](runbooks/shopify-onboarding.md) before treating either
-service as operational. These entries record planned dependencies, not active processing.
+Verify direct gateway eligibility, settlement, test mode and operating ownership before
+treating Safepay as operational. Shopify onboarding is no longer required.
 
 ## Not yet chosen or verified
 

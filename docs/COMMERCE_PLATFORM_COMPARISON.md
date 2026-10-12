@@ -1,5 +1,9 @@
 # Commerce platform comparison
 
+**Historical evaluation.** [ADR 0015](decisions/0015-build-commerce-in-furniro.md)
+supersedes the Shopify selection. Furniro now owns the planned commerce implementation;
+the comparison below is retained for decision history.
+
 **Status:** Shopify selected in [ADR 0014](decisions/0014-select-shopify-for-commerce.md),
 2026-10-11; merchant account and gateway unverified. [ADR 0012](decisions/0012-adopt-commerce-platform.md)
 selected the platform approach.

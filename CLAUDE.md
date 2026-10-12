@@ -16,6 +16,12 @@ logging, correlation ids, errors, health, client error reports),
 `Backend/src/modules/content/` (blog posts), and `Backend/src/security/` are built.
 There is no server-side cart, database, inventory, orders, auth, checkout or payments.
 
+**Trading direction:** [ADR 0015](docs/decisions/0015-build-commerce-in-furniro.md)
+supersedes the Shopify/platform approach. Build commerce in Furniro, beginning with
+transactional persistence, then COD checkout and direct hosted online payment collection.
+Shopify accounts and mappings are not prerequisites. Planned modules do not exist yet;
+keep the current-state statements above accurate as implementation proceeds.
+
 **The front end fetches products and posts from the API** via `src/modules/catalogue`
 and `src/modules/content`. It holds no product data of its own. A guest cart lives in
 `src/modules/cart` and persists `{slug, quantity}` in browser storage. Some presentation

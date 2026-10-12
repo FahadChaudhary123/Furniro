@@ -1,7 +1,7 @@
 # 0012 — Adopt a commerce platform
 
 **Date:** 2026-10-01  
-**Status:** Accepted
+**Status:** Superseded by [0015](0015-build-commerce-in-furniro.md)
 
 ## Context
 

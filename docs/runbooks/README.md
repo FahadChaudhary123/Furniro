@@ -15,7 +15,7 @@ numbered steps, explicit commands, and a stated way to tell whether the step wor
 | [rollback.md](rollback.md) | A deploy broke something and you need it undone |
 | [secret-rotation.md](secret-rotation.md) | A credential leaked, or routine rotation |
 | [pkr-repricing.md](pkr-repricing.md) | Approving and applying the first PKR catalogue prices |
-| [shopify-onboarding.md](shopify-onboarding.md) | Preparing the merchant store, gateway and verified trading data |
+| [shopify-onboarding.md](shopify-onboarding.md) | Historical Shopify approach; superseded by ADR 0015 |
 | [incident-response.md](incident-response.md) | Production is down or degraded |
 
 Governing standard: **Document B — *E-commerce maintenance and operations runbook*, Rev 1.0**.

@@ -238,8 +238,9 @@ Today: canonical products and posts live in JSON repositories behind the API. Th
 front end resolves API image keys and formats integer minor-unit prices at render time.
 Marketing sections still hold presentation arrays. See [DATA_MODEL.md](DATA_MODEL.md).
 
-Planned: a database-backed repository, after the commerce platform and data ownership
-decisions. The API response shape can remain stable while the repository changes.
+Planned: transactional persistence for Furniro-owned commerce under
+[ADR 0015](docs/decisions/0015-build-commerce-in-furniro.md), followed by a deliberate
+catalogue migration. The API response shape can remain stable while the repository changes.
 
 ---
 
@@ -259,5 +260,5 @@ decisions. The API response shape can remain stable while the repository changes
 
 The remaining structural gaps are a durable data store, identity, server-side commerce
 state, deployment infrastructure and alerting. The guest cart, canonical catalogue,
-shared footer, error boundary, tests and CI are already in place. Decide whether to build
-commerce here or adopt a platform before designing checkout and payments.
+shared footer, error boundary, tests and CI are already in place. Commerce will be built
+here under ADR 0015; database migrations and transactional order storage come next.

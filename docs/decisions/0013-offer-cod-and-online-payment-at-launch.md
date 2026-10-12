@@ -3,6 +3,10 @@
 **Date:** 2026-10-11  
 **Status:** Accepted
 
+**Implementation update (2026-10-12):** [ADR 0015](0015-build-commerce-in-furniro.md)
+assigns checkout and durable orders to Furniro. The platform-specific wording below is
+historical; the decision to offer both COD and online payment remains in force.
+
 ## Context
 
 Furniro's first checkout is planned for customers in Pakistan, charged in PKR. The merchant

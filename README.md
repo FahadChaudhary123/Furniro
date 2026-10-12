@@ -24,7 +24,7 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Document A (derived) — 134 functional requirements with IDs, reconstructed from Document B |
 | [docs/MODULES.md](docs/MODULES.md) | The 134 requirements divided into 20 modules — boundaries, dependencies, build order |
 | [docs/COMPLETION_PLAN.md](docs/COMPLETION_PLAN.md) | Ordered milestones for completing the documented scope |
-| [docs/COMMERCE_PLATFORM_COMPARISON.md](docs/COMMERCE_PLATFORM_COMPARISON.md) | Shopify and Medusa comparison; Shopify selected, payment gateway unverified |
+| [docs/COMMERCE_PLATFORM_COMPARISON.md](docs/COMMERCE_PLATFORM_COMPARISON.md) | Historical platform comparison; superseded by Furniro-owned commerce in ADR 0015 |
 | [docs/OPS_CONFORMANCE.md](docs/OPS_CONFORMANCE.md) | Document B (ops standard) mapped against reality, plus the staged roadmap |
 | [docs/THIRD_PARTY_REGISTER.md](docs/THIRD_PARTY_REGISTER.md) | External services, criticality, credentials location, fallbacks |
 | [docs/OWNERSHIP.md](docs/OWNERSHIP.md) | Current responsibilities, escalation and unassigned owners |
@@ -98,7 +98,7 @@ fails at the point of use rather than at boot.
 | `npm test` | Unit tests for the services and platform (72 checks) |
 | `npm run smoke` | Smoke-test a running server (85 checks) |
 | `npm run completeness` | Catalogue data-quality report (`CAT-04`); non-zero if a product is blocked |
-| `npm run mapping:shopify -- <file>` | Read-only Shopify mapping and PKR price check; requires approved PKR catalogue and private store access. See [onboarding](docs/runbooks/shopify-onboarding.md) |
+| `npm run mapping:shopify -- <file>` | Historical Shopify experiment; not required by the current Furniro-owned commerce plan |
 | `npm run latency` | API latency benchmark (`NFR-04`); start the server with `RATE_LIMIT_MAX=3000` |
 
 | Endpoint | Purpose |

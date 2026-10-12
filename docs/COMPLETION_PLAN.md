@@ -4,12 +4,11 @@
 requirements across 20 modules. This plan covers the full documented scope. A first trading
 release is a milestone within it, not completion of all 134 requirements.
 
-**Architecture:** Keep the existing storefront and read API. Use a commerce platform for
-checkout, payments, orders and inventory as decided in
-[ADR 0012](decisions/0012-adopt-commerce-platform.md). The modules in
-[MODULES.md](MODULES.md) are capability and ownership boundaries; they do not all require
-new local services. Mark a requirement complete only after the selected platform and Furniro's
-integration satisfy its acceptance criteria in a working environment.
+**Architecture:** Build commerce inside Furniro's existing modular monolith, as decided in
+[ADR 0015](decisions/0015-build-commerce-in-furniro.md). Furniro owns checkout, totals,
+orders and inventory; an external payment processor collects online payments. Shopify
+setup is no longer required. Follow the boundaries in [MODULES.md](MODULES.md) and mark
+requirements complete only after their behavior is verified.
 
 ## Completion rules
 
@@ -19,7 +18,7 @@ integration satisfy its acceptance criteria in a working environment.
    procedure and end-to-end verification together. Record any decision that changes the
    architecture in `docs/decisions/`.
 3. Never use the current IDR catalogue amounts as PKR amounts or let the browser calculate
-   the amount charged. The commerce platform must authoritatively calculate checkout totals.
+   the amount charged. Furniro's server must authoritatively calculate checkout totals.
 4. Run `Frontend: npm run verify && npm run e2e`, `Backend: npm test && npm run
    completeness && npm run smoke`, plus the milestone-specific checks before marking work
    done. `smoke` needs a running local API. For a deployed release, run `npm run
@@ -57,68 +56,54 @@ On 2026-10-10, a local Git check found `Backend/.env` ignored by
 This does not establish that the credentials are safe or rotated; the account-side
 rotation remains the next required step.
 
-## Milestone 2 — settle the trading design and data
+## Milestone 2 — establish Furniro's durable commerce foundation
 
-**Modules:** `catalogue`, `pricing`, `inventory`, `fulfilment`, `privacy`.
+**Modules:** `catalogue`, `pricing`, `inventory`, `orders`, `payments`, `security`, `privacy`.
 
-Follow the [Shopify onboarding runbook](runbooks/shopify-onboarding.md) to collect and
-verify the account and trading inputs below. The runbook is prepared; its account-side
-steps have not been executed.
+- Design versioned database migrations for orders, immutable order-item snapshots, payment
+  attempts, inventory reservations and idempotency records. Define constraints, atomic
+  writes, rollback and repository boundaries. Start with local database verification;
+  do not use the existing live database credentials for unreviewed migrations.
+- Retain the canonical JSON catalogue until a deliberate migration replaces it. Define
+  stable product/variant references and server-owned integer PKR totals. Never accept a
+  price, payment status or order total supplied by the browser.
+- Obtain approved PKR prices using the [repricing runbook](runbooks/pkr-repricing.md).
+  Confirm tax inclusion, shipping rates, returns and real stock or made-to-order lead
+  times. Synthetic local test data is not approval of production prices or availability.
+- Define protected operator access before exposing order/customer data or manual payment
+  actions. Record retention, access and deletion/export requirements before collecting data.
+- Verify an eligible direct online payment processor for the Pakistan merchant. Safepay
+  remains a candidate; confirm direct integration, PKR settlement, fees, refunds and test
+  mode. No Shopify account or Shopify mapping is needed.
 
-- Offer both cash on delivery and online payment at launch, as decided in
-  [ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md). Confirm the
-  merchant's eligible PKR gateway, settlement, refunds and test mode in a real account.
-  Shopify is selected in [ADR 0014](decisions/0014-select-shopify-for-commerce.md);
-  Safepay is the first gateway candidate. Verify the gateway in the merchant's Shopify
-  account and record actual fees/limits before building the payment path.
-- Decide stocked versus made-to-order versus dropship goods, shipping regions/rates,
-  tax treatment, returns policy, and whether an ERP/PIM is authoritative. Stocked goods
-  require inventory reservation before checkout; made-to-order goods still need an honest
-  availability and lead-time policy. Default all products to unavailable for purchase
-  until their real stock or lead time is verified.
-- Obtain approved PKR prices for every published product and apply them using the
-  [PKR repricing runbook](runbooks/pkr-repricing.md). Record tax inclusion and approved
-  comparison prices. Do not relabel IDR numbers.
-- Configure products/variants in the platform and validate the complete slug-to-variant
-  mapping with `npm run mapping -- --check <file>`. Compare currency, price, image and
-  availability against the provider API separately; the local validator checks mapping
-  coverage, duplicate variants and Shopify ID shape only.
-  Once approved PKR prices and store access exist, run `npm run mapping:shopify -- <file>`
-  to check remote variant ownership, selling prices, availability and image presence.
-  Image identity and actual stock/lead times still require independent confirmation.
-- Define the data boundary: which system owns prices, availability, customer records and
-  orders; how updates reach the storefront; and how deletion/export requests cross it.
-  The [draft data boundary](COMMERCE_DATA_BOUNDARY.md) records the settled ownership rules
-  and the provider-specific decisions still open.
+**Exit:** Transactional persistence works locally with migrations and rollback verification;
+repository and access boundaries are defined. Trading data and provider approval remain
+explicit release gates. No public purchase action is enabled yet.
 
-**Exit:** A selected provider is demonstrably usable for a Pakistan-only PKR checkout;
-all published products have approved PKR prices and verified provider variants; tax,
-shipping, fulfilment and data ownership are documented. No purchase action is enabled yet.
+## Milestone 3 — complete one purchase path in Furniro
 
-## Milestone 3 — complete one purchase path
+**Modules:** `cart`, `checkout`, `pricing`, `payments`, `orders`, `notifications`, `security`,
+`privacy`; `inventory` for stocked goods.
 
-**Modules:** `cart`, `checkout`, `payments`, `orders`, `notifications`, `security`,
-`privacy`; `inventory` if goods are stocked.
+1. Implement server-side cart validation and quote calculation from `{slug, quantity}`.
+   Reject unknown/unavailable items; calculate PKR prices, tax and shipping from approved
+   server data. Preserve the browser cart when checkout fails.
+2. Build an idempotent guest COD checkout that atomically creates an order, snapshots its
+   items/totals and reserves held stock. COD orders remain unpaid until a protected operator
+   records collection. Test concurrent checkout, duplicate submission and stock release.
+3. Build an authenticated operator order view and controlled fulfilment/cancellation
+   transitions, with audit records. Configure order confirmations and delivery-failure handling.
+4. Integrate hosted online payment collection against the persisted order amount. Verify
+   webhook signatures, deduplicate deliveries and reconcile payment state. Browser redirects
+   cannot mark orders paid. Define retry behavior after a timeout with an uncertain outcome.
+5. Test both payment paths, changed prices, unavailable stock, failed/cancelled payment,
+   duplicate requests/webhooks, confirmation, cancellation/refund and cart preservation on
+   desktop and mobile. Publish reviewed privacy/terms before collecting customer data.
 
-- Map `{slug, quantity}` cart lines to provider variants on the server, reject unmapped
-  or unavailable items, and use the platform's current authoritative prices. Preserve the
-  cart on checkout failure. Make checkout idempotent and show a clear success/failure state.
-- Use provider-owned checkout and payment collection. Verify order creation, payment
-  status, webhook authentication, duplicate webhook handling and order-state transitions.
-  Avoid collecting card data in Furniro code or logs.
-- Configure customer-facing order confirmation and an operational view of orders. Provide
-  a documented manual fulfilment path if carrier automation is deferred.
-- Publish the privacy notice and consent behavior before collecting new customer data;
-  map the provider's retention, access and deletion/export capabilities into the processing
-  register. Restrict admin access and enable MFA.
-- Test guest purchase in a non-production environment: success, declined/cancelled payment,
-  changed price, unavailable item, duplicate request/webhook, order confirmation and
-  refund/cancellation. Exercise desktop and mobile browser flows, accessibility checks,
-  and the actual PKR amount charged.
-
-**Exit:** A test customer can place one real-format order in PKR, see a truthful outcome,
-and an operator can find and fulfil or refund it. All money and order states reconcile
-between Furniro and the platform. Only then enable checkout for customers.
+**Exit:** Both COD and online payment work end to end in a test environment with durable
+orders and truthful payment state. Approved trading data, fulfilment, credentials and
+release verification must be complete before enabling public checkout. Building COD first
+is implementation sequencing; ADR 0013 still requires both methods at launch.
 
 ## Milestone 4 — operate the trading release safely
 
@@ -143,7 +128,7 @@ discrepancies, and can complete refunds and privacy requests within the adopted 
 `backoffice`, `support`, `content`, `jobs`, `privacy` and remaining cross-cutting work.
 
 - Add customer accounts and cross-device carts if required; keep guest checkout working.
-  Complete promotions, coupons and price/tax display using the platform's authoritative
+  Complete promotions, coupons and price/tax display using Furniro's authoritative server
   calculation.
 - Build or configure stock reservations/movement history, carrier rates/labels/tracking,
   return-to-origin handling and support tools according to the chosen fulfilment model.
@@ -163,11 +148,13 @@ requirement counts, module status, runbooks and changelog before declaring compl
 |---|---|---|
 | Accountable maintainer and backup; credential rotation | Live deployment | Open |
 | Approved PKR price list and tax treatment | Product migration, checkout | Open; validator/runbook ready |
-| Fulfilment and inventory model | Provider setup, checkout stock rules | Open |
+| Fulfilment and inventory model | Checkout stock rules | Open |
 | COD and online payment at launch; eligible online gateway account | Checkout | Methods chosen; Safepay candidate, account unverified |
-| Commerce platform and verified variant mapping | Purchase integration | Shopify selected; store and mapping open |
+| Durable commerce database and migrations | Orders and checkout | Open; owned by Furniro under ADR 0015 |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-The immediate implementation sequence is **Milestone 1**, followed by the remaining
-account and data work in **Milestone 2**. Milestones 3–5 depend on those inputs and should
-be broken into small reviewable changes once the gateway and fulfilment model are verified.
+**Next implementation:** Milestone 2 database schema, migrations and transaction tests,
+then the guest COD order path in Milestone 3. Deployment is deferred at the user's request;
+Milestone 1 remains a release gate. Online payment follows COD implementation, and both
+methods must pass before public launch. Account-specific facts and approved trading data
+cannot be inferred from the sample catalogue.

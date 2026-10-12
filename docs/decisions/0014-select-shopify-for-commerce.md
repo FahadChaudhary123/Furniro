@@ -1,7 +1,7 @@
 # 0014 — Select Shopify for commerce
 
 **Date:** 2026-10-11  
-**Status:** Accepted
+**Status:** Superseded by [0015](0015-build-commerce-in-furniro.md)
 
 ## Context
 

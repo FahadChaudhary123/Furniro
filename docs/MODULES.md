@@ -375,21 +375,18 @@ purchase path. That is [open decision 4](REQUIREMENTS.md#open-decisions).
 
 ### Next work
 
-The catalogue, price formatter and derived badges are already built. Render is selected
-for both tiers, and a commerce platform is selected for trading (see
-[ADR 0012](decisions/0012-adopt-commerce-platform.md)). The next foundation work is to
-rotate the live credentials, connect and validate the Render deployment, and select a
-commerce provider after mapping products, variants and checkout requirements. See the
-[provider comparison](COMMERCE_PLATFORM_COMPARISON.md). The guest cart can remain
-useful without inventing a server-side cart or order flow before those dependencies exist.
+The catalogue, price formatter and derived badges are built. Furniro will implement its
+own commerce modules under [ADR 0015](decisions/0015-build-commerce-in-furniro.md).
+Next: database migrations and transactional order storage, then guest COD checkout and
+direct online payment integration. Render remains selected, with deployment deferred.
+See the [completion plan](COMPLETION_PLAN.md) for implementation order and release gates.
 
 ---
 
 ## What this decomposition does not settle
 
-- **Commerce provider** ([ADR 0012](decisions/0012-adopt-commerce-platform.md)). The
-  platform approach is accepted; this document is an integration map for the capabilities
-  the platform will own. Provider selection remains open.
+- **Payment processor.** Commerce ownership is settled by ADR 0015; an eligible direct
+  online payment processor and merchant account still need verification.
 - **`inventory`'s stage**, which depends on the fulfilment model.
 - **Whether an ERP/PIM is upstream** (`CAT-09`). If so, `catalogue` and `inventory` become
   read-models over an external source of truth rather than owning their data — a materially

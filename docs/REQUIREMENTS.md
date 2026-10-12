@@ -651,18 +651,14 @@ listed.
 | 4 | **Fulfilment model** — own warehouse, 3PL, or dropship? | All `FUL-*`, `INV-*` |
 | 5 | **Is there an ERP/PIM?** Doc B §15 treats it as the source of truth for price and stock. If none exists, the platform *is* the source of truth — a different architecture | `CAT-09`, `INV-*` |
 | 6 | **Search: database queries or a dedicated cluster?** §5's 60-second staleness SLO implies a cluster | All `SRCH-*` |
-| 7 | **Resolved: adopt a commerce platform.** [ADR 0012](decisions/0012-adopt-commerce-platform.md). Provider selection and integration behavior remain open | Everything |
+| 7 | **Resolved: build commerce in Furniro.** [ADR 0015](decisions/0015-build-commerce-in-furniro.md) supersedes the platform choice. Database, checkout and order implementations remain open | Everything |
 | 8 | **Team size and budget.** Doc B §1 names ten role-holders and a 24/7 rota. Furniro has one person | Delivery plan, all stages |
 
-**Decision 7 is now answered.** Doc B describes an operation
-with a platform team, a warehouse, a finance function and a 24/7 rota. Nothing in this
-requirements list is differentiated — it is the standard feature set of an e-commerce
-platform. The differentiated work is catalogue, brand and merchandising, none of which
-requires building payments, search and fulfilment from scratch.
-
-The next business decision is which platform fits the target market, fulfilment model and
-budget. Requirements remain open until the selected platform and Furniro's integration
-actually satisfy them.
+**Decision 7 is now answered.** The user chose Furniro's own commerce implementation.
+The next technical foundation is transactional persistence, followed by guest COD checkout
+and direct online payment integration. Pakistan-only PKR trading and both launch payment
+methods remain required. Requirements stay open until their behavior is implemented and
+verified; choosing ownership does not complete them.
 
 ---
 
