@@ -313,10 +313,19 @@ create policy "public read" on blog_posts for select using (true);
 `old_price > price` is enforced by the database, not by convention — a discount that raises
 the price is nonsense, and a check constraint is cheaper than the bug report.
 
-### Not yet designed
+### Commerce foundation (2026-10-12)
 
-`carts`, `cart_items`, `orders`, `order_items`, `users`. Deferred until checkout is real,
-but two constraints are worth fixing now because they are expensive to retrofit:
+[ADR 0015](docs/decisions/0015-build-commerce-in-furniro.md) assigns commerce to Furniro.
+The first [order migration](Backend/db/README.md) now defines private order records,
+immutable item snapshots, PKR integer totals and unique idempotency keys. PostgreSQL
+transaction and rollback tests run locally with synthetic data. No live database or
+runtime order repository is connected. The catalogue schema above remains proposed.
+
+### Remaining commerce design
+
+Server carts, users, customer/delivery details, payment attempts, stock reservations,
+operator permissions and order transitions remain to be implemented. Two invariants
+guide the current order foundation:
 
 - **`order_items` snapshots price at purchase time.** It never joins to `products.price`
   for a historical order — a later price change must not rewrite what a customer paid.

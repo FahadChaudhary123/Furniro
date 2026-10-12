@@ -306,6 +306,11 @@ working test orders are still missing, so the `PAY-*` and `CHK-03` statuses stay
 | `ORD-07` | Immutable event log per order, sufficient to replay orders after a point-in-time restore | §8 disaster scenarios | 3 | ⭕ |
 | `ORD-08` | Order confirmation email on placement | §7 R1 "including confirmation email" | 3 | ⭕ |
 
+The [first order migration](../Backend/db/README.md) has local PostgreSQL tests for
+immutable snapshots and consistent totals. `ORD-03` remains open until the checkout/order
+repository writes these records in a working application. Allowed status values in the
+schema do not yet implement `ORD-01` transitions or `ORD-07` event history.
+
 `ORD-07` is a strong requirement hiding in a disaster-recovery table: Doc B §8 expects to
 "replay orders taken since from the event log". That mandates event sourcing, or at minimum
 a durable append-only order event stream. It is not retrofittable.

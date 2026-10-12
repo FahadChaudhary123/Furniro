@@ -60,6 +60,12 @@ rotation remains the next required step.
 
 **Modules:** `catalogue`, `pricing`, `inventory`, `orders`, `payments`, `security`, `privacy`.
 
+**Progress (2026-10-12):** The first [order migration](../Backend/db/README.md) and local
+PostgreSQL tests cover order/item consistency, immutable snapshots, idempotency-key
+uniqueness, denied public access and safe rollback. No production database or runtime
+repository is connected. Payment attempts, stock reservations, application roles and
+multi-client concurrency tests remain open.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;

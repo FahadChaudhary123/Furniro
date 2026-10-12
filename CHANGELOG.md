@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added the first Furniro order database migration with immutable item/price snapshots,
+  consistent PKR totals, idempotency-key uniqueness, private table access and guarded
+  rollback. Local PostgreSQL tests use synthetic data; no live database was changed.
+
 - Changed the trading architecture to Furniro-owned checkout, orders and inventory.
   Shopify onboarding is no longer required; the completion plan now starts commerce
   implementation with durable storage, followed by COD and direct online payments.
