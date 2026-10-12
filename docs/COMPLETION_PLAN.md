@@ -61,6 +61,10 @@ rotation remains the next required step.
 
 **Modules:** `catalogue`, `pricing`, `inventory`, `fulfilment`, `privacy`.
 
+Follow the [Shopify onboarding runbook](runbooks/shopify-onboarding.md) to collect and
+verify the account and trading inputs below. The runbook is prepared; its account-side
+steps have not been executed.
+
 - Offer both cash on delivery and online payment at launch, as decided in
   [ADR 0013](decisions/0013-offer-cod-and-online-payment-at-launch.md). Confirm the
   merchant's eligible PKR gateway, settlement, refunds and test mode in a real account.
@@ -79,6 +83,9 @@ rotation remains the next required step.
   mapping with `npm run mapping -- --check <file>`. Compare currency, price, image and
   availability against the provider API separately; the local validator checks mapping
   coverage, duplicate variants and Shopify ID shape only.
+  Once approved PKR prices and store access exist, run `npm run mapping:shopify -- <file>`
+  to check remote variant ownership, selling prices, availability and image presence.
+  Image identity and actual stock/lead times still require independent confirmation.
 - Define the data boundary: which system owns prices, availability, customer records and
   orders; how updates reach the storefront; and how deletion/export requests cross it.
   The [draft data boundary](COMMERCE_DATA_BOUNDARY.md) records the settled ownership rules

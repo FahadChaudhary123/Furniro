@@ -98,6 +98,7 @@ fails at the point of use rather than at boot.
 | `npm test` | Unit tests for the services and platform (72 checks) |
 | `npm run smoke` | Smoke-test a running server (85 checks) |
 | `npm run completeness` | Catalogue data-quality report (`CAT-04`); non-zero if a product is blocked |
+| `npm run mapping:shopify -- <file>` | Read-only Shopify mapping and PKR price check; requires approved PKR catalogue and private store access. See [onboarding](docs/runbooks/shopify-onboarding.md) |
 | `npm run latency` | API latency benchmark (`NFR-04`); start the server with `RATE_LIMIT_MAX=3000` |
 
 | Endpoint | Purpose |

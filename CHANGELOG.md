@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added a read-only Shopify mapping check for variant ownership, approved PKR selling
+  prices, availability and image presence. It requires private store access and does not
+  enable checkout; live verification remains pending.
+
 - Storefront catalogue and cart pages now explain that current prices are IDR browsing data,
   PKR prices and ordering are unavailable, and shipping and tax are not configured.
 

@@ -11,6 +11,7 @@
     "completeness": "node scripts/completeness.mjs",
     "prices:pkr": "node scripts/pkr-prices.mjs",
     "mapping": "node scripts/platform-mapping.mjs",
+    "mapping:shopify": "node scripts/shopify-mapping.mjs",
     "latency": "node scripts/latency.mjs",
     "test": "vitest run",
     "test:watch": "vitest"

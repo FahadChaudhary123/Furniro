@@ -72,13 +72,38 @@ See [deployment.md](runbooks/deployment.md) and [OWNERSHIP.md](OWNERSHIP.md).
 
 ---
 
-## Not yet chosen
+## Shopify — selected, not connected
+
+| Field | Value |
+|---|---|
+| Service and purpose | Planned hosted checkout, orders, authoritative totals and inventory; ADR 0014 |
+| Criticality | Store-stopping once trading begins; no runtime dependency today |
+| Account, support and status alerts | Store, plan, owner, backup and escalation route unverified; alert recipient unassigned |
+| Credentials and API | Optional read-only mapping CLI uses Storefront API 2026-10 with product listing read permission; `SHOPIFY_STORE_DOMAIN` and `SHOPIFY_STOREFRONT_PRIVATE_TOKEN` come from the private command environment or ignored `Backend/.env`. No store access verified; no running API integration |
+| Limits and contract | Fees, quotas, terms and processing arrangements unreviewed |
+| Fallback | Disable purchase while unavailable; preserve browser cart. No alternate commerce platform configured |
+
+## Safepay — gateway candidate, not connected
+
+| Field | Value |
+|---|---|
+| Service and purpose | First candidate for Pakistan PKR online payments through Shopify; ADR 0014 |
+| Criticality | Online-payment stopping once integrated; no runtime dependency today |
+| Account, support and status alerts | Merchant eligibility, settlement, supported methods, test mode and escalation route unverified |
+| Credentials and API | No configured integration or credentials required by Furniro today; intended Shopify payment app must be verified in the merchant account |
+| Limits and contract | Actual fees, settlement terms, dispute/refund rules and processing arrangements unreviewed |
+| Fallback | COD is a separate chosen method, not automatic payment failover; never retry an uncertain charge through another method |
+
+Complete [Shopify onboarding](runbooks/shopify-onboarding.md) before treating either
+service as operational. These entries record planned dependencies, not active processing.
+
+## Not yet chosen or verified
 
 Document B assumes these exist. Each needs a register row before it goes live, not after.
 
 | Service | Doc B sections | Blocking |
 |---|---|---|
-| Payment gateway (primary) | §5, §7 R3, §10, §14 | Checkout |
+| Payment gateway (primary; Safepay candidate above) | §5, §7 R3, §10, §14 | Online checkout; merchant approval unverified |
 | Payment gateway (secondary) | §7 R3 — assumes a failover target | Checkout resilience |
 | Transactional email provider | §5, §7 R10 | Order confirmations, contact form replies |
 | Error tracking | §5, §6 | Knowing an incident happened |
