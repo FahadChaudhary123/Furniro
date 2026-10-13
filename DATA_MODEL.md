@@ -323,7 +323,10 @@ runtime order repository is connected. The catalogue schema above remains propos
 
 ### Remaining commerce design
 
-Server carts, users, customer/delivery details, payment attempts, stock reservations,
+Payment-attempt storage and atomic status history are now defined by migration 0002,
+with local PostgreSQL tests; provider integration remains unimplemented.
+
+Server carts, users, customer/delivery details, stock reservations,
 operator permissions and order transitions remain to be implemented. Two invariants
 guide the current order foundation:
 

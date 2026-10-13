@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added payment-attempt storage bound to order totals, guarded retry states, unique
+  provider references and immutable status history, with local PostgreSQL migration tests.
+  No online payment provider is connected yet.
+
 - Added the first Furniro order database migration with immutable item/price snapshots,
   consistent PKR totals, idempotency-key uniqueness, private table access and guarded
   rollback. Local PostgreSQL tests use synthetic data; no live database was changed.

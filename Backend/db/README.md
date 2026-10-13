@@ -52,7 +52,35 @@ procedure. Tests demonstrate down/up reversal on an empty disposable database.
 
 ## Next work
 
-Add payment attempts, stock/reservations and their concurrency rules, then build the order
+Add stock/reservations and their concurrency rules, then build the order
 repository and checkout transaction. Customer/delivery data, authenticated operator
-access, valid status transitions, event history and idempotent replay are not implemented.
-The status column only limits possible values; it does not enforce a state machine.
+access, valid order transitions, order event history and idempotent replay are not implemented.
+The order status column only limits possible values; it does not enforce a state machine.
+
+## Payment attempts (migration 0002)
+
+Apply `0002_payment_attempts.up.sql` after `0001_orders`. It adds online payment attempts
+and append-only status history. A composite foreign key binds every attempt to an online
+order's exact PKR amount. COD collection will use a separate protected operator workflow.
+
+Only one created, pending, unknown or succeeded attempt can exist per order. A confirmed
+failure or cancellation permits a new attempt with a fresh idempotency key. An uncertain
+gateway timeout belongs in `unknown`; never label it failed merely to allow a retry.
+Provider references are unique per provider and cannot be replaced once set.
+
+Attempts start as `created`. Created/pending/unknown attempts can advance to pending,
+unknown or a final succeeded/failed/cancelled outcome, but cannot return to created.
+Final outcomes cannot change. Refunds and reconciliation of contradictory provider events
+need separate workflows; they must not rewrite the original charge history. Repeating the
+same status creates no extra event. Attempts and events cannot be deleted by ordinary DML.
+
+The trigger records status history atomically, but does not authenticate gateway messages,
+deduplicate webhooks, update order status or call any provider. Backend permissions and
+event ingestion remain unimplemented. Payment tables use RLS with no public policies.
+
+Run `npm test -- src/modules/payments/schema.test.js` for local checks of amount binding,
+retry restrictions, immutable references, transaction rollback, access denial and migration
+reversal. The down migration refuses populated payment storage and preserves existing
+orders when payment storage is empty. Reverse migrations in descending version order.
+These tests use one disposable PGlite connection; full PostgreSQL concurrency and provider
+integration tests remain required before checkout.

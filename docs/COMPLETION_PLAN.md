@@ -66,6 +66,11 @@ uniqueness, denied public access and safe rollback. No production database or ru
 repository is connected. Payment attempts, stock reservations, application roles and
 multi-client concurrency tests remain open.
 
+**Progress (2026-10-13):** Migration 0002 adds online payment attempts bound to immutable
+order amounts, retry restrictions for uncertain/successful charges, and atomic status
+history. Local PostgreSQL tests pass. No gateway or runtime repository is connected;
+stock reservations and full PostgreSQL concurrency checks are next.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;
