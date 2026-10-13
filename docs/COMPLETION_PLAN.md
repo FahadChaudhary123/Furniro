@@ -71,6 +71,12 @@ order amounts, retry restrictions for uncertain/successful charges, and atomic s
 history. Local PostgreSQL tests pass. No gateway or runtime repository is connected;
 stock reservations and full PostgreSQL concurrency checks are next.
 
+**Progress (2026-10-13, inventory):** Migration 0003 adds stock counters, exact order-line
+reservations, atomic reserve/release/consume updates, expiry guards and immutable history.
+Disposable PostgreSQL tests cover insufficient stock, ignored duplicate inserts, rollback
+and access controls. True multi-client concurrency, expiry jobs, stock adjustment workflows
+and the runtime checkout repository remain open. No real stock has been seeded.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;

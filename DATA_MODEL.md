@@ -326,7 +326,11 @@ runtime order repository is connected. The catalogue schema above remains propos
 Payment-attempt storage and atomic status history are now defined by migration 0002,
 with local PostgreSQL tests; provider integration remains unimplemented.
 
-Server carts, users, customer/delivery details, stock reservations,
+Stock reservation tables and transition history are defined by migration 0003. Local
+tests cover atomic stock updates; runtime stock data, expiry jobs and multi-client
+concurrency verification are still missing.
+
+Server carts, users, customer/delivery details,
 operator permissions and order transitions remain to be implemented. Two invariants
 guide the current order foundation:
 

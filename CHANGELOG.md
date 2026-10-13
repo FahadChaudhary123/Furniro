@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added stock-reservation storage with atomic reserve/release/consume updates, order-line
+  quantity checks, expiry guards, immutable history and local PostgreSQL tests. No real
+  stock data or checkout endpoint has been added.
+
 - Added payment-attempt storage bound to order totals, guarded retry states, unique
   provider references and immutable status history, with local PostgreSQL migration tests.
   No online payment provider is connected yet.

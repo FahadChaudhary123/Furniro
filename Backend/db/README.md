@@ -52,8 +52,8 @@ procedure. Tests demonstrate down/up reversal on an empty disposable database.
 
 ## Next work
 
-Add stock/reservations and their concurrency rules, then build the order
-repository and checkout transaction. Customer/delivery data, authenticated operator
+Build the order repository and checkout transaction over the tested schemas.
+Customer/delivery data, authenticated operator
 access, valid order transitions, order event history and idempotent replay are not implemented.
 The order status column only limits possible values; it does not enforce a state machine.
 
@@ -84,3 +84,33 @@ reversal. The down migration refuses populated payment storage and preserves exi
 orders when payment storage is empty. Reverse migrations in descending version order.
 These tests use one disposable PGlite connection; full PostgreSQL concurrency and provider
 integration tests remain required before checkout.
+
+## Stock reservations (migration 0003)
+
+Apply `0003_stock_reservations.up.sql` after the previous migrations. It adds stock
+counters, reservations tied to exact order-line quantities and immutable status history.
+It creates no stock records or approved availability. The canonical catalogue remains JSON.
+
+An active reservation atomically increments reserved stock only when on-hand minus
+reserved stock covers the quantity. A release decreases reserved stock; consumption
+decreases both on-hand and reserved stock. Repeating a final status has no stock effect.
+Final reservations cannot be reopened; a new purchase requires a new order line.
+Ignored duplicate inserts do not change stock. An invalid or incomplete multi-line
+reservation must roll back the whole checkout transaction.
+
+Reservation expiry must be supplied explicitly and cannot be changed. Expired stock
+remains held until explicitly released, and an expired reservation cannot be consumed.
+The expiry worker, its approved time limit, and payment-versus-expiry orchestration are
+not implemented. Checkout must coordinate cancellation, payment and fulfilment transitions;
+these triggers do not authorize dispatch or determine that an order was paid.
+
+Use `npm test -- src/modules/inventory/schema.test.js` for local checks. Stock rows use
+conditional PostgreSQL updates rather than a separate availability read. PGlite tests
+use a single connection: true concurrent PostgreSQL clients, lock ordering, deadlock retries
+and simultaneous payment/expiry handling still need verification. Reserve multiple products
+in a consistent product-slug order within one transaction when implementing checkout.
+
+Inventory tables have RLS and no public policies. Runtime role grants and protected stock
+adjustment workflows are still required; only migration/test owners can access them today.
+The reservation history is not yet a complete stock-adjustment ledger. The down migration
+refuses to remove any populated stock or reservation tables. No live database is connected.
