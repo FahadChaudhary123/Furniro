@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added an internal COD checkout transaction that writes orders and reserves all stock
+  atomically, replays identical retries and rejects conflicting idempotency keys. Tested
+  locally; public checkout and a production database connection remain unimplemented.
+
 - Added stock-reservation storage with atomic reserve/release/consume updates, order-line
   quantity checks, expiry guards, immutable history and local PostgreSQL tests. No real
   stock data or checkout endpoint has been added.

@@ -14,12 +14,15 @@ Supabase back end.
 logging, correlation ids, errors, health, client error reports),
 `Backend/src/modules/catalogue/` (products, categories),
 `Backend/src/modules/content/` (blog posts), and `Backend/src/security/` are built.
-There is no server-side cart, database, inventory, orders, auth, checkout or payments.
+There is no connected commerce database, server-side cart, auth or public checkout.
+Order/payment/inventory SQL foundations and an internal COD transaction service now have
+local tests under `Backend/db/` and the corresponding modules. They are not wired into
+the running API; see `Backend/db/README.md` for implemented behavior and remaining gaps.
 
 **Trading direction:** [ADR 0015](docs/decisions/0015-build-commerce-in-furniro.md)
 supersedes the Shopify/platform approach. Build commerce in Furniro, beginning with
 transactional persistence, then COD checkout and direct hosted online payment collection.
-Shopify accounts and mappings are not prerequisites. Planned modules do not exist yet;
+Shopify accounts and mappings are not prerequisites. Many planned capabilities remain unbuilt;
 keep the current-state statements above accurate as implementation proceeds.
 
 **The front end fetches products and posts from the API** via `src/modules/catalogue`

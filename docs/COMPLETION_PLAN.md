@@ -77,6 +77,12 @@ Disposable PostgreSQL tests cover insufficient stock, ignored duplicate inserts,
 and access controls. True multi-client concurrency, expiry jobs, stock adjustment workflows
 and the runtime checkout repository remain open. No real stock has been seeded.
 
+**Progress (2026-10-13, COD persistence):** An internal checkout service now writes COD
+orders, immutable lines and stock reservations in one transaction through module interfaces.
+Local tests verify rollback, identical retry replay and conflicting-key rejection. It uses
+trusted server quotes; the quote producer, customer/delivery validation, production database
+adapter, access controls and public endpoint are not built yet.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;

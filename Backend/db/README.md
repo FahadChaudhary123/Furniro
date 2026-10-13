@@ -52,8 +52,8 @@ procedure. Tests demonstrate down/up reversal on an empty disposable database.
 
 ## Next work
 
-Build the order repository and checkout transaction over the tested schemas.
-Customer/delivery data, authenticated operator
+Connect a production database adapter and server quote calculation to the internal
+checkout service. Customer/delivery data, authenticated operator
 access, valid order transitions, order event history and idempotent replay are not implemented.
 The order status column only limits possible values; it does not enforce a state machine.
 
@@ -114,3 +114,27 @@ Inventory tables have RLS and no public policies. Runtime role grants and protec
 adjustment workflows are still required; only migration/test owners can access them today.
 The reservation history is not yet a complete stock-adjustment ledger. The down migration
 refuses to remove any populated stock or reservation tables. No live database is connected.
+
+## Internal COD transaction service
+
+`src/modules/checkout/index.js` exports `createCodCheckout(db)`. It requires a database
+adapter with `transaction(callback)` and transaction-scoped `query(sql, parameters)`;
+the adapter must commit only after callback success and roll back on any error. PGlite
+exercises this contract locally. A production connection adapter is not configured.
+
+The service accepts an idempotency UUID, an explicit reservation expiry, and a trusted
+server quote: PKR lines with slug/name/quantity/unit price plus discount/shipping/tax minor
+units. It derives the total with integer arithmetic, hashes the normalized quote, and
+sorts lines by slug for consistent inventory lock ordering. Orders and inventory are
+written through their module interfaces in the same transaction. COD orders begin on hold.
+
+An identical retry returns the existing order ID without changing stock or expiry. A
+different quote with the same key is rejected. A failed transaction leaves the key reusable.
+Replaying an old order does not assert it is still active; future handlers must read its
+current state before displaying a checkout outcome.
+
+This is not an HTTP contract. Never pass browser prices, tax or shipping into this service.
+The server quote producer, customer/delivery validation, ownership/access checks and order
+lookup are still missing. Include verified customer/delivery intent in the idempotency
+fingerprint before accepting those details. No customer data is collected by this change.
+Run `npm test -- src/modules/checkout/service.test.js` for transaction/retry checks.
