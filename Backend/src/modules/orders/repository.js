@@ -14,6 +14,29 @@ export async function cancelCodOrder(tx, { orderId, actorId }) {
   return { orderId, replayed: false };
 }
 
+/** Caller coordinates inventory validation in the same transaction. */
+export async function advanceCodOrder(tx, { orderId, actorId, targetStatus }) {
+  const predecessors = { allocated: 'on_hold', despatched: 'allocated', delivered: 'despatched' };
+  if (!Object.hasOwn(predecessors, targetStatus)) throw new Error('Unsupported COD transition');
+  const order = (await tx.query('SELECT payment_method, status FROM commerce.orders WHERE id = $1 FOR UPDATE', [orderId])).rows[0];
+  if (!order) throw new Error('Order not found');
+  if (order.payment_method !== 'cod') throw new Error('Only COD orders can use this operation');
+  const events = (await tx.query('SELECT event_type FROM commerce.order_events WHERE order_id = $1', [orderId])).rows.map((row) => row.event_type);
+  const eventType = `cod_${targetStatus}`;
+  const replayed = order.status === targetStatus;
+  if (replayed && !events.includes(eventType)) throw new Error('Order history requires reconciliation');
+  if (!replayed) {
+    if (order.status !== predecessors[targetStatus]) throw new Error('Invalid COD state transition');
+    if (events.includes(eventType) || (targetStatus !== 'allocated' && !events.includes(`cod_${order.status}`))) {
+      throw new Error('Order history requires reconciliation');
+    }
+    await tx.query('UPDATE commerce.orders SET status = $2 WHERE id = $1', [orderId, targetStatus]);
+    await tx.query('INSERT INTO commerce.order_events(order_id, event_type, actor_id) VALUES ($1, $2, $3)', [orderId, eventType, actorId]);
+  }
+  const lineCount = (await tx.query('SELECT count(*)::integer AS count FROM commerce.order_items WHERE order_id = $1', [orderId])).rows[0].count;
+  return { orderId, status: targetStatus, replayed, lineCount };
+}
+
 export async function writeCodOrder(tx, { key, hash, lines, subtotal, discount, shipping, tax, total, delivery }) {
   const { rows } = await tx.query(`INSERT INTO commerce.orders
     (idempotency_key, request_hash, payment_method, status, subtotal_minor,

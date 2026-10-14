@@ -14,6 +14,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added internal COD allocation, despatch and delivery transitions with complete-stock
+  checks, atomic despatch consumption and operator audit events. Retries cannot consume
+  stock twice, and delivery does not record payment collection. Public operator flows
+  and carrier integration remain unimplemented.
+
 - Added internal on-hold COD cancellation with atomic stock release, safe retries and
   immutable operator audit events. Authenticated operator access and public routes remain
   unimplemented; all verification uses disposable local databases.

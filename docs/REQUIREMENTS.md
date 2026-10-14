@@ -309,7 +309,11 @@ working test orders are still missing, so the `PAY-*` and `CHK-03` statuses stay
 The [first order migration](../Backend/db/README.md) has local PostgreSQL tests for
 immutable snapshots and consistent totals. `ORD-03` remains open until the checkout/order
 repository writes these records in a working application. Allowed status values in the
-schema do not yet implement `ORD-01` transitions or `ORD-07` event history.
+schema alone do not implement the full `ORD-01` or `ORD-07` requirements. Internal COD
+services now cover cancellation, allocation, despatch and delivery with atomic stock
+updates and operator audit events. Public operator access, online-order transitions,
+creation-event history and disaster-recovery replay remain unimplemented, so these
+requirements remain open.
 
 `ORD-07` is a strong requirement hiding in a disaster-recovery table: Doc B §8 expects to
 "replay orders taken since from the event log". That mandates event sourcing, or at minimum

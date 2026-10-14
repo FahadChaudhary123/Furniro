@@ -1,5 +1,23 @@
 # Commerce database foundation
 
+## Internal COD fulfilment
+
+Migration 0006 permits allocation, despatch and delivery audit events. The checkout
+interface `createCodFulfilment(db)` accepts `{orderId, actorId, targetStatus}` from a
+trusted, authorized operator caller (authentication is not connected). Only COD orders
+follow `on_hold -> allocated -> despatched -> delivered`. Each operation locks the order
+and all its reservations, requires complete line coverage, and commits state, audit and
+inventory changes together. Allocation keeps active unexpired holds; despatch consumes
+them. Holds are not extended automatically. Delivery requires consumed reservations and
+does not imply payment collection. Retries at the same state verify stock/history and
+return `replayed: true`; backward retries after later progression are rejected.
+
+No endpoint, carrier tracking, shipment record, notification or payment collection is
+added. Cancellation remains restricted to on-hold COD orders. These are application
+guards; privileged direct SQL can bypass them. True PostgreSQL concurrent transitions
+and deadlock retry behavior still need verification. Rollback refuses progressed orders
+or fulfilment events so audit history is preserved.
+
 ## Internal COD cancellation
 
 Migration 0005 adds private, append-only order events. `createCodCancellation(db)` takes

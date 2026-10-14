@@ -142,6 +142,13 @@ Retries reuse the original event; consumed stock and missing cancellation histor
 reconciliation. Local transaction tests cover rollback and guards. Operator authorization,
 UI, the full fulfilment state machine and real PostgreSQL concurrency tests remain open.
 
+**Progress (2026-10-14, COD fulfilment):** Internal COD transitions now cover on-hold to
+allocated to despatched to delivered. Every line requires a reservation; allocation and
+despatch require active, unexpired holds. Despatch consumes stock atomically with state
+and audit writes, while retries preserve the original event and stock counters. Delivery
+does not record COD collection. Operator authorization/UI, carrier tracking, notifications,
+allocated-order cancellation, payment collection and multi-client concurrency remain open.
+
 **Exit:** Both COD and online payment work end to end in a test environment with durable
 orders and truthful payment state. Approved trading data, fulfilment, credentials and
 release verification must be complete before enabling public checkout. Building COD first
