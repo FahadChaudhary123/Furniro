@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added internal on-hold COD cancellation with atomic stock release, safe retries and
+  immutable operator audit events. Authenticated operator access and public routes remain
+  unimplemented; all verification uses disposable local databases.
+
 - Added private order delivery storage to the COD transaction and normalized delivery
   details to retry fingerprints. Changed addresses reject reused keys; stock failures
   roll back delivery alongside the order. No public checkout or live database was enabled.

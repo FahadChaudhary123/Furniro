@@ -202,6 +202,15 @@ Ordered by how much they matter.
 
 ## When to update this
 
+### Planned operator audit data (2026-10-14)
+
+Internal COD cancellation records an operator UUID, order UUID, event type and timestamp
+in private append-only `commerce.order_events`. Only synthetic identifiers are used in
+disposable tests today. No operator authentication or public route is connected. Before
+activation, define trusted identity mapping, restricted access and audit retention together
+with deletion/export treatment; immutable audit rows must not imply indefinite retention.
+
+
 As part of the change, never after it. Specifically:
 
 - Adding any field that identifies a person

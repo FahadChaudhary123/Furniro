@@ -136,6 +136,12 @@ explicit release gates. No public purchase action is enabled yet.
    duplicate requests/webhooks, confirmation, cancellation/refund and cart preservation on
    desktop and mobile. Publish reviewed privacy/terms before collecting customer data.
 
+**Progress (2026-10-14, COD cancellation):** An internal operation cancels only on-hold
+COD orders, releases reservations and writes an immutable operator event atomically.
+Retries reuse the original event; consumed stock and missing cancellation history require
+reconciliation. Local transaction tests cover rollback and guards. Operator authorization,
+UI, the full fulfilment state machine and real PostgreSQL concurrency tests remain open.
+
 **Exit:** Both COD and online payment work end to end in a test environment with durable
 orders and truthful payment state. Approved trading data, fulfilment, credentials and
 release verification must be complete before enabling public checkout. Building COD first

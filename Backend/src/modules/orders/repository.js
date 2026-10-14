@@ -1,4 +1,19 @@
 /** Called inside the checkout transaction; no connection or credentials are created here. */
+export async function cancelCodOrder(tx, { orderId, actorId }) {
+  const order = (await tx.query('SELECT payment_method, status FROM commerce.orders WHERE id = $1 FOR UPDATE', [orderId])).rows[0];
+  if (!order) throw new Error('Order not found');
+  if (order.payment_method !== 'cod') throw new Error('Only COD orders can use this cancellation operation');
+  if (order.status === 'cancelled') {
+    const event = (await tx.query("SELECT id FROM commerce.order_events WHERE order_id = $1 AND event_type = 'cod_cancelled'", [orderId])).rows[0];
+    if (!event) throw new Error('Cancelled order requires reconciliation');
+    return { orderId, replayed: true };
+  }
+  if (order.status !== 'on_hold') throw new Error('Only on-hold COD orders can be cancelled');
+  await tx.query("UPDATE commerce.orders SET status = 'cancelled' WHERE id = $1", [orderId]);
+  await tx.query("INSERT INTO commerce.order_events(order_id, event_type, actor_id) VALUES ($1, 'cod_cancelled', $2)", [orderId, actorId]);
+  return { orderId, replayed: false };
+}
+
 export async function writeCodOrder(tx, { key, hash, lines, subtotal, discount, shipping, tax, total, delivery }) {
   const { rows } = await tx.query(`INSERT INTO commerce.orders
     (idempotency_key, request_hash, payment_method, status, subtotal_minor,

@@ -1,5 +1,17 @@
 # Commerce database foundation
 
+## Internal COD cancellation
+
+Migration 0005 adds private, append-only order events. `createCodCancellation(db)` takes
+`{orderId, actorId}`; the actor UUID must come from a trusted, authorized operator context,
+not a browser field. Authorization is not implemented and this has no endpoint or UI.
+It locks the order, accepts only on-hold COD orders, releases reservations in product order
+and records cancellation in one transaction. Consumed stock fails the transaction; retries
+preserve the original audit actor and event. It does not cancel online payments, refund,
+delete delivery data or implement the full order state machine. The down migration refuses
+populated history. Production roles, audit retention and multi-client concurrency verification
+are still required; direct database owners can bypass application transition guards.
+
 ## Internal quote preparation
 
 `createCheckoutQuote` in the checkout public interface accepts `{items, delivery}`.
