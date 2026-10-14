@@ -99,6 +99,9 @@ it('rejects expired holds without extending them or consuming stock', async () =
   expect(await state()).toBe('allocated');
   expect(await stock()).toEqual({ on_hand: 3, reserved: 2 });
   expect((await db.query('SELECT event_type FROM commerce.order_events')).rows).toEqual([{ event_type: 'cod_allocated' }]);
+  await createCodCancellation(db)({ orderId, actorId });
+  expect(await state()).toBe('cancelled');
+  expect(await stock()).toEqual({ on_hand: 3, reserved: 0 });
 });
 
 it('refuses to advance online orders through the COD operation', async () => {
@@ -124,4 +127,47 @@ it('guards rollback after fulfilment and reverses an unused migration', async ()
   await move(await order(), 'allocated');
   await expect(db.exec(sql('0006_cod_fulfilment_events', 'down'))).rejects.toThrow('progressed');
   await db.exec('ROLLBACK');
+});
+
+it('cancels an allocated order once and releases all stock without changing on-hand stock', async () => {
+  const orderId = await order();
+  await move(orderId, 'allocated');
+  const cancel = createCodCancellation(db);
+  expect(await cancel({ orderId, actorId })).toEqual({ orderId, replayed: false });
+  expect(await cancel({ orderId, actorId: randomUUID() })).toEqual({ orderId, replayed: true });
+  expect(await state()).toBe('cancelled');
+  expect(await stock()).toEqual({ on_hand: 3, reserved: 0 });
+  expect((await db.query('SELECT event_type, actor_id FROM commerce.order_events ORDER BY id')).rows)
+    .toEqual(['cod_allocated', 'cod_cancelled'].map((event_type) => ({ event_type, actor_id: actorId })));
+  await expect(move(orderId, 'despatched')).rejects.toThrow('transition');
+});
+
+it('refuses cancellation after despatch or delivery without restoring consumed stock', async () => {
+  const orderId = await order();
+  await move(orderId, 'allocated');
+  for (const targetStatus of ['despatched', 'delivered']) {
+    await move(orderId, targetStatus);
+    await expect(createCodCancellation(db)({ orderId, actorId })).rejects.toThrow('before despatch');
+    expect(await state()).toBe(targetStatus);
+    expect(await stock()).toEqual({ on_hand: 1, reserved: 0 });
+  }
+  expect((await db.query("SELECT * FROM commerce.order_events WHERE event_type = 'cod_cancelled'")).rows).toHaveLength(0);
+});
+
+it('rolls back allocated cancellation if stock has already been consumed', async () => {
+  const orderId = await order();
+  await move(orderId, 'allocated');
+  await db.query("UPDATE commerce.stock_reservations SET status = 'consumed' WHERE order_id = $1", [orderId]);
+  await expect(createCodCancellation(db)({ orderId, actorId })).rejects.toThrow('reconciliation');
+  expect(await state()).toBe('allocated');
+  expect((await db.query('SELECT event_type FROM commerce.order_events')).rows).toEqual([{ event_type: 'cod_allocated' }]);
+});
+
+it('rejects cancellation when stored state contradicts despatch history', async () => {
+  const orderId = await order();
+  await move(orderId, 'allocated');
+  await move(orderId, 'despatched');
+  await db.query("UPDATE commerce.orders SET status = 'allocated' WHERE id = $1", [orderId]);
+  await expect(createCodCancellation(db)({ orderId, actorId })).rejects.toThrow('history');
+  expect(await stock()).toEqual({ on_hand: 1, reserved: 0 });
 });

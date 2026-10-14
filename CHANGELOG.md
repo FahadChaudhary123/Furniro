@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Extended internal COD cancellation to audited allocated orders before despatch. Held
+  stock is released atomically; consumed stock or conflicting fulfilment history prevents
+  cancellation, and retries preserve the original audit event.
+
 - Added internal full-amount COD collection records for delivered orders, with exact-total
   binding, unique receipt/retry keys and immutable operator evidence. Delivery alone stays
   unpaid; public operator access, remittance reconciliation and refunds remain unimplemented.

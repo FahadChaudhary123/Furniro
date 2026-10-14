@@ -34,7 +34,7 @@ does not imply payment collection. Retries at the same state verify stock/histor
 return `replayed: true`; backward retries after later progression are rejected.
 
 No endpoint, carrier tracking, shipment record, notification or payment collection is
-added. Cancellation remains restricted to on-hold COD orders. These are application
+added. Cancellation accepts on-hold and allocated COD orders before despatch. These are application
 guards; privileged direct SQL can bypass them. True PostgreSQL concurrent transitions
 and deadlock retry behavior still need verification. Rollback refuses progressed orders
 or fulfilment events so audit history is preserved.
@@ -44,8 +44,9 @@ or fulfilment events so audit history is preserved.
 Migration 0005 adds private, append-only order events. `createCodCancellation(db)` takes
 `{orderId, actorId}`; the actor UUID must come from a trusted, authorized operator context,
 not a browser field. Authorization is not implemented and this has no endpoint or UI.
-It locks the order, accepts only on-hold COD orders, releases reservations in product order
-and records cancellation in one transaction. Consumed stock fails the transaction; retries
+It locks the order, accepts on-hold or audited allocated COD orders, releases reservations in product order
+and records cancellation in one transaction. Conflicting fulfilment history or consumed
+stock fails the transaction; despatched/delivered orders require a future returns workflow. Retries
 preserve the original audit actor and event. It does not cancel online payments, refund,
 delete delivery data or implement the full order state machine. The down migration refuses
 populated history. Production roles, audit retention and multi-client concurrency verification

@@ -157,6 +157,13 @@ This records operator-entered evidence, not verified remittance or bank settleme
 Operator authentication/UI, partial collection handling, correction/refund workflows,
 cash reconciliation and production concurrency verification remain open.
 
+**Progress (2026-10-14, allocated cancellation):** Internal cancellation now also accepts
+allocated COD orders with allocation history and no despatch/delivery history. Stock
+release and the cancellation event commit together; consumed stock rolls the operation
+back. Despatched/delivered orders are rejected and require the future returns workflow.
+This closes the internal allocated-cancellation gap; operator access/UI and concurrent
+despatch-versus-cancellation verification on production PostgreSQL remain open.
+
 **Exit:** Both COD and online payment work end to end in a test environment with durable
 orders and truthful payment state. Approved trading data, fulfilment, credentials and
 release verification must be complete before enabling public checkout. Building COD first

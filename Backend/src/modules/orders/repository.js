@@ -8,7 +8,16 @@ export async function cancelCodOrder(tx, { orderId, actorId }) {
     if (!event) throw new Error('Cancelled order requires reconciliation');
     return { orderId, replayed: true };
   }
-  if (order.status !== 'on_hold') throw new Error('Only on-hold COD orders can be cancelled');
+  if (!['on_hold', 'allocated'].includes(order.status)) {
+    throw new Error('Only on-hold or allocated COD orders can be cancelled before despatch');
+  }
+  const events = (await tx.query('SELECT event_type FROM commerce.order_events WHERE order_id = $1', [orderId]))
+    .rows.map((row) => row.event_type);
+  if (events.includes('cod_despatched') || events.includes('cod_delivered') || events.includes('cod_cancelled') ||
+      (order.status === 'allocated' && !events.includes('cod_allocated')) ||
+      (order.status === 'on_hold' && events.includes('cod_allocated'))) {
+    throw new Error('Order history requires reconciliation before cancellation');
+  }
   await tx.query("UPDATE commerce.orders SET status = 'cancelled' WHERE id = $1", [orderId]);
   await tx.query("INSERT INTO commerce.order_events(order_id, event_type, actor_id) VALUES ($1, 'cod_cancelled', $2)", [orderId, actorId]);
   return { orderId, replayed: false };

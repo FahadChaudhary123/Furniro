@@ -137,13 +137,13 @@ describe('atomic COD checkout persistence', () => {
     await expect(db.exec('UPDATE commerce.order_events SET actor_id = gen_random_uuid()')).rejects.toThrow('immutable');
   });
 
-  it('rejects allocated or unknown orders and invalid actors', async () => {
+  it('rejects unaudited allocation, unknown orders and invalid actors', async () => {
     const { orderId } = await checkout(request());
     const cancel = createCodCancellation(db);
     await expect(cancel({ orderId, actorId: 'browser-name' })).rejects.toThrow('UUID');
     await expect(cancel({ orderId: randomUUID(), actorId: randomUUID() })).rejects.toThrow('not found');
     await db.query("UPDATE commerce.orders SET status = 'allocated' WHERE id = $1", [orderId]);
-    await expect(cancel({ orderId, actorId: randomUUID() })).rejects.toThrow('on-hold');
+    await expect(cancel({ orderId, actorId: randomUUID() })).rejects.toThrow('reconciliation');
     expect((await db.query('SELECT * FROM commerce.order_events')).rows).toHaveLength(0);
     expect((await db.query('SELECT reserved FROM commerce.inventory_stock')).rows[0].reserved).toBe(2);
   });
