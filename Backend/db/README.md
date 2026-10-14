@@ -10,9 +10,12 @@ discountMinor, shippingMinor and taxMinor integers. No production policy or rate
 The result contains `{quote, delivery}`; this is not an endpoint or a persisted quote.
 Delivery shape validation does not verify phone ownership or shipping coverage.
 
-Before connecting preparation to COD checkout, persist delivery through the orders module
-and include it in the idempotency fingerprint. The existing COD service accepts only a
-trusted quote and does not store delivery. Protected access, retention rules, a production
+Migration 0004 adds private `order_delivery` storage through the orders module. COD checkout
+requires delivery, normalizes it and includes it in the idempotency fingerprint; changed
+delivery rejects reuse of the key. Delivery writes roll back with failed stock reservations.
+This changes the internal service contract; pre-0004 fingerprints cannot replay as new
+delivery-bearing requests. No production orders exist or have been migrated. The down
+migration refuses populated delivery storage. Protected access, retention rules, a production
 adapter and approved PKR prices/stock/shipping/tax remain prerequisites for public checkout.
 
 `migrations/0001_orders.up.sql` creates the private `commerce` schema, a migration-version

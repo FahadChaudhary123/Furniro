@@ -1,5 +1,5 @@
 /** Called inside the checkout transaction; no connection or credentials are created here. */
-export async function writeCodOrder(tx, { key, hash, lines, subtotal, discount, shipping, tax, total }) {
+export async function writeCodOrder(tx, { key, hash, lines, subtotal, discount, shipping, tax, total, delivery }) {
   const { rows } = await tx.query(`INSERT INTO commerce.orders
     (idempotency_key, request_hash, payment_method, status, subtotal_minor,
      discount_minor, shipping_minor, tax_minor, total_minor)
@@ -16,6 +16,11 @@ export async function writeCodOrder(tx, { key, hash, lines, subtotal, discount, 
     return { orderId: existing.id, replayed: true };
   }
   const orderId = rows[0].id;
+  await tx.query(`INSERT INTO commerce.order_delivery
+    (order_id, recipient_name, phone, address_line1, address_line2, city, postal_code, country)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+  [orderId, delivery.recipientName, delivery.phone, delivery.addressLine1,
+    delivery.addressLine2, delivery.city, delivery.postalCode, delivery.country]);
   for (const [index, line] of lines.entries()) {
     await tx.query(`INSERT INTO commerce.order_items
       (order_id, line_number, product_slug, product_name, quantity, unit_price_minor)

@@ -9,12 +9,13 @@ let checkout;
 const quote = () => ({ currency: 'PKR', discountMinor: 100, shippingMinor: 300, taxMinor: 200,
   lines: [{ slug: 'test-chair', name: 'Synthetic chair', quantity: 2, unitPriceMinor: 1000 }] });
 const request = () => ({ idempotencyKey: randomUUID(), quote: quote(),
+  delivery: { recipientName: 'Synthetic buyer', phone: '+92 300 0000000', addressLine1: 'Test street', city: 'Lahore', country: 'PK' },
   reservationExpiresAt: new Date(Date.now() + 3600000).toISOString() });
 
 describe('atomic COD checkout persistence', () => {
   beforeAll(async () => {
     db = await PGlite.create();
-    for (const name of ['0001_orders', '0002_payment_attempts', '0003_stock_reservations']) {
+    for (const name of ['0001_orders', '0002_payment_attempts', '0003_stock_reservations', '0004_order_delivery']) {
       await db.exec(readFileSync(new URL(`../../../db/migrations/${name}.up.sql`, import.meta.url), 'utf8'));
     }
     checkout = createCodCheckout(db);
@@ -22,7 +23,7 @@ describe('atomic COD checkout persistence', () => {
   beforeEach(async () => {
     await db.exec(`TRUNCATE commerce.stock_reservation_events, commerce.stock_reservations,
       commerce.inventory_stock, commerce.payment_attempt_events, commerce.payment_attempts,
-      commerce.order_items, commerce.orders;
+      commerce.order_delivery, commerce.order_items, commerce.orders;
       INSERT INTO commerce.inventory_stock(product_slug, on_hand) VALUES ('test-chair', 3);`);
   });
   afterAll(async () => { await db?.close(); });
@@ -59,7 +60,7 @@ describe('atomic COD checkout persistence', () => {
     const input = request();
     input.quote.lines.push({ slug: 'test-table', name: 'Synthetic table', quantity: 1, unitPriceMinor: 2000 });
     await expect(checkout(input)).rejects.toThrow();
-    for (const table of ['orders', 'order_items', 'stock_reservations', 'stock_reservation_events']) {
+    for (const table of ['orders', 'order_delivery', 'order_items', 'stock_reservations', 'stock_reservation_events']) {
       expect((await db.query(`SELECT * FROM commerce.${table}`)).rows).toHaveLength(0);
     }
     expect((await db.query('SELECT reserved FROM commerce.inventory_stock')).rows[0].reserved).toBe(0);
@@ -84,5 +85,41 @@ describe('atomic COD checkout persistence', () => {
   it('rolls back a new order when reservation expiry is in the past', async () => {
     await expect(checkout({ ...request(), reservationExpiresAt: '2020-01-01T00:00:00Z' })).rejects.toThrow('future expiry');
     expect((await db.query('SELECT * FROM commerce.orders')).rows).toHaveLength(0);
+  });
+
+  it('stores delivery atomically and rejects a changed address on retry', async () => {
+    const input = request();
+    await checkout(input);
+    expect((await db.query('SELECT recipient_name, city, country FROM commerce.order_delivery')).rows)
+      .toEqual([{ recipient_name: 'Synthetic buyer', city: 'Lahore', country: 'PK' }]);
+    expect((await checkout({ ...input, delivery: { ...input.delivery, city: ' Lahore ' } })).replayed).toBe(true);
+    await expect(checkout({ ...input, delivery: { ...input.delivery, city: 'Karachi' } })).rejects.toThrow('different order');
+    expect((await db.query('SELECT * FROM commerce.order_delivery')).rows).toHaveLength(1);
+  });
+
+  it('requires valid delivery before creating an order', async () => {
+    for (const delivery of [undefined, {}, { ...request().delivery, country: 'US' }]) {
+      await expect(checkout({ ...request(), delivery })).rejects.toThrow();
+    }
+    expect((await db.query('SELECT * FROM commerce.orders')).rows).toHaveLength(0);
+  });
+
+  it('enables forced row security and grants no public delivery access', async () => {
+    const row = (await db.query(`SELECT relrowsecurity, relforcerowsecurity,
+      NOT EXISTS (SELECT 1 FROM aclexplode(COALESCE(relacl, acldefault('r', relowner))) WHERE grantee = 0) AS private
+      FROM pg_class WHERE oid = 'commerce.order_delivery'::regclass`)).rows[0];
+    expect(row).toEqual({ relrowsecurity: true, relforcerowsecurity: true, private: true });
+    await checkout(request());
+    await expect(db.exec("UPDATE commerce.order_delivery SET country = 'US'")).rejects.toThrow();
+  });
+
+  it('guards populated rollback and reverses an empty delivery migration', async () => {
+    const down = readFileSync(new URL('../../../db/migrations/0004_order_delivery.down.sql', import.meta.url), 'utf8');
+    await checkout(request());
+    await expect(db.exec(down)).rejects.toThrow('delivery records exist');
+    await db.exec('ROLLBACK');
+    await db.exec('TRUNCATE commerce.order_delivery');
+    await db.exec(down);
+    await db.exec(readFileSync(new URL('../../../db/migrations/0004_order_delivery.up.sql', import.meta.url), 'utf8'));
   });
 });

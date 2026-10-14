@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { writeCodOrder } from '../orders/index.js';
 import { reserveOrderStock } from '../inventory/index.js';
+import { validateDelivery } from './delivery.js';
 
 const money = (value) => Number.isSafeInteger(value) && value >= 0;
 
@@ -33,7 +34,7 @@ export function prepareQuote(quote) {
 
 /** Requires an adapter whose transaction callback commits atomically or rolls back on error. */
 export function createCodCheckout(db) {
-  return async ({ idempotencyKey, quote, reservationExpiresAt }) => {
+  return async ({ idempotencyKey, quote, delivery, reservationExpiresAt }) => {
     if (typeof idempotencyKey !== 'string' ||
         !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(idempotencyKey)) {
       throw new Error('A UUID idempotency key is required');
@@ -42,9 +43,11 @@ export function createCodCheckout(db) {
       throw new Error('An explicit reservation expiry is required');
     }
     const prepared = prepareQuote(quote);
-    const hash = createHash('sha256').update(JSON.stringify({ method: 'cod', currency: 'PKR', ...prepared })).digest('hex');
+    const normalizedDelivery = validateDelivery(delivery);
+    const hash = createHash('sha256').update(JSON.stringify({ method: 'cod', currency: 'PKR', ...prepared,
+      delivery: normalizedDelivery })).digest('hex');
     return db.transaction(async (tx) => {
-      const order = await writeCodOrder(tx, { key: idempotencyKey, hash, ...prepared });
+      const order = await writeCodOrder(tx, { key: idempotencyKey, hash, ...prepared, delivery: normalizedDelivery });
       if (!order.replayed) {
         await reserveOrderStock(tx, { orderId: order.orderId, lines: prepared.lines, expiresAt: reservationExpiresAt });
       }

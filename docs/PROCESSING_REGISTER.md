@@ -168,11 +168,15 @@ consent record.
 ### Planned checkout delivery validation (2026-10-14)
 
 An internal helper validates recipient name, phone, address lines, city, optional postal
-code and country (Pakistan only). It returns normalized values in memory without logging,
-storage or third-party calls. Only synthetic tests call it today; no public endpoint or
-form collects these details. Before enabling collection, implement protected order delivery
-storage, retention/deletion rules and privacy disclosure, and include delivery intent in
-the order retry fingerprint. Shape checks do not establish deliverability.
+code and country (Pakistan only). It returns normalized values in memory without logging
+or third-party calls. Only synthetic tests call it today; no public endpoint or form collects
+these details. Internal COD persistence now stores normalized delivery in the private
+`commerce.order_delivery` table and includes it in the order retry fingerprint. Local
+tests use disposable databases; no real customer data is stored. No public grants or
+policies are provided. Retention duration, deletion/export workflows, production operator
+access and privacy disclosure remain prerequisites before collection. Shape checks do
+not establish deliverability. The fingerprint is personal-data-derived and must be
+included in the retention review, not treated as anonymous data.
 
 
 Ordered by how much they matter.

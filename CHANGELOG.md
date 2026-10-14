@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added private order delivery storage to the COD transaction and normalized delivery
+  details to retry fingerprints. Changed addresses reject reused keys; stock failures
+  roll back delivery alongside the order. No public checkout or live database was enabled.
+
 - Added internal checkout quote preparation using catalogue PKR prices, validated Pakistan
   delivery details and explicit server charge policies. Browser money fields and unsafe
   totals are rejected; public checkout remains disabled.

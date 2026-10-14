@@ -89,6 +89,13 @@ using a required server charge policy. It rejects browser money fields and non-P
 Approved PKR prices, actual shipping/tax policies, delivery persistence and inclusion in
 the order idempotency fingerprint remain required before wiring this into public checkout.
 
+**Progress (2026-10-14, delivery persistence):** Migration 0004 adds private delivery
+storage owned by orders. Internal COD checkout now validates and stores delivery in the
+same transaction as the order/stock reservation, and includes normalized delivery in
+retry fingerprints. Local tests cover changed-address conflicts, rollback and access
+configuration. Production roles, retention/deletion workflows, approved trading rules
+and a production database adapter remain required before exposing checkout.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;
