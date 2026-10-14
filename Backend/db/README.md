@@ -1,5 +1,20 @@
 # Commerce database foundation
 
+## Internal quote preparation
+
+`createCheckoutQuote` in the checkout public interface accepts `{items, delivery}`.
+Items contain only `{slug, quantity}`. Catalogue reads use its public interface and must
+return PKR prices; current IDR prices cannot be used. A required server `calculateCharges`
+policy receives immutable lines, normalized delivery and subtotalMinor, returning explicit
+discountMinor, shippingMinor and taxMinor integers. No production policy or rates exist yet.
+The result contains `{quote, delivery}`; this is not an endpoint or a persisted quote.
+Delivery shape validation does not verify phone ownership or shipping coverage.
+
+Before connecting preparation to COD checkout, persist delivery through the orders module
+and include it in the idempotency fingerprint. The existing COD service accepts only a
+trusted quote and does not store delivery. Protected access, retention rules, a production
+adapter and approved PKR prices/stock/shipping/tax remain prerequisites for public checkout.
+
 `migrations/0001_orders.up.sql` creates the private `commerce` schema, a migration-version
 record, orders and immutable order-item snapshots. It has only been applied to disposable
 local test databases. The running API still uses JSON and exposes no order endpoints.

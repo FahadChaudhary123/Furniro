@@ -83,6 +83,12 @@ Local tests verify rollback, identical retry replay and conflicting-key rejectio
 trusted server quotes; the quote producer, customer/delivery validation, production database
 adapter, access controls and public endpoint are not built yet.
 
+**Progress (2026-10-14, quote preparation):** Internal checkout preparation now resolves
+catalogue prices, validates Pakistan delivery input and calculates safe integer totals
+using a required server charge policy. It rejects browser money fields and non-PKR prices.
+Approved PKR prices, actual shipping/tax policies, delivery persistence and inclusion in
+the order idempotency fingerprint remain required before wiring this into public checkout.
+
 - Design versioned database migrations for orders, immutable order-item snapshots, payment
   attempts, inventory reservations and idempotency records. Define constraints, atomic
   writes, rollback and repository boundaries. Start with local database verification;

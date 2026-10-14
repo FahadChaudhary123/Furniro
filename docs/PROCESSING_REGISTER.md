@@ -165,6 +165,16 @@ consent record.
 
 ## Known gaps
 
+### Planned checkout delivery validation (2026-10-14)
+
+An internal helper validates recipient name, phone, address lines, city, optional postal
+code and country (Pakistan only). It returns normalized values in memory without logging,
+storage or third-party calls. Only synthetic tests call it today; no public endpoint or
+form collects these details. Before enabling collection, implement protected order delivery
+storage, retention/deletion rules and privacy disclosure, and include delivery intent in
+the order retry fingerprint. Shape checks do not establish deliverability.
+
+
 Ordered by how much they matter.
 
 1. **No privacy notice** (`PRIV-07`). Everything above is undisclosed to the people it

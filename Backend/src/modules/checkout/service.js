@@ -5,7 +5,7 @@ import { reserveOrderStock } from '../inventory/index.js';
 const money = (value) => Number.isSafeInteger(value) && value >= 0;
 
 /** Internal server-quote boundary. Never pass browser prices or totals into this service. */
-function prepareQuote(quote) {
+export function prepareQuote(quote) {
   if (!quote || quote.currency !== 'PKR' || !Array.isArray(quote.lines) || !quote.lines.length ||
       ![quote.discountMinor, quote.shippingMinor, quote.taxMinor].every(money)) {
     throw new Error('A complete server-generated PKR quote is required');

@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added internal checkout quote preparation using catalogue PKR prices, validated Pakistan
+  delivery details and explicit server charge policies. Browser money fields and unsafe
+  totals are rejected; public checkout remains disabled.
+
 - Added an internal COD checkout transaction that writes orders and reserves all stock
   atomically, replays identical retries and rejects conflicting idempotency keys. Tested
   locally; public checkout and a production database connection remain unimplemented.
