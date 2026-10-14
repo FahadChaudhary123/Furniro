@@ -149,6 +149,14 @@ and audit writes, while retries preserve the original event and stock counters. 
 does not record COD collection. Operator authorization/UI, carrier tracking, notifications,
 allocated-order cancellation, payment collection and multi-client concurrency remain open.
 
+**Progress (2026-10-14, COD collection):** Internal collection now records a full PKR
+payment against a delivered COD order after checking delivery history and consumed stock.
+Migration 0007 binds the amount to the immutable total, permits one collection per order
+and prevents receipt/retry duplication. Identical retries preserve the original operator.
+This records operator-entered evidence, not verified remittance or bank settlement.
+Operator authentication/UI, partial collection handling, correction/refund workflows,
+cash reconciliation and production concurrency verification remain open.
+
 **Exit:** Both COD and online payment work end to end in a test environment with durable
 orders and truthful payment state. Approved trading data, fulfilment, credentials and
 release verification must be complete before enabling public checkout. Building COD first

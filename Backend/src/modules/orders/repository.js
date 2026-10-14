@@ -15,6 +15,18 @@ export async function cancelCodOrder(tx, { orderId, actorId }) {
 }
 
 /** Caller coordinates inventory validation in the same transaction. */
+export async function getCollectableCodOrder(tx, orderId) {
+  const order = (await tx.query('SELECT payment_method, status, total_minor FROM commerce.orders WHERE id = $1 FOR UPDATE', [orderId])).rows[0];
+  if (!order) throw new Error('Order not found');
+  if (order.payment_method !== 'cod' || order.status !== 'delivered') {
+    throw new Error('COD collection requires a delivered COD order');
+  }
+  const event = (await tx.query("SELECT id FROM commerce.order_events WHERE order_id = $1 AND event_type = 'cod_delivered'", [orderId])).rows[0];
+  if (!event) throw new Error('Delivery history requires reconciliation');
+  const lineCount = (await tx.query('SELECT count(*)::integer AS count FROM commerce.order_items WHERE order_id = $1', [orderId])).rows[0].count;
+  return { totalMinor: Number(order.total_minor), lineCount };
+}
+
 export async function advanceCodOrder(tx, { orderId, actorId, targetStatus }) {
   const predecessors = { allocated: 'on_hold', despatched: 'allocated', delivered: 'despatched' };
   if (!Object.hasOwn(predecessors, targetStatus)) throw new Error('Unsupported COD transition');

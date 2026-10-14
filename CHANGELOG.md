@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added internal full-amount COD collection records for delivered orders, with exact-total
+  binding, unique receipt/retry keys and immutable operator evidence. Delivery alone stays
+  unpaid; public operator access, remittance reconciliation and refunds remain unimplemented.
+
 - Added internal COD allocation, despatch and delivery transitions with complete-stock
   checks, atomic despatch consumption and operator audit events. Retries cannot consume
   stock twice, and delivery does not record payment collection. Public operator flows

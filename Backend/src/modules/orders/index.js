@@ -2,3 +2,4 @@
 export { writeCodOrder } from './repository.js';
 export { cancelCodOrder } from './repository.js';
 export { advanceCodOrder } from './repository.js';
+export { getCollectableCodOrder } from './repository.js';

@@ -1,5 +1,26 @@
 # Commerce database foundation
 
+## Internal COD collection
+
+Migration 0007 adds private, immutable `cod_collections` owned by payments, bound to an
+order's exact total, currency and COD method. `createCodCollection(db)` in checkout takes
+`{orderId, actorId, idempotencyKey, amountMinor, receiptReference}` from an authorized
+operator context (authentication is still absent). `amountMinor` is observed cash and must
+match the full stored total; it cannot change the price. The order must be delivered with
+a delivery audit event and consumed stock for every line. Delivery alone creates no payment.
+
+Receipt references are globally unique internal cash-receipt codes: 1–100 ASCII letters,
+digits, dots, slashes, underscores or hyphens, starting with a letter/digit, normalized to
+uppercase. Do not enter names, phone numbers or addresses. These are not carrier tracking
+codes. A repeated key with the same order/amount/receipt returns the original collection;
+a different key for the order, a reused receipt or a conflicting request is rejected.
+Retries preserve the first operator attribution. All callers still need authorization.
+
+This records operator evidence only; it neither moves money nor confirms courier remittance
+or bank settlement. Partial collections, overpayments, corrections, reversals, refunds,
+retention and reconciliation workflows remain unimplemented. No endpoint, UI or live
+database connection is added. The rollback refuses populated collection history.
+
 ## Internal COD fulfilment
 
 Migration 0006 permits allocation, despatch and delivery audit events. The checkout

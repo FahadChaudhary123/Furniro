@@ -204,6 +204,13 @@ Ordered by how much they matter.
 
 ### Planned operator audit data (2026-10-14)
 
+Internal COD collection additionally records an operator UUID, order UUID, retry UUID,
+amount/currency, internal receipt code and recording timestamp in private immutable
+`commerce.cod_collections`. Receipt codes must not contain customer names or contact data.
+These records currently exist only in disposable tests with synthetic data. Before public
+use, define authorized payment access, receipt handling, financial retention and deletion/
+export treatment. Immutable storage is not a decision to retain personal data indefinitely.
+
 Internal COD cancellation, allocation, despatch and delivery record an operator UUID,
 order UUID, event type and timestamp
 in private append-only `commerce.order_events`. Only synthetic identifiers are used in
