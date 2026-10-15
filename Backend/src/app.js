@@ -14,13 +14,16 @@
 import express from 'express';
 import cors from 'cors';
 
-import { securityHeaders, apiLimiter, clientErrorLimiter } from './security/index.js';
+import { securityHeaders, apiLimiter, clientErrorLimiter, createLimiter } from './security/index.js';
+import { createOperatorAuthenticator } from './modules/identity/index.js';
+import { createOperatorRouter } from './modules/backoffice/index.js';
 import { productsRouter, categoriesRouter } from './modules/catalogue/index.js';
 import { postsRouter } from './modules/content/index.js';
 import {
   config,
   cachePolicy,
   logger,
+  requestLogPath,
   correlationMiddleware,
   healthRouter,
   clientErrorsRouter,
@@ -28,7 +31,7 @@ import {
   errorHandler,
 } from './platform/index.js';
 
-export function createApp() {
+export function createApp({ operatorAuth = config.operatorAuth, operatorFetch = globalThis.fetch, commerceDb = null } = {}) {
   const app = express();
 
   // Behind a proxy or load balancer, req.ip is the proxy without this.
@@ -90,7 +93,7 @@ export function createApp() {
       // carry personal data. docs/SECURITY.md#handling-user-data.
       logger.info('request', {
         method: req.method,
-        path: req.path,
+        path: requestLogPath(req),
         status: res.statusCode,
         durationMs: Math.round(ms),
       });
@@ -108,6 +111,9 @@ export function createApp() {
   app.use('/api/products', productsRouter);
   app.use('/api/categories', categoriesRouter);
   app.use('/api/posts', postsRouter);
+
+  app.use('/api/operator', createLimiter({ windowMs: 60_000, limit: 60, name: 'operatorRateLimit' }),
+    createOperatorRouter({ authenticate: createOperatorAuthenticator(operatorAuth, { fetchImpl: operatorFetch }), db: commerceDb }));
 
   // PLAT-04. The only unauthenticated write in the API. It gets its own limit rather than
   // the contact-form one: reports arrive without anyone choosing to send them, and the key

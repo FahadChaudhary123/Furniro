@@ -454,6 +454,12 @@ the first email, not after the first accident.
 
 ## 16. Back office and support — `ADM` `SUP`
 
+Operator API groundwork is implemented: verified Supabase tokens, mandatory MFA, private
+fulfilment/finance role assignments and protected COD actions with verified audit actors.
+`ADM-02` remains open until individual accounts, MFA onboarding, the separate operator UI
+and live permissions are verified. Local signed-token tests are not evidence of configured
+production access. See [operator access](runbooks/operator-access.md).
+
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|
 | `ADM-01` | Back office for catalogue, orders, inventory and content | §Cover, §1 | 2 | ⭕ |

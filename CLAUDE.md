@@ -14,7 +14,9 @@ Supabase back end.
 logging, correlation ids, errors, health, client error reports),
 `Backend/src/modules/catalogue/` (products, categories),
 `Backend/src/modules/content/` (blog posts), and `Backend/src/security/` are built.
-There is no connected commerce database, server-side cart, auth or public checkout.
+There is no connected commerce database, server-side cart or public checkout. Operator API
+authentication is opt-in through Supabase with mandatory MFA and private role assignments;
+it is disabled until configured. The separate back-office sign-in UI is not built.
 Order/payment/inventory SQL foundations and an internal COD transaction service now have
 local tests under `Backend/db/` and the corresponding modules. They are not wired into
 the running API; see `Backend/db/README.md` for implemented behavior and remaining gaps.
@@ -65,7 +67,9 @@ the public bundle as a string literal. There is no way to un-publish it after a 
 
 **Never invent an endpoint.** What exists: `/health`, `/health/ready`, `/api/products`
 (+`/featured`, `/:slug`), `/api/categories`, `/api/posts` (+`/recent`, `/tags`, `/:slug`),
-and `POST /api/client-errors` — the only unauthenticated write, and the only `POST`.
+and `POST /api/client-errors` — the only unauthenticated write. Protected operator routes
+also exist under `/api/operator`: session, order cancellation, fulfilment and COD collection.
+They require verified MFA/roles; actions need a configured commerce transaction adapter.
 
 **The cart never stores a price.** `{slug, quantity}` only; line detail is re-read from the
 API. A cart holding its own price copy shows yesterday's price after a repricing, and it is

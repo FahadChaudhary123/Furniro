@@ -80,6 +80,14 @@ export const config = {
     url: process.env.SUPABASE_URL ?? null,
     anonKey: process.env.SUPABASE_ANON_KEY ?? null,
   },
+
+  // Explicit opt-in; never silently reuse the legacy credentials in this workspace.
+  operatorAuth: {
+    enabled: process.env.OPERATOR_AUTH_ENABLED === 'true',
+    url: process.env.OPERATOR_AUTH_URL ?? '',
+    publishableKey: process.env.OPERATOR_AUTH_PUBLISHABLE_KEY ?? '',
+    access: process.env.OPERATOR_ACCESS ?? '{}',
+  },
 };
 
 /**

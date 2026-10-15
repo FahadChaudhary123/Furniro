@@ -164,6 +164,14 @@ back. Despatched/delivered orders are rejected and require the future returns wo
 This closes the internal allocated-cancellation gap; operator access/UI and concurrent
 despatch-versus-cancellation verification on production PostgreSQL remain open.
 
+**Progress (2026-10-14, operator API access):** Identity now verifies Supabase signatures,
+issuer/audience, expiry, current user and MFA. Backoffice routes enforce server-owned
+fulfilment/finance roles and derive audit actors from verified identities. Local signed-token
+HTTP tests exercise protected COD actions using disposable storage. Normal startup leaves
+Auth disabled and commerce storage disconnected. Individual-user provisioning, live MFA
+verification, a separate back-office sign-in UI, access reviews and production DB integration
+remain open; see [operator access](runbooks/operator-access.md).
+
 **Exit:** Both COD and online payment work end to end in a test environment with durable
 orders and truthful payment state. Approved trading data, fulfilment, credentials and
 release verification must be complete before enabling public checkout. Building COD first

@@ -12,6 +12,7 @@
 
 import { logger } from './logger.js';
 import { config } from './config.js';
+import { requestLogPath } from './requestPath.js';
 
 /** An error with an intended HTTP status and a stable machine-readable code. */
 export class AppError extends Error {
@@ -40,7 +41,7 @@ export const conflict = (message, details) =>
 
 /** Terminal 404 for unmatched routes. Mounted after every router. */
 export function notFoundHandler(req, res, next) {
-  next(new AppError(404, 'NOT_FOUND', `No route matches ${req.method} ${req.path}`));
+  next(new AppError(404, 'NOT_FOUND', `No route matches ${req.method} ${requestLogPath(req)}`));
 }
 
 /**
@@ -89,11 +90,11 @@ export function errorHandler(err, req, res, next) {
       code,
       status,
       method: req.method,
-      path: req.path,
+      path: requestLogPath(req),
       stack: err.stack,
     });
   } else {
-    logger.warn(err.message, { code, status, method: req.method, path: req.path });
+    logger.warn(err.message, { code, status, method: req.method, path: requestLogPath(req) });
   }
 
   if (res.headersSent) return next(err);

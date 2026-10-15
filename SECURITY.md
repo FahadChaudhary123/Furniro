@@ -30,7 +30,11 @@ service for others.
 
 ## Scope note
 
-The project does not handle payments, accounts, checkout or orders, and has no database.
+Commerce services are tested locally but have no connected production database or public
+checkout. Opt-in operator API access verifies Supabase tokens, MFA and private server roles;
+see [operator access](docs/runbooks/operator-access.md). It is disabled by default, and
+protected order actions require a configured transaction adapter. Customer accounts and
+the separate operator sign-in UI are not implemented.
 The contact and newsletter forms are disabled because there is no receiving endpoint.
 
 The guest cart holds product slugs and quantities in the visitor's browser. The API also

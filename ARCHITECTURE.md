@@ -252,7 +252,7 @@ catalogue migration. The API response shape can remain stable while the reposito
 | Rendering | Client-side SPA | Simplest to build and host | Weak SEO and slow first paint — both matter for a storefront, and both point at SSR later |
 | Language | JavaScript, not TypeScript | Lower ceremony | `@types/react` is installed but inert; the product shape is enforced by nothing |
 | Styling | Tailwind utilities | Fast, no naming overhead | Long `className` strings; no design tokens while `theme.extend` is empty |
-| Auth | None yet | Not needed for a catalogue | Supabase Auth is the natural choice — it is already a dependency |
+| Auth | Opt-in Supabase operator verification with mandatory MFA | Private server roster separates fulfilment and finance; no user-metadata permissions | Separate operator UI/onboarding and customer identity remain open |
 
 ---
 

@@ -14,15 +14,16 @@ Registers get shared, screenshotted and pasted into chat. See [SECURITY.md](../S
 
 | Field | Value |
 |---|---|
-| **Service & purpose** | Managed Postgres. Intended to also provide Auth and Storage. Not yet used by any running code |
-| **Criticality** | Store-stopping *once integrated* — it is the only planned data store. Currently **cosmetic**: nothing reads from it |
+| **Service & purpose** | Planned managed Postgres/Storage; opt-in operator Auth now verifies tokens and current users. Disabled by default; no live Auth setup tested |
+| **Criticality** | Operator access stops if Auth is enabled and unavailable; the public JSON catalogue remains independent. Production commerce database integration is pending |
 | **Support route** | Dashboard support. Escalation path not established — free-tier projects have no SLA |
 | **Status page** | <https://status.supabase.com> — **not currently subscribed by anyone** |
 | **Credentials** | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `DATABASE_URL` in `Backend/.env`. Rotatable in the project dashboard. **Rotation outstanding** — see [secret-rotation.md](runbooks/secret-rotation.md#-outstanding-rotate-now) |
+| **Operator Auth configuration** | Explicit `OPERATOR_AUTH_URL`, current `OPERATOR_AUTH_PUBLISHABLE_KEY`, `OPERATOR_AUTH_ENABLED` and private `OPERATOR_ACCESS` roster. No automatic reuse of legacy credentials; all live configuration remains pending |
 | **API version** | `@supabase/supabase-js` ^2.96.0. No deprecation date known. Upgrade owner unassigned |
 | **Limits** | Free-tier quotas apply; no headroom measurement exists because there is no traffic |
 | **Contract** | None. No paid plan, no data-processing agreement. **A DPA is required before storing any personal data** (Doc B §11) |
-| **Fallback** | **None documented.** `pg` is installed and could reach the same Postgres directly, but that is the same provider, not a fallback |
+| **Fallback** | Operator access fails closed during Auth outages. No alternate identity provider or production commerce database adapter is connected |
 
 **Register gaps for this row:** no status-page subscription, no escalation path, no DPA, no
 upgrade owner, no tested fallback. All five are Doc B §16 requirements. None are urgent

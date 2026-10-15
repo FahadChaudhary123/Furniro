@@ -3,8 +3,10 @@
 A furniture e-commerce storefront. React + Vite front end, Express + Supabase back end.
 
 > **Project status: the storefront and read API run locally.** Catalogue and blog content
-> come from the API, and a guest cart persists in browser storage. There is no database,
-> account system, checkout, payments or orders. See [Current state](#current-state).
+> come from the API, and a guest cart persists in browser storage. Commerce services have
+> local tests but no connected production database or public checkout. Operator API Auth
+> is opt-in; its separate sign-in UI and customer accounts remain unbuilt.
+> See [Current state](#current-state).
 
 ---
 
@@ -125,6 +127,10 @@ npm run smoke
 ## Current state
 
 ### What works
+
+- Operator API authentication/authorization with verified Supabase MFA and private roles,
+  tested locally. Live setup and the separate operator UI are pending; see the
+  [operator access runbook](docs/runbooks/operator-access.md).
 
 - Routes `/`, `/shop`, `/shop/:slug`, `/blog`, `/blog/:slug`, `/cart`, `/contact` and a `*` catch-all —
   wired through React Router in [App.jsx](Frontend/src/App.jsx), each setting its own

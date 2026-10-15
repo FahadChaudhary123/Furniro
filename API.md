@@ -2,7 +2,9 @@
 
 **Status: catalogue, content and client-error reporting are live.** Product, category and
 blog reads plus `POST /api/client-errors` are implemented and covered by the smoke suite.
-Contact, identity and commerce endpoints below are proposed contracts.
+Operator session and protected COD actions are implemented but require explicit Auth
+configuration and a connected transaction adapter. Customer identity, contact and public
+checkout endpoints below remain proposed contracts.
 
 Conventions and error shapes here govern the implemented routes and guide future ones.
 
@@ -311,7 +313,7 @@ Design 8, Handmade 7, Interior 1, Wood 6) against three real posts.
 > ✅ **Implemented.** `Backend/src/platform/clientErrors.js`
 
 Receives a crash from a visitor's browser and writes it to the structured log (`PLAT-04`).
-**The only unauthenticated write in the API, and the only `POST`.**
+**The only unauthenticated write in the API.** Operator POST routes require verified MFA and roles.
 
 ```json
 {
@@ -405,12 +407,13 @@ See [SECURITY.md](SECURITY.md#payments).
 
 ## Authentication
 
-> 🔴 **Not implemented.**
+> **Operator API implemented; live configuration remains pending.**
 
-No endpoint requires auth today because none exists. Supabase Auth is the intended
-mechanism — it is already a dependency and issues JWTs the API can verify.
+Operator API authentication is implemented using Supabase Auth; it is disabled by default.
+See [operator setup](docs/runbooks/operator-access.md). Customer registration/login and the
+separate operator sign-in UI are not implemented. No legacy `.env` keys are reused.
 
-When added:
+Operator rules:
 
 - Bearer tokens in the `Authorization: Bearer <jwt>` header.
 - **Verify the JWT signature on every request.** Decoding a token is not verifying it;
@@ -420,6 +423,28 @@ When added:
   on state-changing methods.
 - Row-level security stays enabled in Postgres regardless. Application-tier checks and RLS
   are defence in depth, not alternatives.
+
+### Operator endpoints
+
+All require a Supabase access token verified against the configured issuer, current user,
+`authenticated` audience/role, expiry and `aal2` MFA. Roles come only from the private
+server roster, never user-editable metadata. Responses are `no-store`; no cookies or
+refresh tokens are created. Limit: 60 requests/minute/IP, in addition to the general limit.
+
+| Endpoint | Role | JSON body |
+|---|---|---|
+| `GET /api/operator/session` | Any assigned operator | None; returns `{operator_id, roles}` |
+| `POST /api/operator/orders/:id/cancel` | `fulfilment` | `{}` |
+| `POST /api/operator/orders/:id/fulfilment` | `fulfilment` | `{target_status}`: allocated, despatched or delivered |
+| `POST /api/operator/orders/:id/collections` | `finance` | `{amount_minor, receipt_reference, idempotency_key}` |
+
+Actions return 200 with `{order_id, replayed}`, plus `status` for fulfilment or
+`collection_id` for collection. Unknown fields, including `actor_id`, are rejected.
+The actor is always the verified user. Errors: 401 missing/invalid token; 403 unassigned
+role or `MFA_REQUIRED`; 400 invalid input; 404 missing order; 409 state/retry conflict;
+503 Auth unavailable/unconfigured or commerce storage unavailable. Authorization runs
+before input/order lookup. Normal startup supplies no commerce adapter, so authorized
+actions return 503 until a production transaction adapter is deliberately connected.
 
 ---
 

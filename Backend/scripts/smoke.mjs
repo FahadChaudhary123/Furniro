@@ -352,6 +352,18 @@ async function main() {
     `got ${wrongMethod.status}`,
   );
 
+  const operatorSession = await fetch(`${BASE}/api/operator/session`);
+  check('operator session requires a bearer token', operatorSession.status === 401);
+  check('operator responses cannot be cached', operatorSession.headers.get('cache-control') === 'no-store');
+  check('operator challenge uses Bearer authentication', operatorSession.headers.get('www-authenticate') === 'Bearer');
+  check('operator session sets no cookie', !operatorSession.headers.get('set-cookie'));
+  for (const action of ['cancel', 'fulfilment', 'collections']) {
+    const response = await fetch(`${BASE}/api/operator/orders/00000000-0000-0000-0000-000000000001/${action}`, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
+    });
+    check(`operator ${action} rejects unauthenticated requests`, response.status === 401);
+  }
+
   console.log(`\n${passed} passed, ${failed} failed\n`);
   process.exit(failed === 0 ? 0 : 1);
 }

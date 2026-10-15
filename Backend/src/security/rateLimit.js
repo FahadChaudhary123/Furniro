@@ -11,13 +11,13 @@
  */
 
 import rateLimit from 'express-rate-limit';
-import { config, logger, AppError } from '../platform/index.js';
+import { config, logger, AppError, requestLogPath } from '../platform/index.js';
 
 /** Emit the documented error shape rather than express-rate-limit's default text. */
 function limitReached(req, res, next, options) {
   logger.warn('rate limit exceeded', {
     method: req.method,
-    path: req.path,
+    path: requestLogPath(req),
     limit: options.limit,
   });
   next(new AppError(429, 'RATE_LIMITED', 'Too many requests. Please slow down.'));

@@ -14,6 +14,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added opt-in Supabase-verified operator API access with MFA, private fulfilment/finance
+  role assignments and protected COD actions. Audit actors come from verified identities;
+  token/provider details and order IDs are excluded from routine logs. Auth and production
+  commerce storage must be configured before live use; the separate operator UI is pending.
+
 - Extended internal COD cancellation to audited allocated orders before despatch. Held
   stock is released atomically; consumed stock or conflicting fulfilment history prevents
   cancellation, and retries preserve the original audit event.

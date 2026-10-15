@@ -31,8 +31,9 @@ than a blank page. **Do not publish a privacy notice derived from this without t
 The system currently processes **very little** personal data, and that is a property worth
 keeping rather than an accident to correct.
 
-There is no database, no accounts, no orders and no payments. Nothing here is stored in a
-form that could be looked up by person, because there is no person to look anything up by.
+There is no connected production commerce database or customer account system. Commerce
+tests use synthetic records in disposable databases. Operator Auth can be explicitly enabled
+as described below; it is disabled by default and no live account was used for verification.
 
 | | |
 |---|---|
@@ -46,6 +47,28 @@ form that could be looked up by person, because there is no person to look anyth
 ---
 
 ## Activities
+
+### Operator authentication and protected actions — opt-in
+
+When enabled, the identity module sends the supplied bearer token to the configured
+Supabase Auth project to verify the current user, and verifies signed token claims and MFA.
+The provider therefore receives operator authentication requests and the API server's
+network address. The API uses the returned user UUID and a private server role roster;
+it does not return email, factors, user metadata or tokens. Passwords, refresh tokens and
+MFA secrets are not accepted or stored by these API routes. Sign-in/enrolment remains a
+separate client/provider activity whose UI is not built here.
+
+Tokens/user records are held only for request processing. The roster is deployment
+configuration retained until changed. Existing action audit tables retain the verified
+operator UUID when a commerce adapter is connected. Routine request/error/rate-limit logs
+mask operator paths to `/api/operator` and omit bodies, identities and authorization headers.
+There is no success-session store or token persistence. Operator rate counters use client
+IP in memory for one minute, per process, as with the existing rate limiter.
+
+Before activation: identify individual account owners, complete provider/privacy review,
+define audit/identity retention and access removal, and document provider-side auth-log
+retention and transfers. Legal basis remains `NEEDS SIGN-OFF`. No live Supabase Auth call,
+real operator account or production commerce write was made during verification.
 
 ### 1. Serving the storefront (request logs)
 
@@ -214,7 +237,8 @@ export treatment. Immutable storage is not a decision to retain personal data in
 Internal COD cancellation, allocation, despatch and delivery record an operator UUID,
 order UUID, event type and timestamp
 in private append-only `commerce.order_events`. Only synthetic identifiers are used in
-disposable tests today. No operator authentication or public route is connected. Before
+disposable tests today. Protected operator API routes now exist, with Auth disabled by
+default and no production commerce adapter connected. Before
 activation, define trusted identity mapping, restricted access and audit retention together
 with deletion/export treatment; immutable audit rows must not imply indefinite retention.
 

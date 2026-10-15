@@ -172,7 +172,9 @@ it sits at the module's data boundary: every read path inherits it and none can 
 `npm run completeness` is the `CAT-04` report over the same rules — one definition, two
 consumers, no chance of the report and the API disagreeing.
 The remaining `CAT-*` work includes missing tax, weight and SEO fields, variants, and the
-ERP/PIM feed. `identity` and `inventory` are unstarted; `pricing` has an implemented
+ERP/PIM feed. `identity` now verifies opt-in operator tokens, MFA and private role rosters;
+customer accounts remain unstarted. Inventory has locally tested SQL/services but no live
+database. `pricing` has an implemented
 promotion-expiry rule but no pricing module or server-side checkout calculator.
 
 **`inventory` is separated from `catalogue` deliberately.** They look like one thing and are
@@ -336,6 +338,10 @@ the earlier duplicate product shapes were resolved.
 Back office is a **separate application**, not a route inside the storefront. It has a
 different auth model (`ADM-02`: RBAC + MFA), a different audience, and no reason to share a
 bundle with a public storefront where `NFR-06` caps the payload.
+
+The API-side `backoffice` module now exposes protected session/COD actions through
+`identity` and `checkout` public interfaces. Auth is opt-in and commerce storage defaults
+to disconnected. The separate UI, onboarding and live access review are still pending.
 
 ---
 
