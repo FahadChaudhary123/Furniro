@@ -14,6 +14,11 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Added: operator sign-in (2026-10-15)
+
+- Separate Operator app: password login, TOTP setup/verification, server role checks, sign-out and expiry locking with memory-only sessions.
+- Safe public Auth configuration endpoint, browser coverage and CI for the new app. Live Auth activation and order management remain pending.
+
 - Added opt-in Supabase-verified operator API access with MFA, private fulfilment/finance
   role assignments and protected COD actions. Audit actors come from verified identities;
   token/provider details and order IDs are excluded from routine logs. Auth and production

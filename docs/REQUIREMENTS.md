@@ -456,8 +456,9 @@ the first email, not after the first accident.
 
 Operator API groundwork is implemented: verified Supabase tokens, mandatory MFA, private
 fulfilment/finance role assignments and protected COD actions with verified audit actors.
-`ADM-02` remains open until individual accounts, MFA onboarding, the separate operator UI
-and live permissions are verified. Local signed-token tests are not evidence of configured
+The separate `Operator/` sign-in app now supports password login, TOTP enrolment/challenge
+and sign-out with memory-only sessions. `ADM-02` remains open until individual accounts,
+live MFA onboarding and permissions are verified. Local signed-token tests are not evidence of configured
 production access. See [operator access](runbooks/operator-access.md).
 
 | ID | Requirement | Doc B | Stage | Status |

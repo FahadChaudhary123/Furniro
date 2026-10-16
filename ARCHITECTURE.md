@@ -11,7 +11,9 @@ shape; those explain how it was arrived at.
 
 ## Shape
 
-Two independently deployable units in one repository:
+Three independently deployable units in one repository. `Operator/` is a separate React/Vite
+application for operator sign-in and TOTP MFA; it calls Supabase Auth and the protected API.
+It is never imported into the storefront bundle. The storefront/API path is:
 
 ```
 Browser
@@ -252,7 +254,7 @@ catalogue migration. The API response shape can remain stable while the reposito
 | Rendering | Client-side SPA | Simplest to build and host | Weak SEO and slow first paint — both matter for a storefront, and both point at SSR later |
 | Language | JavaScript, not TypeScript | Lower ceremony | `@types/react` is installed but inert; the product shape is enforced by nothing |
 | Styling | Tailwind utilities | Fast, no naming overhead | Long `className` strings; no design tokens while `theme.extend` is empty |
-| Auth | Opt-in Supabase operator verification with mandatory MFA | Private server roster separates fulfilment and finance; no user-metadata permissions | Separate operator UI/onboarding and customer identity remain open |
+| Auth | Opt-in Supabase operator verification with mandatory MFA | Private server roster separates fulfilment and finance; no user-metadata permissions | Operator sign-in UI built; live onboarding and customer identity remain open |
 
 ---
 

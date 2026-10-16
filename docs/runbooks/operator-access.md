@@ -2,8 +2,8 @@
 
 The API verifies Supabase Auth bearer tokens and enforces MFA plus server-assigned roles.
 It is disabled by default. No live account or database has been contacted during development.
-The separate back-office sign-in/MFA UI is not built yet; do not add it to the storefront
-bundle. Customer login/registration is also still unimplemented.
+The separate `Operator/` app provides password sign-in, TOTP setup/verification and sign-out.
+It is built independently from the storefront. Customer login/registration is also still unimplemented.
 
 ## Configure before activation
 
@@ -70,3 +70,26 @@ MFA enrolment, provider account or production permission setup has been verified
 Provider references: [getClaims](https://supabase.com/docs/reference/javascript/auth-getclaims),
 [getUser](https://supabase.com/docs/reference/javascript/auth-getuser),
 [MFA](https://supabase.com/docs/guides/auth/auth-mfa).
+
+## Separate sign-in application
+
+Run `npm ci` then `npm run dev` in `Operator/` (http://localhost:5174).
+Set `VITE_API_URL` using `.env.example`; include this origin in `ALLOWED_ORIGINS`.
+The API exposes `GET /api/operator/auth-config`, returning only the public Auth origin and
+publishable key when valid and enabled, otherwise `{enabled:false}`. No private roster or
+service key is published. The UI does not collect credentials when disabled.
+
+Provision individual email/password users through the provider; there is no public signup
+or password-reset workflow here. Operators sign in, enrol a TOTP authenticator using a
+manual setup key if needed, then verify a six-digit code. Server session verification must
+succeed before roles are shown. Order management screens remain pending.
+
+Sessions are memory-only, with automatic refresh disabled. Reload requires another login;
+expiry locks the screen. Sign-out requests provider local-scope logout and discards the
+client even if the provider is unavailable. Existing bearer tokens can remain valid until
+expiry. Only this app's abandoned unverified factors are removed during setup retries.
+
+`npm run verify` checks lint/build; `npm run e2e` runs isolated browser tests with synthetic
+provider responses on desktop/mobile. It never uses live credentials. Host this app on a
+separate trusted HTTPS origin with no-store HTML and appropriate security headers; deployment
+remains deferred. Do not record live MFA screens in screenshots or browser traces.

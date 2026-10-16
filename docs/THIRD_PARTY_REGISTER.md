@@ -14,7 +14,7 @@ Registers get shared, screenshotted and pasted into chat. See [SECURITY.md](../S
 
 | Field | Value |
 |---|---|
-| **Service & purpose** | Planned managed Postgres/Storage; opt-in operator Auth now verifies tokens and current users. Disabled by default; no live Auth setup tested |
+| **Service & purpose** | Planned managed Postgres/Storage; opt-in operator Auth verifies tokens and current users. The separate Operator app sends login credentials and MFA codes directly to Auth. Disabled by default; no live Auth setup tested |
 | **Criticality** | Operator access stops if Auth is enabled and unavailable; the public JSON catalogue remains independent. Production commerce database integration is pending |
 | **Support route** | Dashboard support. Escalation path not established — free-tier projects have no SLA |
 | **Status page** | <https://status.supabase.com> — **not currently subscribed by anyone** |

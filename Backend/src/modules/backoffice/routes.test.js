@@ -50,6 +50,15 @@ async function order() {
     reservationExpiresAt: new Date(Date.now() + 3600000).toISOString() })).orderId;
 }
 
+it('publishes only safe sign-in configuration without authentication', async () => {
+  await start();
+  const response = await call('/auth-config', { token: null });
+  expect(response.status).toBe(200);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  expect(await response.json()).toEqual({ enabled: true, url: fixture.url, publishable_key: fixture.settings.publishableKey });
+  expect(fixture.calls).toEqual([]);
+});
+
 it('returns a minimal non-cacheable operator session after verified MFA', async () => {
   await start();
   const response = await call('/session');

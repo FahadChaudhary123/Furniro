@@ -341,7 +341,7 @@ bundle with a public storefront where `NFR-06` caps the payload.
 
 The API-side `backoffice` module now exposes protected session/COD actions through
 `identity` and `checkout` public interfaces. Auth is opt-in and commerce storage defaults
-to disconnected. The separate UI, onboarding and live access review are still pending.
+to disconnected. The separate `Operator/` sign-in/MFA UI is built; order management screens, onboarding and live access review remain pending.
 
 ---
 

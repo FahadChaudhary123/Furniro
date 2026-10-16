@@ -33,8 +33,8 @@ service for others.
 Commerce services are tested locally but have no connected production database or public
 checkout. Opt-in operator API access verifies Supabase tokens, MFA and private server roles;
 see [operator access](docs/runbooks/operator-access.md). It is disabled by default, and
-protected order actions require a configured transaction adapter. Customer accounts and
-the separate operator sign-in UI are not implemented.
+protected order actions require a configured transaction adapter. Customer accounts are not implemented. The separate `Operator/` sign-in app keeps sessions
+in memory and requires a fresh login after reload or token expiry.
 The contact and newsletter forms are disabled because there is no receiving endpoint.
 
 The guest cart holds product slugs and quantities in the visitor's browser. The API also

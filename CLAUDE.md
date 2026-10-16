@@ -16,7 +16,7 @@ logging, correlation ids, errors, health, client error reports),
 `Backend/src/modules/content/` (blog posts), and `Backend/src/security/` are built.
 There is no connected commerce database, server-side cart or public checkout. Operator API
 authentication is opt-in through Supabase with mandatory MFA and private role assignments;
-it is disabled until configured. The separate back-office sign-in UI is not built.
+it is disabled until configured. The separate `Operator/` app supports password sign-in, TOTP setup/verification and sign-out.
 Order/payment/inventory SQL foundations and an internal COD transaction service now have
 local tests under `Backend/db/` and the corresponding modules. They are not wired into
 the running API; see `Backend/db/README.md` for implemented behavior and remaining gaps.
@@ -69,6 +69,7 @@ the public bundle as a string literal. There is no way to un-publish it after a 
 (+`/featured`, `/:slug`), `/api/categories`, `/api/posts` (+`/recent`, `/tags`, `/:slug`),
 and `POST /api/client-errors` — the only unauthenticated write. Protected operator routes
 also exist under `/api/operator`: session, order cancellation, fulfilment and COD collection.
+The public read-only `/api/operator/auth-config` returns safe sign-in configuration.
 They require verified MFA/roles; actions need a configured commerce transaction adapter.
 
 **The cart never stores a price.** `{slug, quantity}` only; line detail is re-read from the
@@ -156,6 +157,7 @@ cd Frontend && npm run e2e      # browser checks; starts both servers itself
 cd Backend  && npm test         # unit tests
 cd Backend  && npm run completeness  # catalogue data quality; non-zero if a product is blocked
 cd Backend  && npm run smoke    # API checks against a running server
+cd Operator && npm run verify && npm run e2e  # separate operator sign-in app
 ```
 
 All of these must pass. **A build that succeeds is not a page that renders** — the e2e suite

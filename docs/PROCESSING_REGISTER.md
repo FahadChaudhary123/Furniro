@@ -55,8 +55,11 @@ Supabase Auth project to verify the current user, and verifies signed token clai
 The provider therefore receives operator authentication requests and the API server's
 network address. The API uses the returned user UUID and a private server role roster;
 it does not return email, factors, user metadata or tokens. Passwords, refresh tokens and
-MFA secrets are not accepted or stored by these API routes. Sign-in/enrolment remains a
-separate client/provider activity whose UI is not built here.
+MFA secrets are not accepted or stored by these API routes. The separate `Operator/` browser app sends email/password and TOTP codes directly to
+Supabase Auth. Setup keys and access/refresh tokens exist only in browser memory, never
+local/session storage or URLs. Password/code fields clear on submit; setup keys clear after
+verification or sign-out. Reload discards the local session; token expiry locks the UI.
+The app has no analytics or credential logging. Provider auth-log retention still needs review.
 
 Tokens/user records are held only for request processing. The roster is deployment
 configuration retained until changed. Existing action audit tables retain the verified

@@ -18,8 +18,9 @@ const conflicts = new Set([
 ]);
 
 /** Auth always runs before permissions, input validation or any commerce operation. */
-export function createOperatorRouter({ authenticate, db = null }) {
+export function createOperatorRouter({ authenticate, publicConfig = { enabled: false }, db = null }) {
   const router = Router();
+  router.get('/auth-config', (req, res) => res.set('Cache-Control', 'no-store').json(publicConfig));
   const services = db ? {
     cancel: createCodCancellation(db), fulfil: createCodFulfilment(db), collect: createCodCollection(db),
   } : null;

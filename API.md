@@ -410,8 +410,7 @@ See [SECURITY.md](SECURITY.md#payments).
 > **Operator API implemented; live configuration remains pending.**
 
 Operator API authentication is implemented using Supabase Auth; it is disabled by default.
-See [operator setup](docs/runbooks/operator-access.md). Customer registration/login and the
-separate operator sign-in UI are not implemented. No legacy `.env` keys are reused.
+See [operator setup](docs/runbooks/operator-access.md). Customer registration/login is not implemented. The separate `Operator/` app handles operator sign-in and MFA. No legacy `.env` keys are reused.
 
 Operator rules:
 
@@ -495,3 +494,10 @@ Order matters — items 1–3 are the ones that are painful to add afterwards.
       endpoint sections with the generated reference; keep the conventions above by hand
 
 Update the 🔴 markers as endpoints land, and record each in [CHANGELOG.md](CHANGELOG.md).
+
+### Public operator sign-in configuration
+
+`GET /api/operator/auth-config` is unauthenticated, rate limited and `no-store`.
+Returns `{enabled:false}` when disabled or malformed; otherwise
+`{enabled:true,url,publishable_key}`. Only an HTTPS provider origin and modern public key
+are exposed. The private role roster is never returned. This endpoint grants no access.

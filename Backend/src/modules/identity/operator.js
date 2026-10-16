@@ -22,6 +22,13 @@ function settingsFor(input) {
   } catch { throw unavailable(); }
 }
 
+export function operatorPublicConfig(settings) {
+  try {
+    const { url, key } = settingsFor(settings);
+    return { enabled: true, url, publishable_key: key };
+  } catch { return { enabled: false }; }
+}
+
 function checkProviderError(error) {
   if (!error) return;
   if ([400, 401, 403, 422].includes(error.status) || error.name === 'AuthInvalidJwtError') throw unauthorized();

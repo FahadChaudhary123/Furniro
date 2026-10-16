@@ -1,7 +1,15 @@
 import { generateKeyPairSync, randomUUID } from 'node:crypto';
 import { expect, it, vi } from 'vitest';
-import { createOperatorAuthenticator } from './index.js';
+import { createOperatorAuthenticator, operatorPublicConfig } from './index.js';
 import { operatorFixture } from '../../../test/helpers/operatorAuth.js';
+
+it('never publishes disabled, malformed or private authentication configuration', () => {
+  const { settings } = operatorFixture();
+  for (const change of [{ enabled: false }, { publishableKey: 'sb_secret_synthetic' }, { access: 'invalid' }, { url: 'http://example.test' }]) {
+    expect(operatorPublicConfig({ ...settings, ...change })).toEqual({ enabled: false });
+  }
+  expect(Object.keys(operatorPublicConfig(settings)).sort()).toEqual(['enabled', 'publishable_key', 'url']);
+});
 
 it('verifies signed MFA tokens and obtains roles only from the server roster', async () => {
   const f = operatorFixture(['fulfilment']);

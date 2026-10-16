@@ -230,3 +230,9 @@ then the guest COD order path in Milestone 3. Deployment is deferred at the user
 Milestone 1 remains a release gate. Online payment follows COD implementation, and both
 methods must pass before public launch. Account-specific facts and approved trading data
 cannot be inferred from the sample catalogue.
+
+**Progress (2026-10-15, operator sign-in):** Added the independent `Operator/` React app
+with password login, TOTP enrolment/verification, server-authorized roles and sign-out.
+Sessions are memory-only with expiry locking. Public safe Auth configuration is supplied
+by the API. Synthetic browser tests cover these flows; live onboarding, access reviews,
+order management screens and production transaction integration remain open.

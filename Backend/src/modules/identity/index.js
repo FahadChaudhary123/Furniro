@@ -1,1 +1,1 @@
-export { createOperatorAuthenticator } from './operator.js';
+export { createOperatorAuthenticator, operatorPublicConfig } from './operator.js';
