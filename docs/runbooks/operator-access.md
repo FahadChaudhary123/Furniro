@@ -82,7 +82,12 @@ service key is published. The UI does not collect credentials when disabled.
 Provision individual email/password users through the provider; there is no public signup
 or password-reset workflow here. Operators sign in, enrol a TOTP authenticator using a
 manual setup key if needed, then verify a six-digit code. Server session verification must
-succeed before roles are shown. Order management screens remain pending.
+succeed before roles are shown. Signed-in operators can look up one order by its full UUID.
+Saved items, totals and fulfilment status are shown; delivery details require fulfilment
+access. Finance-only users receive no delivery data. Fulfilment status does not confirm
+payment collection. Mutation controls, order lists and payment history screens remain pending.
+Lookup returns an explicit unavailable error until commerce storage is connected; it does
+not fall back to sample orders. Results are cleared on another lookup, sign-out or expiry.
 
 Sessions are memory-only, with automatic refresh disabled. Reload requires another login;
 expiry locks the screen. Sign-out requests provider local-scope logout and discards the

@@ -235,6 +235,11 @@ inventory input and index remain Stage 4 work.
 
 ### Layer 5 — Operations surfaces
 
+The separate Operator app includes authenticated exact-ID order lookup. The backoffice
+route delegates to the orders public interface; only orders reads its snapshot/delivery
+tables. Finance sees financial snapshots; fulfilment also sees delivery details. No
+cross-module table reads, public order endpoint or production connection are introduced.
+
 | Module | Owns | Requirements | Size | Owner | Runbook |
 |---|---|---|---|---|---|
 | `backoffice` | Admin UI, RBAC, MFA, access review, audit log, feature-flag console | `ADM-01`–`05` (5) | L | Engineering lead | — |

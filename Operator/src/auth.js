@@ -29,3 +29,26 @@ export async function verifyAccess(client) {
     : 'Access could not be verified. Please try again or sign out.');
   return { ...await response.json(), expiresAt: data.session.expires_at * 1000 };
 }
+
+export async function loadOrder(client, orderId, signal) {
+  const { data, error } = await client.auth.getSession();
+  if (error || !data.session) throw new Error('Your session ended. Sign out and sign in again.');
+  let response;
+  try {
+    response = await fetch(`${api}/operator/orders/${encodeURIComponent(orderId)}`, {
+      headers: { Authorization: `Bearer ${data.session.access_token}` }, credentials: 'omit',
+      cache: 'no-store', signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
+    });
+  } catch { throw new Error('The order could not be loaded. Check your connection and retry.'); }
+  if (!response.ok) {
+    const messages = {
+      400: 'Enter a valid order ID.', 401: 'Your session ended. Sign out and sign in again.',
+      403: 'Access denied. Ask the account owner to check your roles.',
+      404: 'No order was found with that ID.',
+      429: 'Too many requests. Wait a minute and retry.',
+      503: 'Order lookup is unavailable. Commerce storage or authentication may not be configured.',
+    };
+    throw new Error(messages[response.status] || 'The order could not be loaded. Please retry.');
+  }
+  return response.json();
+}

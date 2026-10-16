@@ -6,6 +6,8 @@ A furniture e-commerce storefront. React + Vite front end, Express + Supabase ba
 > come from the API, and a guest cart persists in browser storage. Commerce services have
 > local tests but no connected production database or public checkout. Operator API Auth
 > is opt-in; the separate `Operator/` sign-in app is built. Customer accounts remain unbuilt.
+> Signed-in operators can look up saved orders when a commerce adapter is supplied;
+> delivery details require the fulfilment role. Production storage remains disconnected.
 > See [Current state](#current-state).
 
 ---

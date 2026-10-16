@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AppError } from '../../platform/index.js';
 import { createCodCancellation, createCodFulfilment, createCodCollection } from '../checkout/index.js';
+import { readOperatorOrder } from '../orders/index.js';
 
 const uuid = (value) => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 const conflicts = new Set([
@@ -36,6 +37,23 @@ export function createOperatorRouter({ authenticate, publicConfig = { enabled: f
     next();
   });
   router.get('/session', (req, res) => res.json({ operator_id: req.operator.id, roles: req.operator.roles }));
+  router.get('/orders/:orderId', async (req, res) => {
+    if (!req.operator.roles.some(role => ['fulfilment', 'finance'].includes(role))) {
+      throw new AppError(403, 'FORBIDDEN', 'This operator role cannot view orders.');
+    }
+    if (!uuid(req.params.orderId) || Object.keys(req.query).length) {
+      throw new AppError(400, 'VALIDATION_FAILED', 'A valid order ID is required.');
+    }
+    if (!db) throw new AppError(503, 'COMMERCE_UNAVAILABLE', 'Commerce storage is not connected.');
+    let order;
+    try {
+      order = await readOperatorOrder(db, {
+        orderId: req.params.orderId.toLowerCase(), includeDelivery: req.operator.roles.includes('fulfilment'),
+      });
+    } catch { throw new AppError(503, 'COMMERCE_UNAVAILABLE', 'The order could not be loaded.'); }
+    if (!order) throw new AppError(404, 'NOT_FOUND', 'Order not found.');
+    res.json(order);
+  });
 
   function action(role, fields, operation, validate, map) {
     return async (req, res) => {

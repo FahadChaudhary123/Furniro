@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadClient, verifyAccess } from './auth.js';
+import OrderLookup from './OrderLookup.jsx';
 
 const inputClass = 'mt-2 block w-full rounded-lg border border-stone-400 bg-white px-3 py-3 text-stone-950 focus:outline-none focus:ring-2 focus:ring-stone-700';
 const buttonClass = 'rounded-lg bg-stone-900 px-5 py-3 font-semibold text-white hover:bg-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-900 disabled:opacity-50';
@@ -112,7 +113,7 @@ export default function App() {
         </form>}
         {stage === 'verify' && <button className={`${buttonClass} mt-6`} disabled={busy} onClick={() => run(access)}>Retry access check</button>}
         {stage === 'expired' && <p role="status" className="mt-6">Your session expired. Sign out and sign in again.</p>}
-        {stage === 'ready' && <div className="mt-6 space-y-4"><p role="status">You are signed in.</p><h2 className="font-semibold">Assigned roles</h2><ul className="list-inside list-disc">{operator.roles.map(role => <li key={role}>{role}</li>)}</ul><p className="text-sm text-stone-600">Order management screens are not available yet.</p></div>}
+        {stage === 'ready' && <div className="mt-6 space-y-4"><p role="status">You are signed in.</p><h2 className="font-semibold">Assigned roles</h2><ul className="list-inside list-disc">{operator.roles.map(role => <li key={role}>{role}</li>)}</ul><OrderLookup client={client.current} /></div>}
         {!['loading', 'login', 'disabled', 'unavailable'].includes(stage) && <button className="mt-6 rounded px-2 py-2 font-medium underline focus-visible:outline disabled:opacity-50" disabled={busy} onClick={signOut}>Sign out</button>}
       </section>
       <p className="mt-6 text-center text-sm text-stone-600">For your security, reloading this page ends this local session.</p>

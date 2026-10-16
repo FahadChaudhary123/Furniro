@@ -101,3 +101,71 @@ test('login form is accessible and provider outages allow retry', async ({ page 
   await expect(page.getByRole('alert')).toContainText('Unable to sign in');
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeEnabled();
 });
+
+const orderId = '33333333-3333-4333-8333-333333333333';
+const savedOrder = {
+  order_id: orderId, currency: 'PKR', payment_method: 'cod', status: 'delivered',
+  created_at: '2026-10-15T10:00:00Z', subtotal_minor: 2000, discount_minor: 0,
+  shipping_minor: 125, tax_minor: 0, total_minor: 2125,
+  items: [{ line_number: 1, product_slug: 'test-chair', product_name: 'Saved test chair', quantity: 2, unit_price_minor: 1000, line_total_minor: 2000 }],
+  delivery: { recipient_name: 'Synthetic buyer', phone: '+92 300 0000000', address_line1: 'Test street', address_line2: '', city: 'Lahore', postal_code: '', country: 'PK' },
+};
+async function findOrder(page) {
+  await page.getByLabel('Order ID', { exact: true }).fill(orderId);
+  await page.getByRole('button', { name: 'Find order', exact: true }).click();
+}
+test('order lookup renders stored details accessibly and clears them on sign-out', async ({ page }) => {
+  await mock(page);
+  await page.route('**/api/operator/orders/*', async route => {
+    expect(route.request().headers().authorization).toMatch(/^Bearer /);
+    await route.fulfill({ json: savedOrder });
+  });
+  await login(page); await code(page); await findOrder(page);
+  await expect(page.getByText('Saved test chair')).toBeVisible();
+  await expect(page.getByText('Synthetic buyer')).toBeVisible();
+  await expect(page.getByText('PKR 21.25', { exact: true })).toBeVisible();
+  await expect(page.getByText('Delivered', { exact: true })).toBeVisible();
+  await expect(page.getByText(/does not confirm payment/)).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect(page.url()).not.toContain(orderId);
+  expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
+});
+test('order lookup hides restricted delivery and clears stale data on errors', async ({ page }) => {
+  await mock(page);
+  let status = 200;
+  await page.route('**/api/operator/orders/*', route => route.fulfill({ status, json: status === 200 ? { ...savedOrder, delivery: null } : { error: { code: 'NOT_FOUND' } } }));
+  await login(page); await code(page); await findOrder(page);
+  await expect(page.getByText('Saved test chair')).toBeVisible();
+  await expect(page.getByText(/restricted to the fulfilment role/)).toBeVisible();
+  await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
+  for (const [value, message] of [[404, 'No order was found'], [503, 'Order lookup is unavailable'], [403, 'Access denied'], [401, 'Your session ended'], [429, 'Too many requests']]) {
+    status = value; await findOrder(page);
+    await expect(page.getByRole('alert')).toContainText(message);
+    await expect(page.getByText('Saved test chair')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Find order', exact: true })).toBeEnabled();
+  }
+});
+test('order lookup validates IDs before sending a request and supports network retries', async ({ page }) => {
+  await mock(page);
+  let calls = 0;
+  await page.route('**/api/operator/orders/*', route => { calls++; return route.abort(); });
+  await login(page); await code(page);
+  await page.getByLabel('Order ID', { exact: true }).fill('invalid');
+  await page.getByRole('button', { name: 'Find order', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('valid order ID');
+  expect(calls).toBe(0);
+  await findOrder(page);
+  await expect(page.getByRole('alert')).toContainText('Check your connection');
+  expect(calls).toBe(1);
+});
+test('expiry removes loaded order and customer details', async ({ page }) => {
+  await page.clock.install(); await mock(page);
+  await page.route('**/api/operator/orders/*', route => route.fulfill({ json: savedOrder }));
+  await login(page); await code(page); await findOrder(page);
+  await expect(page.getByText('Synthetic buyer')).toBeVisible();
+  await page.clock.fastForward(3601000);
+  await expect(page.getByText(/Your session expired/)).toBeVisible();
+  await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
+});

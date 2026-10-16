@@ -35,6 +35,10 @@ checkout. Opt-in operator API access verifies Supabase tokens, MFA and private s
 see [operator access](docs/runbooks/operator-access.md). It is disabled by default, and
 protected order actions require a configured transaction adapter. Customer accounts are not implemented. The separate `Operator/` sign-in app keeps sessions
 in memory and requires a fresh login after reload or token expiry.
+Protected exact-ID order lookup requires a current MFA session and an assigned finance or
+fulfilment role; delivery details are returned only for fulfilment. Results are held in
+browser memory and cleared on a new lookup, sign-out or expiry. Production storage remains
+disconnected; live permissions and read-access auditing are still release gates.
 The contact and newsletter forms are disabled because there is no receiving endpoint.
 
 The guest cart holds product slugs and quantities in the visitor's browser. The API also

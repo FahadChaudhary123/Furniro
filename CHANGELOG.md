@@ -14,6 +14,10 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+- Added protected operator order lookup with saved items, integer-money totals and
+  fulfilment status. Delivery details require the fulfilment role; finance-only views
+  omit customer details. Browser tests cover failures and clearing details on sign-out/expiry.
+
 ### Added: operator sign-in (2026-10-15)
 
 - Separate Operator app: password login, TOTP setup/verification, server role checks, sign-out and expiry locking with memory-only sessions.

@@ -59,6 +59,51 @@ it('publishes only safe sign-in configuration without authentication', async () 
   expect(fixture.calls).toEqual([]);
 });
 
+it('reads saved order details and restricts delivery to fulfilment operators', async () => {
+  const orderId = await order();
+  await start();
+  const response = await call(`/orders/${orderId}`);
+  expect(response.status).toBe(200);
+  expect(response.headers.get('cache-control')).toBe('no-store');
+  const result = await response.json();
+  expect(result).toMatchObject({ order_id: orderId, currency: 'PKR', status: 'on_hold', total_minor: 2000,
+    delivery: { recipient_name: 'Synthetic buyer', city: 'Lahore' },
+    items: [{ product_name: 'Synthetic chair', quantity: 2, unit_price_minor: 1000, line_total_minor: 2000 }] });
+  expect(result).not.toHaveProperty('request_hash');
+  expect(result).not.toHaveProperty('idempotency_key');
+  fixture.settings.access[fixture.actorId] = ['finance'];
+  const finance = await (await call(`/orders/${orderId}`)).json();
+  expect(finance.delivery).toBeNull();
+  expect(JSON.stringify(finance)).not.toContain('Synthetic buyer');
+  expect(finance.items).toEqual(result.items);
+  expect(JSON.stringify(logger.info.mock.calls)).not.toContain(orderId);
+});
+
+it('protects order reads before lookup and rejects malformed or missing orders', async () => {
+  await start();
+  for (const [token, status] of [[null, 401], [fixture.token({ sub: randomUUID() }), 403], [fixture.token({ aal: 'aal1' }), 403]]) {
+    expect((await call('/orders/not-an-id', { token })).status).toBe(status);
+  }
+  expect((await call('/orders/not-an-id')).status).toBe(400);
+  expect((await call(`/orders/${randomUUID()}?include_delivery=true`)).status).toBe(400);
+  expect((await call(`/orders/${randomUUID()}`)).status).toBe(404);
+});
+
+it('returns an unavailable read rather than an empty order when storage is absent', async () => {
+  await start({ commerceDb: null });
+  const response = await call(`/orders/${randomUUID()}`);
+  expect(response.status).toBe(503);
+  expect((await response.json()).error.code).toBe('COMMERCE_UNAVAILABLE');
+});
+
+it('redacts order read storage failures', async () => {
+  await start({ commerceDb: { query: async () => { throw new Error('synthetic-private-read-detail'); } } });
+  const response = await call(`/orders/${randomUUID()}`);
+  expect(response.status).toBe(503);
+  expect(await response.text()).not.toContain('synthetic-private-read-detail');
+  expect(JSON.stringify(logger.error.mock.calls)).not.toContain('synthetic-private-read-detail');
+});
+
 it('returns a minimal non-cacheable operator session after verified MFA', async () => {
   await start();
   const response = await call('/session');

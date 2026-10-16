@@ -11,6 +11,11 @@ shape; those explain how it was arrived at.
 
 ## Shape
 
+The Operator app's order view calls `GET /api/operator/orders/:id`. Backoffice authenticates
+the caller and delegates to the orders module's public read interface. One SQL statement
+reads the saved order/items/delivery snapshot; delivery is selected only for fulfilment
+roles. No catalogue repricing, cross-module table reads or production connection is added.
+
 Three independently deployable units in one repository. `Operator/` is a separate React/Vite
 application for operator sign-in and TOTP MFA; it calls Supabase Auth and the protected API.
 It is never imported into the storefront bundle. The storefront/API path is:

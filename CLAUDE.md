@@ -70,6 +70,8 @@ the public bundle as a string literal. There is no way to un-publish it after a 
 and `POST /api/client-errors` — the only unauthenticated write. Protected operator routes
 also exist under `/api/operator`: session, order cancellation, fulfilment and COD collection.
 The public read-only `/api/operator/auth-config` returns safe sign-in configuration.
+Protected `GET /api/operator/orders/:id` returns saved order details; only fulfilment roles
+receive delivery information. The separate Operator app provides an exact-ID lookup screen.
 They require verified MFA/roles; actions need a configured commerce transaction adapter.
 
 **The cart never stores a price.** `{slug, quantity}` only; line detail is re-read from the

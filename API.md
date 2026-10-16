@@ -433,6 +433,7 @@ refresh tokens are created. Limit: 60 requests/minute/IP, in addition to the gen
 | Endpoint | Role | JSON body |
 |---|---|---|
 | `GET /api/operator/session` | Any assigned operator | None; returns `{operator_id, roles}` |
+| `GET /api/operator/orders/:id` | `fulfilment` or `finance` | None; exact UUID lookup, no query parameters |
 | `POST /api/operator/orders/:id/cancel` | `fulfilment` | `{}` |
 | `POST /api/operator/orders/:id/fulfilment` | `fulfilment` | `{target_status}`: allocated, despatched or delivered |
 | `POST /api/operator/orders/:id/collections` | `finance` | `{amount_minor, receipt_reference, idempotency_key}` |
@@ -444,6 +445,15 @@ role or `MFA_REQUIRED`; 400 invalid input; 404 missing order; 409 state/retry co
 503 Auth unavailable/unconfigured or commerce storage unavailable. Authorization runs
 before input/order lookup. Normal startup supplies no commerce adapter, so authorized
 actions return 503 until a production transaction adapter is deliberately connected.
+
+Order lookup returns `{order_id, currency, payment_method, status, created_at,
+subtotal_minor, discount_minor, shipping_minor, tax_minor, total_minor, items, delivery}`.
+Items contain saved line numbers, product slugs/names, quantities, unit prices and line
+totals in integer minor units. The response excludes retry keys and request hashes.
+Delivery contains recipient name, phone, address lines, city, postal code and country
+only for `fulfilment`; finance-only callers receive `delivery:null`. Query parameters
+cannot override this permission. Missing orders return 404; disconnected storage returns
+503, never an empty success. Fulfilment status does not imply payment or COD collection.
 
 ---
 

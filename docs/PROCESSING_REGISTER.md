@@ -61,6 +61,15 @@ local/session storage or URLs. Password/code fields clear on submit; setup keys 
 verification or sign-out. Reload discards the local session; token expiry locks the UI.
 The app has no analytics or credential logging. Provider auth-log retention still needs review.
 
+Operator order lookup (2026-10-16) reads one exact UUID through the protected API.
+Both finance and fulfilment may view order/item financial snapshots. Only fulfilment may
+receive recipient name, phone and delivery address; finance-only responses return no
+delivery data. The browser holds results in component memory, clears them before another
+lookup and removes them on sign-out/expiry. No browser URL navigation, persistent storage,
+bulk listing or export is provided. API responses are no-store; routine logs mask order paths.
+Live storage remains disconnected and verification uses synthetic buyers only. Read-access
+audit records, retention policy and production permissions remain launch requirements.
+
 Tokens/user records are held only for request processing. The roster is deployment
 configuration retained until changed. Existing action audit tables retain the verified
 operator UUID when a commerce adapter is connected. Routine request/error/rate-limit logs

@@ -225,8 +225,9 @@ requirement counts, module status, runbooks and changelog before declaring compl
 | Durable commerce database and migrations | Orders and checkout | Open; owned by Furniro under ADR 0015 |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-**Next implementation:** Milestone 2 database schema, migrations and transaction tests,
-then the guest COD order path in Milestone 3. Deployment is deferred at the user's request;
+**Next implementation:** Complete Milestone 3 operator controls on the existing protected
+COD endpoints, followed by production transaction-adapter and concurrency verification.
+Deployment is deferred at the user's request;
 Milestone 1 remains a release gate. Online payment follows COD implementation, and both
 methods must pass before public launch. Account-specific facts and approved trading data
 cannot be inferred from the sample catalogue.
@@ -236,3 +237,10 @@ with password login, TOTP enrolment/verification, server-authorized roles and si
 Sessions are memory-only with expiry locking. Public safe Auth configuration is supplied
 by the API. Synthetic browser tests cover these flows; live onboarding, access reviews,
 order management screens and production transaction integration remain open.
+
+**Progress (2026-10-16, operator order view):** Protected exact-ID lookup now returns saved
+order/item snapshots. Fulfilment operators may read delivery details; finance-only callers
+cannot. The separate app displays these records and handles missing/disconnected storage,
+denied access and session expiry. Local database and desktop/mobile browser tests use
+synthetic records. Order mutation controls, payment history, lists, live permissions,
+read-access auditing and production storage integration remain open.

@@ -357,6 +357,8 @@ async function main() {
   check('operator responses cannot be cached', operatorSession.headers.get('cache-control') === 'no-store');
   check('operator challenge uses Bearer authentication', operatorSession.headers.get('www-authenticate') === 'Bearer');
   check('operator session sets no cookie', !operatorSession.headers.get('set-cookie'));
+  const operatorOrder = await fetch(`${BASE}/api/operator/orders/00000000-0000-0000-0000-000000000001`);
+  check('operator order lookup rejects unauthenticated requests', operatorOrder.status === 401);
   for (const action of ['cancel', 'fulfilment', 'collections']) {
     const response = await fetch(`${BASE}/api/operator/orders/00000000-0000-0000-0000-000000000001/${action}`, {
       method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}',
