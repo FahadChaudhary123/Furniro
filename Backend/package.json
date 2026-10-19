@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
     "smoke": "node scripts/smoke.mjs",
     "smoke:deploy": "node scripts/deployment-smoke.mjs",
     "completeness": "node scripts/completeness.mjs",
@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",
-    "nodemon": "^3.1.11",
     "vitest": "^5.0.0"
   },
   "type": "module",

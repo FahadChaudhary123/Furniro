@@ -62,7 +62,7 @@ later. That is the trade this repo has chosen.
 
 ## Front end
 
-**Stack:** React 19, React Router 7, Vite 8 (beta), Tailwind CSS 3, `lucide-react` for
+**Stack:** React 19, React Router 7, Vite 8 (beta), Tailwind CSS 4, `lucide-react` for
 iconography. No animation library — see [Animation](#animation).
 
 `react-icons` was also removed: it was 83 MB installed and used in one file for three
@@ -118,13 +118,13 @@ through `shared/lib/usePageMeta`, driven by `shared/lib/routes.js`.
 
 ### Styling
 
-Tailwind utilities in JSX, configured over `./index.html` and `./src/**/*.{js,jsx}` in
-[tailwind.config.js](Frontend/tailwind.config.js). `theme.extend` is empty, so the brand
-gold `#B88E2F` appears as an arbitrary value (`text-[#B88E2F]`) at each call site. Lifting
-it to `theme.extend.colors.brand` would make it a single point of change.
+Tailwind 4 utilities in JSX, compiled with `@tailwindcss/postcss` from
+`src/index.css`. Source detection is automatic; the empty JavaScript configuration
+files were removed. Border-default compatibility rules preserve the v3 appearance.
+Custom marquee keyframes remain in the stylesheet.
 
-Keyframe animations that Tailwind 3 cannot express — the two marquee loops — live as plain
-CSS in [index.css](Frontend/src/index.css).
+The security-driven migration and browser baseline (Safari 16.4+, Chrome 111+,
+Firefox 128+) are recorded in [ADR 0016](docs/decisions/0016-remove-vulnerable-build-dependencies.md).
 
 ### Animation
 
@@ -258,7 +258,7 @@ catalogue migration. The API response shape can remain stable while the reposito
 | Repo layout | Monorepo, two npm roots, no workspace tool | Two `package.json` files with no shared code; a workspace tool would add config for no gain | Dependencies installed twice; no shared lint config |
 | Rendering | Client-side SPA | Simplest to build and host | Weak SEO and slow first paint — both matter for a storefront, and both point at SSR later |
 | Language | JavaScript, not TypeScript | Lower ceremony | `@types/react` is installed but inert; the product shape is enforced by nothing |
-| Styling | Tailwind utilities | Fast, no naming overhead | Long `className` strings; no design tokens while `theme.extend` is empty |
+| Styling | Tailwind utilities | Fast, no naming overhead | Long `className` strings; brand colors still use arbitrary values |
 | Auth | Opt-in Supabase operator verification with mandatory MFA | Private server roster separates fulfilment and finance; no user-metadata permissions | Operator sign-in UI built; live onboarding and customer identity remain open |
 
 ---

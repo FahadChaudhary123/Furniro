@@ -30,7 +30,7 @@ const Hero = () => {
 
       {/* Content */}
       <div className="relative z-10 h-full max-w-7xl mx-auto px-6 flex items-center justify-end">
-        <div className="bg-[#FDF1DF] p-8 md:p-12 rounded-lg max-w-lg shadow-sm">
+        <div className="bg-[#FDF1DF] p-8 md:p-12 rounded-lg max-w-lg shadow-xs">
           <span className="text-sm uppercase tracking-wide text-gray-600">
             New Era Collection
           </span>

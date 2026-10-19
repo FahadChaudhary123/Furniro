@@ -17,6 +17,15 @@ const addFirstProduct = async (page) => {
 };
 
 test.describe('cart', () => {
+  test('touch users can add from a card without hovering', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'Touch-device behavior');
+    await page.goto('/shop');
+    const button = page.locator('.group').first().getByRole('button', { name: /Add .* to cart/ });
+    await expect(button).toBeVisible();
+    await expect(button).toHaveCSS('pointer-events', 'auto');
+    await button.tap();
+    await expect(page.getByTestId('cart-badge')).toHaveText('1');
+  });
   test('starts empty with no badge', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('cart-badge')).toHaveCount(0);

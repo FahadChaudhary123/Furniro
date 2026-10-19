@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { loadClient, verifyAccess } from './auth.js';
 import OrderLookup from './OrderLookup.jsx';
 
-const inputClass = 'mt-2 block w-full rounded-lg border border-stone-400 bg-white px-3 py-3 text-stone-950 focus:outline-none focus:ring-2 focus:ring-stone-700';
-const buttonClass = 'rounded-lg bg-stone-900 px-5 py-3 font-semibold text-white hover:bg-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-900 disabled:opacity-50';
+const inputClass = 'mt-2 block w-full rounded-lg border border-stone-400 bg-white px-3 py-3 text-stone-950 focus:outline-hidden focus:ring-2 focus:ring-stone-700';
+const buttonClass = 'rounded-lg bg-stone-900 px-5 py-3 font-semibold text-white hover:bg-stone-700 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-stone-900 disabled:opacity-50';
 
 export default function App() {
   const client = useRef(null);
@@ -91,7 +91,7 @@ export default function App() {
   return <main className="min-h-screen bg-stone-100 px-5 py-12 text-stone-900 sm:py-20">
     <div className="mx-auto max-w-md">
       <p className="mb-8 text-3xl font-bold tracking-tight">Furniro<span className="ml-3 text-sm font-normal text-stone-600">Operations</span></p>
-      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm sm:p-8" aria-busy={busy}>
+      <section className="rounded-2xl border border-stone-200 bg-white p-6 shadow-xs sm:p-8" aria-busy={busy}>
         <h1 className="text-2xl font-semibold">{stage === 'ready' ? 'Operator access verified' : 'Operator sign in'}</h1>
         <p className="mt-3 text-sm leading-6 text-stone-600">Use your assigned account and an authenticator app. Access is limited to your approved roles.</p>
         {error && <p role="alert" className="mt-5 rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
@@ -114,7 +114,7 @@ export default function App() {
         {stage === 'verify' && <button className={`${buttonClass} mt-6`} disabled={busy} onClick={() => run(access)}>Retry access check</button>}
         {stage === 'expired' && <p role="status" className="mt-6">Your session expired. Sign out and sign in again.</p>}
         {stage === 'ready' && <div className="mt-6 space-y-4"><p role="status">You are signed in.</p><h2 className="font-semibold">Assigned roles</h2><ul className="list-inside list-disc">{operator.roles.map(role => <li key={role}>{role}</li>)}</ul><OrderLookup client={client.current} /></div>}
-        {!['loading', 'login', 'disabled', 'unavailable'].includes(stage) && <button className="mt-6 rounded px-2 py-2 font-medium underline focus-visible:outline disabled:opacity-50" disabled={busy} onClick={signOut}>Sign out</button>}
+        {!['loading', 'login', 'disabled', 'unavailable'].includes(stage) && <button className="mt-6 rounded-sm px-2 py-2 font-medium underline focus-visible:outline-solid disabled:opacity-50" disabled={busy} onClick={signOut}>Sign out</button>}
       </section>
       <p className="mt-6 text-center text-sm text-stone-600">For your security, reloading this page ends this local session.</p>
     </div>

@@ -14,6 +14,18 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Security: dependency audit fixes (2026-10-17)
+
+- Migrated storefront and operator styling to Tailwind 4.3.3 and its PostCSS plugin,
+  removing the unpatched `braces` dependency chain. Updated renamed utilities and
+  retained border compatibility styles; Vite stays pinned to 8.0.0-beta.13.
+- Updated Sharp and vulnerable transitive dependencies in all three lockfiles.
+- Replaced nodemon with Node's built-in watch mode for backend development.
+- Kept the high/critical GitHub audit gate enabled. See ADR 0016 for migration details
+  and the Tailwind 4 browser requirements.
+- Kept product-card cart actions visible and tappable on touch devices, where Tailwind 4
+  intentionally does not apply hover styles.
+
 - Added protected operator order lookup with saved items, integer-money totals and
   fulfilment status. Delivery details require the fulfilment role; finance-only views
   omit customer details. Browser tests cover failures and clearing details on sign-out/expiry.

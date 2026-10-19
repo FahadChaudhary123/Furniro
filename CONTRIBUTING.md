@@ -171,7 +171,7 @@ list and React reuses the wrong DOM node.
 
 ### Styling
 
-Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind 3 cannot
+Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind 4 cannot
 express — the marquee keyframes are the existing precedent.
 
 The brand gold is `#B88E2F`. It is currently written as an arbitrary value at each call

@@ -55,11 +55,11 @@ const ProductsSection = () => {
               </Link>
 
               {/* Hover Overlay */}
-              <div className="pointer-events-none absolute inset-0 bg-black/50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition">
+              <div className="pointer-events-none absolute inset-0 bg-black/50 flex flex-col justify-center items-center opacity-0 [@media(hover:none)]:opacity-100 [@media(hover:none)]:static [@media(hover:none)]:pt-3 [@media(hover:none)]:bg-transparent [@media(hover:none)]:justify-end [@media(hover:none)]:pb-3 group-hover:opacity-100 group-focus-within:opacity-100 transition">
                 <button
                   onClick={() => add(item.slug)}
                   aria-label={`Add ${item.name} to cart`}
-                  className="pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold"
+                  className="pointer-events-none [@media(hover:none)]:pointer-events-auto [@media(hover:none)]:text-gray-900 [@media(hover:none)]:mb-0 group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-[#B88E2F] px-6 py-2 mb-4 font-semibold"
                 >
                   Add to cart
                 </button>

@@ -50,7 +50,7 @@ const Footer = () => {
               aria-label="Email address for the newsletter"
               aria-describedby="newsletter-unavailable"
               placeholder="Enter Your Email Address"
-              className="flex-1 px-4 py-1 outline-none text-sm text-gray-700 bg-transparent"
+              className="flex-1 px-4 py-1 outline-hidden text-sm text-gray-700 bg-transparent"
             />
             <button disabled className="text-sm font-bold px-4">
               SUBSCRIBE

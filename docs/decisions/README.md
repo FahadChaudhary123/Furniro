@@ -38,6 +38,7 @@ Not here: how something works (that is the code), what changed (that is
 | [0013](0013-offer-cod-and-online-payment-at-launch.md) | Offer COD and online payment at launch | 2026-10-11 | Accepted |
 | [0014](0014-select-shopify-for-commerce.md) | Select Shopify for commerce; evaluate Safepay for PKR payments | 2026-10-11 | Superseded by 0015 |
 | [0015](0015-build-commerce-in-furniro.md) | Build commerce in Furniro | 2026-10-12 | Accepted |
+| [0016](0016-remove-vulnerable-build-dependencies.md) | Remove vulnerable build dependencies | 2026-10-17 | Accepted |
 
 ## A caveat on these dates
 

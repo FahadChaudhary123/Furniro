@@ -16,9 +16,9 @@ import Picture from "../shared/ui/Picture";
 
 const PostSkeleton = () => (
   <div className="bg-white rounded-xl p-6 space-y-6 animate-pulse" aria-busy="true">
-    <div className="h-8 w-2/3 bg-gray-200 rounded" />
-    <div className="h-4 w-full bg-gray-200 rounded" />
-    <div className="h-4 w-5/6 bg-gray-200 rounded" />
+    <div className="h-8 w-2/3 bg-gray-200 rounded-sm" />
+    <div className="h-4 w-full bg-gray-200 rounded-sm" />
+    <div className="h-4 w-5/6 bg-gray-200 rounded-sm" />
     <div className="h-64 w-full bg-gray-200 rounded-xl" />
   </div>
 );
@@ -77,7 +77,7 @@ const BlogSection = () => {
             posts.map((post) => (
               <article
                 key={post.id}
-                className="bg-white rounded-xl overflow-hidden shadow-sm space-y-6 p-6"
+                className="bg-white rounded-xl overflow-hidden shadow-xs space-y-6 p-6"
               >
                 <h2 className="text-3xl font-semibold">
                   <Link to={`/blog/${post.slug}`} state={{ blogReturnTo }} className="hover:text-[#B88E2F] transition">
@@ -121,10 +121,10 @@ const BlogSection = () => {
           {!error && !loading && !pageOutOfRange && meta?.total_pages > 1 && (
             <nav aria-label="Blog pages" className="flex justify-center gap-4">
               <button disabled={page <= 1} onClick={() => update({ page: page - 1 === 1 ? null : page - 1 })}
-                className="rounded border px-4 py-2 disabled:opacity-50">Previous</button>
+                className="rounded-sm border px-4 py-2 disabled:opacity-50">Previous</button>
               <span className="self-center">Page {page} of {meta.total_pages}</span>
               <button disabled={page >= meta.total_pages} onClick={() => update({ page: page + 1 })}
-                className="rounded border px-4 py-2 disabled:opacity-50">Next</button>
+                className="rounded-sm border px-4 py-2 disabled:opacity-50">Next</button>
             </nav>
           )}
         </div>
@@ -132,7 +132,7 @@ const BlogSection = () => {
         {/* ===== RIGHT SIDE - Sidebar ===== */}
         <div className="space-y-10">
           {/* Search and category filters share URL state for bookmarkable blog views. */}
-          <div className="bg-white p-5 rounded-xl shadow-sm">
+          <div className="bg-white p-5 rounded-xl shadow-xs">
             <form role="search" className="relative" onSubmit={(event) => {
               event.preventDefault();
               update({ q: new FormData(event.currentTarget).get("q")?.toString().trim() || null });
@@ -145,17 +145,17 @@ const BlogSection = () => {
                 key={q}
                 defaultValue={q}
                 placeholder="Search..."
-                className="w-full border border-gray-300 rounded-lg py-2 px-4 pr-10 focus:outline-none focus:ring-1 focus:ring-black"
+                className="w-full border border-gray-300 rounded-lg py-2 px-4 pr-10 focus:outline-hidden focus:ring-1 focus:ring-black"
               />
               <button type="submit" aria-label="Search blog posts"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-gray-700 hover:bg-gray-100">
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-sm p-1 text-gray-700 hover:bg-gray-100">
                 <Search size={18} aria-hidden="true" />
               </button>
             </form>
           </div>
 
           {/* Categories — counts derived from the posts, so they cannot be wrong */}
-          <div className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="bg-white p-6 rounded-xl shadow-xs">
             <h3 className="text-lg font-semibold mb-6">Categories</h3>
             {tags.length === 0 ? (
               <p className="text-sm text-gray-600">No categories yet.</p>
@@ -176,7 +176,7 @@ const BlogSection = () => {
           </div>
 
           {/* Recent posts — real posts, not five copies of a placeholder */}
-          <div className="bg-white p-6 rounded-xl shadow-sm">
+          <div className="bg-white p-6 rounded-xl shadow-xs">
             <h3 className="text-lg font-semibold mb-6">Recent Posts</h3>
             {recent.length === 0 ? (
               <p className="text-sm text-gray-600">Nothing published yet.</p>
@@ -191,7 +191,7 @@ const BlogSection = () => {
                   avif={post.image.avif}
                         alt=""
                         loading="lazy"
-                        className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                        className="w-20 h-20 object-cover rounded-lg shrink-0"
                       />
                       <div>
                         <p className="text-sm font-medium leading-snug group-hover:text-[#B88E2F] transition">

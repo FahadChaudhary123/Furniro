@@ -94,10 +94,10 @@ const ProductDetail = () => {
           <div className="grid md:grid-cols-2 gap-12 animate-pulse" aria-busy="true">
             <div className="h-96 bg-gray-200 rounded-lg" />
             <div className="space-y-4 pt-6">
-              <div className="h-8 w-2/3 bg-gray-200 rounded" />
-              <div className="h-6 w-1/3 bg-gray-200 rounded" />
-              <div className="h-4 w-full bg-gray-200 rounded" />
-              <div className="h-4 w-5/6 bg-gray-200 rounded" />
+              <div className="h-8 w-2/3 bg-gray-200 rounded-sm" />
+              <div className="h-6 w-1/3 bg-gray-200 rounded-sm" />
+              <div className="h-4 w-full bg-gray-200 rounded-sm" />
+              <div className="h-4 w-5/6 bg-gray-200 rounded-sm" />
             </div>
           </div>
         ) : (
@@ -172,7 +172,7 @@ const ProductDetail = () => {
                   <label htmlFor="product-quantity" className="block text-sm text-gray-700">Quantity</label>
                   <input id="product-quantity" name="quantity" type="number" min="1" max={remaining}
                     step="1" defaultValue="1" disabled={remaining === 0}
-                    className="mt-1 w-20 rounded border border-gray-300 px-3 py-2 disabled:opacity-50" />
+                    className="mt-1 w-20 rounded-sm border border-gray-300 px-3 py-2 disabled:opacity-50" />
                 </div>
                 <button type="submit" disabled={remaining === 0}
                   className="border border-[#B88E2F] text-[#B88E2F] px-10 py-3 font-semibold hover:bg-[#B88E2F] hover:text-white transition disabled:cursor-not-allowed disabled:opacity-50">

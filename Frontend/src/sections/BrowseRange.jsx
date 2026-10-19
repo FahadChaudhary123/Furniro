@@ -75,7 +75,7 @@ const BrowseRange = () => {
               to={categorySlugs.has(cat.categoryName)
                 ? `/shop?category=${categorySlugs.get(cat.categoryName)}`
                 : "/shop"}
-              className="group block rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B88E2F]"
+              className="group block rounded-xl focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B88E2F]"
               onMouseEnter={() => {
                 setHoveredIndex(index);
                 setImageIndex(0);

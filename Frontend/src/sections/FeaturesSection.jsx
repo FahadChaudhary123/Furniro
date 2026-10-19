@@ -27,7 +27,7 @@ const FeaturesSection = () => {
   return (
     <section className="bg-[#F9F1E7] py-20">
       {/* Wider container than product grid */}
-      <div className="max-w-screen-xl mx-auto px-8 lg:px-16">
+      <div className="max-w-(--breakpoint-xl) mx-auto px-8 lg:px-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-14">
           {features.map((feature, index) => (
             <div

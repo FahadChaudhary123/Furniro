@@ -10,7 +10,7 @@ const ProductCard = ({ product, shopReturnTo }) => {
   const { add } = useCart();
 
   return (
-    <div className="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
+    <div className="group relative bg-white rounded-lg overflow-hidden shadow-xs hover:shadow-md transition">
       {/* Badge — derived from price and age, never stored. See modules/catalogue/lib/badge.js */}
       {badge && (
         <span
@@ -45,11 +45,11 @@ const ProductCard = ({ product, shopReturnTo }) => {
         </Link>
 
         {/* Hover actions */}
-        <div className="pointer-events-none absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition flex flex-col items-center justify-center gap-2">
+        <div className="pointer-events-none absolute inset-0 bg-black/40 opacity-0 [@media(hover:none)]:opacity-100 [@media(hover:none)]:bg-transparent [@media(hover:none)]:justify-end [@media(hover:none)]:pb-3 group-hover:opacity-100 group-focus-within:opacity-100 transition flex flex-col items-center justify-center gap-2">
           <button
             onClick={() => add(product.slug)}
             aria-label={`Add ${product.name} to cart`}
-            className="pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-sm px-4 py-2 rounded hover:bg-gray-100"
+            className="pointer-events-none [@media(hover:none)]:pointer-events-auto group-hover:pointer-events-auto group-focus-within:pointer-events-auto bg-white text-sm px-4 py-2 rounded-sm hover:bg-gray-100"
           >
             Add to cart
           </button>

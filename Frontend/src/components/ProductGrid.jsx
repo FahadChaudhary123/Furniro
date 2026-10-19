@@ -103,13 +103,13 @@ const ProductGrid = () => {
             key={q}
             defaultValue={q}
             placeholder="Search products…"
-            className="w-full border border-gray-300 rounded-lg py-2 pl-4 pr-10 focus:outline-none focus:ring-1 focus:ring-[#B88E2F]"
+            className="w-full border border-gray-300 rounded-lg py-2 pl-4 pr-10 focus:outline-hidden focus:ring-1 focus:ring-[#B88E2F]"
           />
           <Search size={18} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600" />
         </div>
         <button
           type="submit"
-          className="bg-[#B88E2F] text-white px-6 py-2 rounded font-medium hover:bg-[#a57f28] transition"
+          className="bg-[#B88E2F] text-white px-6 py-2 rounded-sm font-medium hover:bg-[#a57f28] transition"
         >
           Search
         </button>
@@ -135,15 +135,15 @@ const ProductGrid = () => {
           <label htmlFor="min-price" className="block text-sm text-gray-700">Minimum price</label>
           <input id="min-price" name="min_price" type="text" inputMode="decimal"
             key={`min-${minPrice}`} defaultValue={displayPrice(minPrice)}
-            className="mt-1 w-36 rounded border border-gray-300 px-3 py-2" placeholder="0" />
+            className="mt-1 w-36 rounded-sm border border-gray-300 px-3 py-2" placeholder="0" />
         </div>
         <div>
           <label htmlFor="max-price" className="block text-sm text-gray-700">Maximum price</label>
           <input id="max-price" name="max_price" type="text" inputMode="decimal"
             key={`max-${maxPrice}`} defaultValue={displayPrice(maxPrice)}
-            className="mt-1 w-36 rounded border border-gray-300 px-3 py-2" placeholder="Any" />
+            className="mt-1 w-36 rounded-sm border border-gray-300 px-3 py-2" placeholder="Any" />
         </div>
-        <button type="submit" className="rounded bg-[#B88E2F] px-5 py-2 font-medium text-gray-900 hover:bg-[#a57f28]">
+        <button type="submit" className="rounded-sm bg-[#B88E2F] px-5 py-2 font-medium text-gray-900 hover:bg-[#a57f28]">
           Apply price
         </button>
         {priceError && <p role="alert" className="w-full text-sm text-red-700">{priceError}</p>}
@@ -214,7 +214,7 @@ const ProductGrid = () => {
             value={sort}
             onChange={(e) => update({ sort: e.target.value })}
             disabled={Boolean(error)}
-            className="border px-3 py-2 text-sm rounded disabled:opacity-50"
+            className="border px-3 py-2 text-sm rounded-sm disabled:opacity-50"
           >
             {Object.entries(SORT_OPTIONS).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
@@ -227,7 +227,7 @@ const ProductGrid = () => {
             value={limit}
             onChange={(e) => update({ limit: Number(e.target.value) })}
             disabled={Boolean(error)}
-            className="border px-3 py-2 text-sm rounded disabled:opacity-50"
+            className="border px-3 py-2 text-sm rounded-sm disabled:opacity-50"
           >
             {PAGE_SIZE_OPTIONS.map((n) => (
               <option key={n} value={n}>Show {n}</option>
@@ -309,7 +309,7 @@ const ProductGrid = () => {
           <button
             onClick={() => update({ page: Math.min(page + 1, totalPages) }, { resetPage: false })}
             disabled={page === totalPages}
-            className="px-4 py-2 border rounded hover:bg-gray-100 disabled:opacity-50"
+            className="px-4 py-2 border rounded-sm hover:bg-gray-100 disabled:opacity-50"
           >
             Next
           </button>

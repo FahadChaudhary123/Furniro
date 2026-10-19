@@ -144,6 +144,8 @@ Dependencies flow `pages` → `sections` → `components` → `modules`, never u
   the component body; do not replicate that.
 - Stable `key` on every mapped element, never the array index.
 - Tailwind utilities in JSX. Plain CSS in `index.css` only for what Tailwind cannot express.
+- Both UI apps use Tailwind 4 with `@tailwindcss/postcss`; configuration lives in CSS.
+  Keep the security rationale and browser baseline in ADR 0016 in mind when changing tooling.
 - Brand gold is `#B88E2F`, hover `#a57f28`. There is exactly one of each — the `#B88A2B`
   and `#a57924` near-duplicates were removed. Do not introduce a third.
 - Icons come from `lucide-react`. There is no animation library; use CSS keyframes in `index.css`.

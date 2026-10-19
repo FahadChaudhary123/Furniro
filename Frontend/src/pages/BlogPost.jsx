@@ -64,10 +64,10 @@ const BlogPost = () => {
           </div>
         ) : loading ? (
           <div className="space-y-6 animate-pulse" aria-busy="true">
-            <div className="h-10 w-3/4 bg-gray-200 rounded" />
+            <div className="h-10 w-3/4 bg-gray-200 rounded-sm" />
             <div className="h-64 w-full bg-gray-200 rounded-xl" />
-            <div className="h-4 w-full bg-gray-200 rounded" />
-            <div className="h-4 w-5/6 bg-gray-200 rounded" />
+            <div className="h-4 w-full bg-gray-200 rounded-sm" />
+            <div className="h-4 w-5/6 bg-gray-200 rounded-sm" />
           </div>
         ) : (
           <article>

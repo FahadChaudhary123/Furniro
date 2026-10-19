@@ -35,8 +35,8 @@ export default function OrderLookup({ client }) {
     <h2 id="order-lookup-title" className="text-xl font-semibold">Find an order</h2>
     <p className="mt-2 text-sm text-stone-600">Enter the full order ID to view its saved details.</p>
     <form onSubmit={lookup} className="mt-4 space-y-3">
-      <label className="block text-sm font-medium">Order ID<input name="order_id" autoComplete="off" spellCheck={false} required maxLength={36} disabled={busy} className="mt-2 block w-full rounded-lg border border-stone-400 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-stone-700" /></label>
-      <button disabled={busy} className="rounded-lg bg-stone-900 px-5 py-3 font-semibold text-white hover:bg-stone-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 disabled:opacity-50">{busy ? 'Loading order…' : 'Find order'}</button>
+      <label className="block text-sm font-medium">Order ID<input name="order_id" autoComplete="off" spellCheck={false} required maxLength={36} disabled={busy} className="mt-2 block w-full rounded-lg border border-stone-400 px-3 py-3 focus:outline-hidden focus:ring-2 focus:ring-stone-700" /></label>
+      <button disabled={busy} className="rounded-lg bg-stone-900 px-5 py-3 font-semibold text-white hover:bg-stone-700 focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-offset-4 disabled:opacity-50">{busy ? 'Loading order…' : 'Find order'}</button>
     </form>
     {busy && <p role="status" className="mt-4">Loading order details…</p>}
     {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
@@ -57,7 +57,7 @@ export default function OrderLookup({ client }) {
       </li>)}</ul>
       <dl className="grid grid-cols-2 gap-2 text-sm">{[['Subtotal', 'subtotal_minor'], ['Discount', 'discount_minor'], ['Shipping', 'shipping_minor'], ['Tax', 'tax_minor'], ['Total', 'total_minor']].map(([label, field]) => <div key={field} className="contents"><dt className={field === 'total_minor' ? 'font-bold' : ''}>{label}</dt><dd>{money(order[field], order.currency)}</dd></div>)}</dl>
       <h3 className="font-semibold">Delivery</h3>
-      {order.delivery ? <address className="break-words text-sm not-italic leading-6">
+      {order.delivery ? <address className="wrap-break-word text-sm not-italic leading-6">
         <p>{order.delivery.recipient_name}</p><p>{order.delivery.phone}</p>
         <p>{order.delivery.address_line1}</p>{order.delivery.address_line2 && <p>{order.delivery.address_line2}</p>}
         <p>{order.delivery.city} {order.delivery.postal_code}</p><p>{order.delivery.country}</p>

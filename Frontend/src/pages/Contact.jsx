@@ -80,27 +80,27 @@ const Contact = () => {
                 name="name"
                 aria-label="Your name"
                 placeholder="Your Name"
-                className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="border border-gray-300 rounded-md p-3 focus:outline-hidden focus:ring-2 focus:ring-yellow-500"
               />
               <input
                 type="email"
                 name="email"
                 aria-label="Email address"
                 placeholder="Email Address"
-                className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="border border-gray-300 rounded-md p-3 focus:outline-hidden focus:ring-2 focus:ring-yellow-500"
               />
               <input
                 type="text"
                 name="subject"
                 aria-label="Subject (optional)"
                 placeholder="Subject (optional)"
-                className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="border border-gray-300 rounded-md p-3 focus:outline-hidden focus:ring-2 focus:ring-yellow-500"
               />
               <textarea
                 name="message"
                 aria-label="Message"
                 placeholder="Message"
-                className="border border-gray-300 rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none h-32"
+                className="border border-gray-300 rounded-md p-3 focus:outline-hidden focus:ring-2 focus:ring-yellow-500 resize-none h-32"
               ></textarea>
               <button
                 type="submit"

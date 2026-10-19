@@ -29,7 +29,7 @@ const RouteFallback = () => (
   <div className="max-w-7xl mx-auto px-4 py-24" aria-busy="true" aria-live="polite">
     <span className="sr-only">Loading page…</span>
     <div className="animate-pulse space-y-6">
-      <div className="h-10 w-1/3 bg-gray-200 rounded" />
+      <div className="h-10 w-1/3 bg-gray-200 rounded-sm" />
       <div className="h-64 w-full bg-gray-200 rounded-lg" />
     </div>
   </div>

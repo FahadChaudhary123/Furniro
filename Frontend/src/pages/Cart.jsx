@@ -76,7 +76,7 @@ const Cart = () => {
                             webp={product.image.webp}
                             avif={product.image.avif}
                             alt=""
-                            className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                            className="w-16 h-16 object-cover rounded-lg shrink-0"
                           />
                           <Link
                             to={`/shop/${slug}`}
@@ -101,7 +101,7 @@ const Cart = () => {
                           max={MAX_LINE_QUANTITY}
                           value={quantity}
                           onChange={(e) => setQuantity(slug, Number(e.target.value))}
-                          className="w-16 border rounded px-2 py-1 text-center"
+                          className="w-16 border rounded-sm px-2 py-1 text-center"
                         />
                       </td>
                       <td className="block md:table-cell py-2 md:py-6 px-4 font-medium">
@@ -158,7 +158,7 @@ const Cart = () => {
               <button
                 disabled
                 title="Checkout is not available yet"
-                className="w-full border border-gray-300 text-gray-600 px-8 py-3 font-semibold rounded cursor-not-allowed"
+                className="w-full border border-gray-300 text-gray-600 px-8 py-3 font-semibold rounded-sm cursor-not-allowed"
               >
                 Checkout — coming soon
               </button>

@@ -103,7 +103,7 @@ const RoomsInspiration = () => {
           {/* NEXT ARROW */}
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow flex items-center justify-center text-xl hover:bg-gray-100"
+            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-xl hover:bg-gray-100"
           >
             →
           </button>
