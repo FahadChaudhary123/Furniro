@@ -169,3 +169,86 @@ test('expiry removes loaded order and customer details', async ({ page }) => {
   await expect(page.getByText(/Your session expired/)).toBeVisible();
   await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
 });
+
+test('fulfilment confirms each transition and refreshes saved state', async ({ page }) => {
+  await mock(page);
+  let status = 'on_hold'; const writes = [];
+  await page.route('**/api/operator/orders/**', async route => {
+    if (route.request().method() === 'POST') {
+      expect(route.request().headers().authorization).toMatch(/^Bearer /);
+      const body = route.request().postDataJSON(); writes.push(body);
+      status = body.target_status;
+      return route.fulfill({ json: { order_id: orderId, status, replayed: false } });
+    }
+    return route.fulfill({ json: { ...savedOrder, status } });
+  });
+  await login(page); await code(page); await findOrder(page);
+  for (const [label, value] of [['Allocated', 'allocated'], ['Despatched', 'despatched'], ['Delivered', 'delivered']]) {
+    await page.getByRole('button', { name: `Mark ${label}`, exact: true }).click();
+    expect(status).not.toBe(value);
+    await page.getByRole('button', { name: `Confirm ${label}`, exact: true }).click();
+    await expect(page.getByText('Order refreshed after the action.')).toBeVisible();
+    await expect(page.getByText(label, { exact: true })).toBeVisible();
+  }
+  expect(writes).toEqual([{ target_status: 'allocated' }, { target_status: 'despatched' }, { target_status: 'delivered' }]);
+  await expect(page.getByRole('region', { name: 'Order actions' })).toHaveCount(0);
+});
+test('cancellation can be dismissed and conflicts clear stale controls', async ({ page }) => {
+  await mock(page); let calls = 0;
+  await page.route('**/api/operator/orders/**', route => {
+    if (route.request().method() === 'POST') {
+      calls++; expect(route.request().url()).toContain('/cancel');
+      expect(route.request().postDataJSON()).toEqual({});
+      return route.fulfill({ status: 409, json: { error: { code: 'ORDER_CONFLICT' } } });
+    }
+    return route.fulfill({ json: { ...savedOrder, status: 'allocated' } });
+  });
+  await login(page); await code(page); await findOrder(page);
+  await page.getByRole('button', { name: 'Cancel order', exact: true }).click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole('button', { name: 'Keep current status' }).click(); expect(calls).toBe(0);
+  await page.getByRole('button', { name: 'Cancel order', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm Cancelled' }).click();
+  await expect(page.getByRole('alert')).toContainText('order changed'); expect(calls).toBe(1);
+  await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Order actions' })).toHaveCount(0);
+});
+test('finance role cannot see fulfilment controls', async ({ page }) => {
+  await mock(page);
+  await page.route('**/api/operator/session', route => route.fulfill({ json: { operator_id: user.id, roles: ['finance'] } }));
+  await page.route('**/api/operator/orders/*', route => route.fulfill({ json: { ...savedOrder, status: 'on_hold', delivery: null } }));
+  await login(page); await code(page); await findOrder(page);
+  await expect(page.getByText('Saved test chair')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Order actions' })).toHaveCount(0);
+});
+
+test('successful cancellation refreshes and removes further actions', async ({ page }) => {
+  await mock(page); let status = 'on_hold';
+  await page.route('**/api/operator/orders/**', route => {
+    if (route.request().method() === 'POST') {
+      status = 'cancelled'; return route.fulfill({ json: { order_id: orderId, status, replayed: false } });
+    }
+    return route.fulfill({ json: { ...savedOrder, status } });
+  });
+  await login(page); await code(page); await findOrder(page);
+  await page.getByRole('button', { name: 'Cancel order', exact: true }).click();
+  await page.getByRole('button', { name: 'Confirm Cancelled' }).click();
+  await expect(page.getByText('Cancelled', { exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Order actions' })).toHaveCount(0);
+});
+test('lost action response requires lookup before another attempt', async ({ page }) => {
+  await mock(page); let writes = 0;
+  await page.route('**/api/operator/orders/**', route => {
+    if (route.request().method() === 'POST') { writes++; return route.abort(); }
+    return route.fulfill({ json: { ...savedOrder, status: 'on_hold' } });
+  });
+  await login(page); await code(page); await findOrder(page);
+  await page.getByRole('button', { name: 'Mark Allocated' }).click();
+  await page.getByRole('button', { name: 'Confirm Allocated' }).click();
+  await expect(page.getByRole('alert')).toContainText('outcome is unknown');
+  expect(writes).toBe(1);
+  await expect(page.getByRole('region', { name: 'Order actions' })).toHaveCount(0);
+  await expect(page.getByText('Synthetic buyer')).toHaveCount(0);
+  await findOrder(page);
+  await expect(page.getByRole('button', { name: 'Mark Allocated' })).toBeVisible();
+});

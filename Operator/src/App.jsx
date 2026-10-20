@@ -113,7 +113,7 @@ export default function App() {
         </form>}
         {stage === 'verify' && <button className={`${buttonClass} mt-6`} disabled={busy} onClick={() => run(access)}>Retry access check</button>}
         {stage === 'expired' && <p role="status" className="mt-6">Your session expired. Sign out and sign in again.</p>}
-        {stage === 'ready' && <div className="mt-6 space-y-4"><p role="status">You are signed in.</p><h2 className="font-semibold">Assigned roles</h2><ul className="list-inside list-disc">{operator.roles.map(role => <li key={role}>{role}</li>)}</ul><OrderLookup client={client.current} /></div>}
+        {stage === 'ready' && <div className="mt-6 space-y-4"><p role="status">You are signed in.</p><h2 className="font-semibold">Assigned roles</h2><ul className="list-inside list-disc">{operator.roles.map(role => <li key={role}>{role}</li>)}</ul><OrderLookup client={client.current} roles={operator.roles} /></div>}
         {!['loading', 'login', 'disabled', 'unavailable'].includes(stage) && <button className="mt-6 rounded-sm px-2 py-2 font-medium underline focus-visible:outline-solid disabled:opacity-50" disabled={busy} onClick={signOut}>Sign out</button>}
       </section>
       <p className="mt-6 text-center text-sm text-stone-600">For your security, reloading this page ends this local session.</p>

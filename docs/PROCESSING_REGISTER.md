@@ -265,3 +265,10 @@ As part of the change, never after it. Specifically:
 
 If a change adds a row here and the change ships without it, the register is wrong, and a
 register that is known to be wrong is worse than no register — it gets trusted once.
+
+### Operator action screen (2026-10-20)
+
+The separate operator app submits only order ID and target status for fulfilment, or
+order ID for cancellation. The API derives the audit actor from verified identity.
+No new personal fields or browser persistence are added. Action failures clear displayed
+order/customer data; the existing audit retention and activation gates still apply.

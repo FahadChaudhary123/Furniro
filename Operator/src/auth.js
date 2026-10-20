@@ -52,3 +52,26 @@ export async function loadOrder(client, orderId, signal) {
   }
   return response.json();
 }
+
+export async function changeOrder(client, orderId, target, signal) {
+  const { data, error } = await client.auth.getSession();
+  if (error || !data.session) throw new Error('Your session ended. Sign out and sign in again.');
+  let response;
+  try {
+    response = await fetch(`${api}/operator/orders/${encodeURIComponent(orderId)}/${target === 'cancelled' ? 'cancel' : 'fulfilment'}`, {
+      method: 'POST', headers: { Authorization: `Bearer ${data.session.access_token}`, 'Content-Type': 'application/json' },
+      credentials: 'omit', cache: 'no-store', signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
+      body: JSON.stringify(target === 'cancelled' ? {} : { target_status: target }),
+    });
+  } catch { throw new Error('The outcome is unknown. Find the order again before attempting another action.'); }
+  if (!response.ok) {
+    const messages = {
+      401: 'Your session ended. Sign out and sign in again.',
+      403: 'Access denied. Ask the account owner to check your roles.',
+      409: 'The order changed or cannot make this transition. Find the order again to review its current state.',
+      404: 'No order was found with that ID.',
+      429: 'Too many requests. Wait before looking up the order again.',
+    };
+    throw new Error(messages[response.status] || 'The action could not be confirmed. Find the order again before retrying.');
+  }
+}

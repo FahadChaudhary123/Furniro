@@ -463,8 +463,9 @@ production access. See [operator access](runbooks/operator-access.md).
 
 Exact-ID operator order lookup is implemented locally with stored item/totals/status
 and fulfilment-only delivery access. This is groundwork for `SUP-01`, not a completed
-support workspace: mutation controls, search/listing, read-access audit and production
-integration remain pending. Requirement counts are unchanged.
+support workspace. Confirmed COD fulfilment/cancellation controls are implemented with
+role restrictions and saved-state refresh. Finance collection controls, search/listing,
+read-access audit and production integration remain pending. Requirement counts are unchanged.
 
 | ID | Requirement | Doc B | Stage | Status |
 |---|---|---|---|---|

@@ -85,7 +85,7 @@ manual setup key if needed, then verify a six-digit code. Server session verific
 succeed before roles are shown. Signed-in operators can look up one order by its full UUID.
 Saved items, totals and fulfilment status are shown; delivery details require fulfilment
 access. Finance-only users receive no delivery data. Fulfilment status does not confirm
-payment collection. Mutation controls, order lists and payment history screens remain pending.
+payment collection. Fulfilment operators can confirm allocation, despatch, delivery and pre-despatch cancellation for COD orders. Each action reloads the saved order; errors clear stale details and require a new lookup. Order lists, COD collection controls and payment history screens remain pending.
 Lookup returns an explicit unavailable error until commerce storage is connected; it does
 not fall back to sample orders. Results are cleared on another lookup, sign-out or expiry.
 

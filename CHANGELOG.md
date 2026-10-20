@@ -14,6 +14,14 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Added: operator fulfilment controls (2026-10-20)
+
+- Confirmed COD allocation, despatch, delivery and cancellation in the operator order view.
+- Fulfilment role controls, saved-state refresh and stale-data clearing on action failures.
+- Desktop/mobile browser coverage for transitions, confirmation, conflicts and finance restrictions.
+- Live authentication and production commerce storage remain configuration/integration gates.
+
+
 ### Security: dependency audit fixes (2026-10-17)
 
 - Migrated storefront and operator styling to Tailwind 4.3.3 and its PostCSS plugin,
