@@ -14,6 +14,15 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Added: operator COD collection (2026-10-21)
+
+- Finance operators can review and confirm receipt of the full delivered PKR COD total with an internal receipt code.
+- Retries preserve the exact payload and submission key in memory; conflicts and access failures block resubmission.
+- Validated collection acknowledgements distinguish new records from retries, without claiming bank settlement.
+- Synthetic desktop/mobile tests cover collection, retries, role/state restrictions and session cleanup.
+- Live Auth onboarding, collection history and production commerce storage remain open.
+
+
 ### Added: operator fulfilment controls (2026-10-20)
 
 - Confirmed COD allocation, despatch, delivery and cancellation in the operator order view.

@@ -225,8 +225,8 @@ requirement counts, module status, runbooks and changelog before declaring compl
 | Durable commerce database and migrations | Orders and checkout | Open; owned by Furniro under ADR 0015 |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-**Next implementation:** Complete Milestone 3 finance collection controls on the existing protected
-COD endpoint, followed by production transaction-adapter and concurrency verification.
+**Next implementation:** Build and verify the production transaction adapter and multi-client
+concurrency behavior, without connecting live credentials or applying live migrations.
 Deployment is deferred at the user's request;
 Milestone 1 remains a release gate. Online payment follows COD implementation, and both
 methods must pass before public launch. Account-specific facts and approved trading data
@@ -250,3 +250,9 @@ allocation, despatch, delivery and pre-despatch cancellation using the protected
 Controls require the fulfilment role; the API remains authoritative. Results refresh from
 storage; ambiguous outcomes and conflicts require another lookup. Finance collection UI,
 live Auth provisioning and production commerce storage remain open.
+
+**Progress (2026-10-21, finance collection UI):** Finance operators can confirm the full
+cash amount for delivered PKR COD orders, submit an internal receipt and safely retry
+using the same in-memory payload/key. Success acknowledges a new or replayed collection;
+it does not claim settlement. Local browser tests use synthetic records. Payment history,
+reconciliation, corrections, live Auth provisioning and production storage remain open.

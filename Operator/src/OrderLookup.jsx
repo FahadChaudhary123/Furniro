@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { loadOrder, changeOrder } from './auth.js';
+import CodCollection from './CodCollection.jsx';
 
 const money = (value, currency) => new Intl.NumberFormat('en-PK', {
   style: 'currency', currency, currencyDisplay: 'code', minimumFractionDigits: 2, maximumFractionDigits: 2,
@@ -84,6 +85,7 @@ export default function OrderLookup({ client, roles }) {
           {['on_hold', 'allocated'].includes(order.status) && <button type="button" disabled={busy} onClick={() => setTarget('cancelled')} className="rounded-lg border border-stone-500 px-4 py-3">Cancel order</button>}
         </div>}
       </section>}
+      {roles.includes('finance') && order.payment_method === 'cod' && order.status === 'delivered' && order.currency === 'PKR' && Number.isSafeInteger(order.total_minor) && order.total_minor > 0 && <CodCollection key={order.order_id} client={client} order={order} />}
       <h3 className="font-semibold">Items</h3>
       <ul className="space-y-3">{order.items.map(item => <li key={item.line_number} className="rounded-lg bg-stone-50 p-3">
         <p className="font-medium">{item.product_name}</p>

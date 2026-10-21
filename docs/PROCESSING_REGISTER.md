@@ -272,3 +272,13 @@ The separate operator app submits only order ID and target status for fulfilment
 order ID for cancellation. The API derives the audit actor from verified identity.
 No new personal fields or browser persistence are added. Action failures clear displayed
 order/customer data; the existing audit retention and activation gates still apply.
+
+### Operator collection screen (2026-10-21)
+
+Finance users enter an internal receipt code and confirm receipt of the saved full order
+amount. The browser sends the amount in integer minor units, receipt and retry UUID to the
+protected collection endpoint. The server derives the audit actor. No customer names or
+contact data should be entered in receipt codes. Drafts, acknowledgements and retry keys
+are memory-only and clear on lookup, reload, sign-out or expiry. No browser storage,
+query parameters or new logging is added. Existing financial retention, reconciliation
+and production activation gates still apply.

@@ -252,3 +252,105 @@ test('lost action response requires lookup before another attempt', async ({ pag
   await findOrder(page);
   await expect(page.getByRole('button', { name: 'Mark Allocated' })).toBeVisible();
 });
+
+const collectionId = '44444444-4444-4444-8444-444444444444';
+async function financeOrder(page, overrides = {}, roles = ['finance']) {
+  await mock(page);
+  await page.route('**/api/operator/session', route => route.fulfill({ json: { operator_id: user.id, roles } }));
+  await page.route('**/api/operator/orders/*', route => route.fulfill({ json: { ...savedOrder, delivery: null, ...overrides } }));
+  await login(page); await code(page); await findOrder(page);
+  await expect(page.getByText('Saved test chair')).toBeVisible();
+}
+async function reviewCollection(page) {
+  await page.getByLabel('Receipt reference', { exact: true }).fill('cod-2026/001');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Review collection' }).click();
+}
+test('finance confirms full COD collection and clears receipt on sign-out', async ({ page }) => {
+  let writes = 0;
+  await financeOrder(page);
+  await page.route('**/api/operator/orders/*/collections', route => {
+    writes++;
+    expect(route.request().method()).toBe('POST');
+    expect(route.request().headers().authorization).toMatch(/^Bearer /);
+    const body = route.request().postDataJSON();
+    expect(body).toEqual({ amount_minor: 2125, receipt_reference: 'COD-2026/001', idempotency_key: expect.stringMatching(/^[a-f0-9-]{36}$/) });
+    return route.fulfill({ json: { order_id: orderId, collection_id: collectionId, replayed: false } });
+  });
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await reviewCollection(page); expect(writes).toBe(0);
+  await page.getByRole('button', { name: 'Edit receipt' }).click(); expect(writes).toBe(0);
+  await reviewCollection(page);
+  await page.getByRole('button', { name: 'Confirm collection' }).click();
+  await expect(page.getByText('COD collection recorded.', { exact: true })).toBeVisible();
+  expect(writes).toBe(1);
+  await expect(page.getByRole('button', { name: 'Confirm collection' })).toHaveCount(0);
+  expect(await page.evaluate(() => localStorage.length + sessionStorage.length)).toBe(0);
+  expect(page.url()).not.toContain('cod-2026');
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await expect(page.getByText(/Collection reference:/)).toHaveCount(0);
+});
+test('uncertain collection retries identical payload and accepts replay', async ({ page }) => {
+  await financeOrder(page); const writes = [];
+  await page.route('**/api/operator/orders/*/collections', route => {
+    writes.push(route.request().postDataJSON());
+    if (writes.length === 1) return route.abort();
+    return route.fulfill({ json: { order_id: orderId, collection_id: collectionId, replayed: true } });
+  });
+  await reviewCollection(page); await page.getByRole('button', { name: 'Confirm collection' }).click();
+  await expect(page.getByRole('alert')).toContainText('outcome is unconfirmed');
+  await expect(page.getByRole('button', { name: 'Edit receipt' })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Retry same collection' }).click();
+  await expect(page.getByText('Previously recorded collection confirmed.')).toBeVisible();
+  expect(writes).toHaveLength(2); expect(writes[1]).toEqual(writes[0]);
+});
+for (const status of [401, 403, 409]) {
+  test(`collection ${status} blocks further submission`, async ({ page }) => {
+    await financeOrder(page);
+    await page.route('**/api/operator/orders/*/collections', route => route.fulfill({ status, json: { error: { code: 'DENIED' } } }));
+    await reviewCollection(page); await page.getByRole('button', { name: 'Confirm collection' }).click();
+    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Retry same collection' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Confirm collection' })).toHaveCount(0);
+  });
+}
+test('collection requires finance, delivered COD and PKR', async ({ page }) => {
+  for (const [overrides, roles] of [[{}, ['fulfilment']], [{status:'allocated'}, ['finance']], [{payment_method:'online'}, ['finance']], [{currency:'IDR'}, ['finance']]]) {
+    await financeOrder(page, overrides, roles);
+    await expect(page.getByRole('heading', { name: 'Record COD collection' })).toHaveCount(0);
+  }
+});
+test('collection validates receipt and expiry discards pending retry', async ({ page }) => {
+  await page.clock.install(); await financeOrder(page);
+  await page.getByLabel('Receipt reference', { exact: true }).fill('not a code');
+  await page.getByRole('checkbox').check();
+  await page.getByRole('button', { name: 'Review collection' }).click();
+  await expect(page.getByRole('alert')).toContainText('valid internal receipt');
+  await expect(page.getByRole('button', { name: 'Confirm collection' })).toHaveCount(0);
+  await reviewCollection(page);
+  await page.clock.fastForward(3601000);
+  await expect(page.getByText(/Your session expired/)).toBeVisible();
+  await expect(page.getByText(/COD-2026/)).toHaveCount(0);
+});
+
+test('invalid acknowledgement and transient failures preserve collection retry', async ({ page }) => {
+  await financeOrder(page); const writes = [];
+  await page.route('**/api/operator/orders/*/collections', route => {
+    writes.push(route.request().postDataJSON());
+    const responses = [
+      { json: { order_id: orderId, collection_id: 'invalid', replayed: false } },
+      { status: 503, json: { error: { code: 'COMMERCE_UNAVAILABLE' } } },
+      { status: 429, json: { error: { code: 'RATE_LIMITED' } } },
+      { json: { order_id: orderId, collection_id: collectionId, replayed: true } },
+    ];
+    return route.fulfill(responses[writes.length - 1]);
+  });
+  await reviewCollection(page); await page.getByRole('button', { name: 'Confirm collection' }).click();
+  for (const message of ['outcome is unconfirmed', 'outcome is unconfirmed', 'Too many requests']) {
+    await expect(page.getByRole('alert')).toContainText(message);
+    await page.getByRole('button', { name: 'Retry same collection' }).click();
+  }
+  await expect(page.getByText('Previously recorded collection confirmed.')).toBeVisible();
+  expect(writes).toHaveLength(4);
+  for (const body of writes) expect(body).toEqual(writes[0]);
+});

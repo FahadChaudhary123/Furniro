@@ -75,3 +75,34 @@ export async function changeOrder(client, orderId, target, signal) {
     throw new Error(messages[response.status] || 'The action could not be confirmed. Find the order again before retrying.');
   }
 }
+
+export async function collectCod(client, orderId, payload, signal) {
+  const { data, error } = await client.auth.getSession();
+  if (error || !data.session) throw new Error('Your session ended. Sign out and sign in again.');
+  const uncertain = () => Object.assign(new Error('The collection outcome is unconfirmed. Retry the same collection to check or complete this submission.'), { retryable: true });
+  let response;
+  try {
+    response = await fetch(`${api}/operator/orders/${encodeURIComponent(orderId)}/collections`, {
+      method: 'POST', headers: { Authorization: `Bearer ${data.session.access_token}`, 'Content-Type': 'application/json' },
+      credentials: 'omit', cache: 'no-store', signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
+      body: JSON.stringify(payload),
+    });
+  } catch { throw uncertain(); }
+  if (!response.ok) {
+    const messages = {
+      400: 'Collection details were rejected. Look up the order again and check the receipt.',
+      401: 'Your session ended. Sign out and sign in again.',
+      403: 'Access denied. Ask the account owner to check your finance role.',
+      404: 'No order was found with that ID.',
+      409: 'Collection conflicts with an existing record or order state. Reconcile the receipt with finance before submitting again.',
+      429: 'Too many requests. Wait before retrying the same collection.',
+    };
+    if (!messages[response.status]) throw uncertain();
+    throw Object.assign(new Error(messages[response.status]), { retryable: response.status === 429 });
+  }
+  let result;
+  try { result = await response.json(); } catch { throw uncertain(); }
+  if (result?.order_id !== orderId || typeof result.replayed !== 'boolean' ||
+      typeof result.collection_id !== 'string' || !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(result.collection_id)) throw uncertain();
+  return result;
+}

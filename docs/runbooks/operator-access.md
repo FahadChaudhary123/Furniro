@@ -85,7 +85,7 @@ manual setup key if needed, then verify a six-digit code. Server session verific
 succeed before roles are shown. Signed-in operators can look up one order by its full UUID.
 Saved items, totals and fulfilment status are shown; delivery details require fulfilment
 access. Finance-only users receive no delivery data. Fulfilment status does not confirm
-payment collection. Fulfilment operators can confirm allocation, despatch, delivery and pre-despatch cancellation for COD orders. Each action reloads the saved order; errors clear stale details and require a new lookup. Order lists, COD collection controls and payment history screens remain pending.
+payment collection. Fulfilment operators can confirm allocation, despatch, delivery and pre-despatch cancellation for COD orders. Each action reloads the saved order; errors clear stale details and require a new lookup. Order lists and payment history screens remain pending.
 Lookup returns an explicit unavailable error until commerce storage is connected; it does
 not fall back to sample orders. Results are cleared on another lookup, sign-out or expiry.
 
@@ -98,3 +98,25 @@ expiry. Only this app's abandoned unverified factors are removed during setup re
 provider responses on desktop/mobile. It never uses live credentials. Host this app on a
 separate trusted HTTPS origin with no-store HTML and appropriate security headers; deployment
 remains deferred. Do not record live MFA screens in screenshots or browser traces.
+
+## Recording COD collection
+
+Finance operators can record the full total of a delivered PKR COD order. Enter an
+internal receipt code (no names or contact details), confirm that the full amount was
+received in cash, review, and confirm collection. Partial receipts and corrections are
+not supported. The API rechecks roles, delivery/stock history, total and uniqueness.
+
+A successful acknowledgement shows the collection reference and whether this is a replay.
+It records operator-entered evidence, not verified courier remittance or bank settlement.
+Order lookup does not include collection history: absence of an acknowledgement on a new
+lookup does not mean the order is unpaid. Reconcile existing receipt records first.
+
+For timeouts, unavailable storage/provider or invalid acknowledgements, use **Retry same
+collection** on the same screen. The amount, receipt and retry UUID remain unchanged.
+Do not change the receipt to work around a conflict. A conflict requires finance review;
+401/403 requires a new sign-in or corrected access. Rate limits require waiting.
+
+Drafts and retry details stay in memory only. Another lookup, reload, sign-out or expiry
+clears them; unmount aborts the browser request but cannot undo a committed server write.
+After leaving an uncertain submission, reconcile the original receipt before trying again.
+Normal startup still has no commerce adapter; live account setup and storage remain gates.
