@@ -14,6 +14,16 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Added: PostgreSQL commerce adapter (2026-10-21)
+
+- Explicit pooled transaction adapter with one client per transaction, local timeouts, rollback and connection cleanup.
+- No automatic replay after uncertain commits and no environment/production connection at import time.
+- Disposable PostgreSQL concurrency runner and CI job for checkout, stock, fulfilment/cancellation and collection races.
+- Verified six competing-operation/commit scenarios on disposable PostgreSQL 16; the container is removed afterward.
+- Patched backend test-tool dependencies (Vite 8.3.5 and Vitest 5.0.5) after newly reported audit findings; backend audit reports zero vulnerabilities. UI Vite pins are unchanged.
+- Production startup wiring, roles, migrations and recovery verification remain activation gates.
+
+
 ### Added: operator COD collection (2026-10-21)
 
 - Finance operators can review and confirm receipt of the full delivered PKR COD total with an internal receipt code.

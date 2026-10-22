@@ -1,5 +1,39 @@
 # Commerce database foundation
 
+## PostgreSQL adapter and concurrency checks (2026-10-21)
+
+`createCommerceDatabase(pool)` in platform accepts an explicitly configured `pg.Pool`.
+It provides `query` and `transaction`, pins each transaction to one checked-out client,
+uses READ COMMITTED, and sets local lock/statement/idle transaction timeouts. All queries
+inside a callback must be awaited. Callback failure, SQL failure or commit rejection fails
+the operation; failed rollback or ambiguous commit discards the connection. No automatic
+transaction retry occurs. An uncertain commit must be reconciled using domain idempotency.
+Do not perform remote calls or other external side effects inside transaction callbacks.
+
+The caller owns pool configuration (credentials, verified TLS, connection timeout, sizing,
+idle-error handling and shutdown). This adapter never reads environment variables or runs
+migrations. Normal API startup still supplies no commerce adapter. Do not connect the
+existing live DATABASE_URL or grant migration-owner access to the application implicitly.
+Production runtime roles, migration/checksum tooling, backups and explicit startup/shutdown
+integration are still required before activation.
+
+Run `npm run test:postgres` from Backend with Docker running. The script creates a fresh
+PostgreSQL 16 Alpine container on a random loopback-only port, applies migrations to that
+container, and removes it in finally. It uses synthetic data and a local trust-auth test
+cluster; it never loads .env, accepts an external URL, or contacts Supabase. If the process
+is forcibly killed, remove only its `furniro-commerce-<uuid>` test container after inspection.
+The CI commerce-postgres job runs the same command; no remote CI result is claimed locally.
+
+Two checked-out PostgreSQL backend PIDs are synchronized before competing operations.
+Checks cover identical/conflicting checkout keys, last-unit contention, cancellation versus
+despatch, collection replay, and deferred COMMIT failure. PGlite remains useful for fast
+schema/domain tests; it alone cannot prove multi-client locking. These owner-role local
+checks do not establish production least-privilege permissions or restart recovery.
+
+References: [node-postgres transactions](https://node-postgres.com/features/transactions)
+and [pool lifecycle](https://node-postgres.com/apis/pool).
+
+
 ## Internal COD collection
 
 Migration 0007 adds private, immutable `cod_collections` owned by payments, bound to an

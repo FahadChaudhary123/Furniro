@@ -18,3 +18,5 @@ export {
   AppError, badRequest, validationFailed, unauthorized, forbidden, notFound, conflict,
   notFoundHandler, errorHandler,
 } from './errors.js';
+
+export { createCommerceDatabase } from './commerceDatabase.js';

@@ -225,8 +225,8 @@ requirement counts, module status, runbooks and changelog before declaring compl
 | Durable commerce database and migrations | Orders and checkout | Open; owned by Furniro under ADR 0015 |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-**Next implementation:** Build and verify the production transaction adapter and multi-client
-concurrency behavior, without connecting live credentials or applying live migrations.
+**Next implementation:** Define and verify least-privilege commerce database roles and migration
+management in disposable PostgreSQL, followed by explicit runtime connection lifecycle.
 Deployment is deferred at the user's request;
 Milestone 1 remains a release gate. Online payment follows COD implementation, and both
 methods must pass before public launch. Account-specific facts and approved trading data
@@ -256,3 +256,11 @@ cash amount for delivered PKR COD orders, submit an internal receipt and safely 
 using the same in-memory payload/key. Success acknowledges a new or replayed collection;
 it does not claim settlement. Local browser tests use synthetic records. Payment history,
 reconciliation, corrections, live Auth provisioning and production storage remain open.
+
+**Progress (2026-10-21, PostgreSQL adapter):** Added an explicitly injected pg pool adapter
+with transaction-scoped connections and rollback/commit failure handling. A disposable
+PostgreSQL Docker runner and CI job exercise competing domain operations. Six local
+PostgreSQL 16 scenarios passed, including checkout contention, cancellation/despatch,
+collection replay and deferred commit failure. Remote CI has not been run. Normal startup
+remains disconnected; production role grants, migration/checksum management, explicit
+connection lifecycle and recovery verification remain required before real orders.
