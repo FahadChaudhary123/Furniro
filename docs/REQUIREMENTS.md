@@ -306,7 +306,10 @@ working test orders are still missing, so the `PAY-*` and `CHK-03` statuses stay
 | `ORD-07` | Immutable event log per order, sufficient to replay orders after a point-in-time restore | §8 disaster scenarios | 3 | ⭕ |
 | `ORD-08` | Order confirmation email on placement | §7 R1 "including confirmation email" | 3 | ⭕ |
 
-The [first order migration](../Backend/db/README.md) has local PostgreSQL tests for
+The [commerce migrations](../Backend/db/README.md) now have checksum/ordering guards
+and a restricted COD runtime role verified with a non-owner PostgreSQL login. Production
+role provisioning and runtime activation remain open; these checks do not close the
+order requirements. The first migration has local PostgreSQL tests for
 immutable snapshots and consistent totals. `ORD-03` remains open until the checkout/order
 repository writes these records in a working application. Allowed status values in the
 schema alone do not implement the full `ORD-01` or `ORD-07` requirements. Internal COD

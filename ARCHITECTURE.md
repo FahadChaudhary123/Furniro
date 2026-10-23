@@ -15,7 +15,9 @@ Platform now provides `createCommerceDatabase(pool)` for an explicitly configure
 Domain callbacks receive a single transaction-scoped query interface. The adapter never
 reads credentials, migrates a database or enables commerce on normal startup. Local full
 PostgreSQL concurrency checks run in a disposable Docker container; deployment roles and
-runtime connection lifecycle remain open. See [database foundation](Backend/db/README.md).
+runtime connection lifecycle remain open. Migration 0008 defines the restricted COD
+service role; the explicit administrative runner verifies checksums and serializes changes
+in disposable PostgreSQL tests. Neither runs automatically at API startup. See [database foundation](Backend/db/README.md).
 
 ## Shape
 

@@ -1,10 +1,11 @@
 // Disposable Docker PostgreSQL only. Never reads .env or any connection URL.
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { setTimeout as delay } from 'node:timers/promises';
 import { Pool } from 'pg';
+import { migrateCommerce, readMigrations } from '../db/migrate.js';
 import { createCommerceDatabase } from '../src/platform/commerceDatabase.js';
 import { createCodCheckout, createCodFulfilment, createCodCancellation, createCodCollection } from '../src/modules/checkout/index.js';
 import { readOperatorOrder } from '../src/modules/orders/index.js';
@@ -12,6 +13,8 @@ import { readOperatorOrder } from '../src/modules/orders/index.js';
 const docker = (...args) => execFileSync('docker', args, { encoding: 'utf8', timeout: 180000 }).trim();
 const name = `furniro-commerce-${randomUUID()}`;
 let pool;
+let runtimePool;
+let anonymousPool;
 let attempted = false;
 const actorId = randomUUID();
 const input = () => ({ idempotencyKey: randomUUID(),
@@ -34,11 +37,40 @@ try {
     user: 'postgres', password: 'unused-local-test', database: 'furniro_test', ssl: false,
     max: 4, connectionTimeoutMillis: 5000, idleTimeoutMillis: 1000 });
   pool.on('error', () => { process.exitCode = 1; });
-  const db = createCommerceDatabase(pool);
-  const migrations = new URL('../db/migrations/', import.meta.url);
-  for (const file of readdirSync(migrations).filter(file => file.endsWith('.up.sql')).sort()) {
-    await pool.query(readFileSync(new URL(file, migrations), 'utf8'));
-  }
+  const migrations = readMigrations();
+  const applied = await Promise.all([migrateCommerce(pool), migrateCommerce(pool)]);
+  assert.deepEqual(applied.map(a => a.length).sort((a,b) => a-b), [0, migrations.length]);
+  assert.deepEqual(await migrateCommerce(pool), []);
+  await assert.rejects(migrateCommerce(pool, migrations.map((m, i) => i ? m : { ...m, checksum: '0'.repeat(64) })), /checksum mismatch/);
+  await assert.rejects(migrateCommerce(pool, migrations.slice(1)), /history or checksum mismatch/);
+  console.log('PASS migration lock, repeat apply and checksum/history rejection');
+  await assert.rejects(migrateCommerce(pool, [...migrations, {
+    version: '0009_test_failure', checksum: 'a'.repeat(64),
+    sql: 'CREATE TABLE commerce.must_rollback(id integer); SELECT * FROM commerce.missing_table;',
+  }]));
+  assert.equal((await pool.query("SELECT to_regclass('commerce.must_rollback') AS found")).rows[0].found, null);
+  assert.equal((await pool.query('SELECT * FROM commerce_migrations.applied')).rows.length, migrations.length);
+  console.log('PASS failed migration rolls back schema changes and checksum ledger');
+  await pool.query(`CREATE ROLE furniro_test_app LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS;
+    GRANT furniro_commerce_runtime TO furniro_test_app;
+    CREATE ROLE furniro_test_anonymous LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS`);
+  const runtimeConfig = { host: '127.0.0.1', port: Number(address.split(':')[1]), password: 'unused-local-test',
+    database: 'furniro_test', ssl: false, max: 4, connectionTimeoutMillis: 5000, idleTimeoutMillis: 1000 };
+  runtimePool = new Pool({ ...runtimeConfig, user: 'furniro_test_app' });
+  anonymousPool = new Pool({ ...runtimeConfig, user: 'furniro_test_anonymous' });
+  runtimePool.on('error', () => { process.exitCode = 1; });
+  anonymousPool.on('error', () => { process.exitCode = 1; });
+  const db = createCommerceDatabase(runtimePool);
+  await assert.rejects(anonymousPool.query('SELECT * FROM commerce.orders'), { code: '42501' });
+  for (const statement of [
+    'SELECT * FROM commerce_migrations.applied', 'SELECT * FROM commerce.schema_migrations',
+    'SELECT * FROM commerce.payment_attempts', 'TRUNCATE commerce.orders',
+    'DELETE FROM commerce.orders', 'UPDATE commerce.orders SET total_minor = 1',
+    "UPDATE commerce.order_delivery SET city = 'Changed'", 'DELETE FROM commerce.order_events',
+    'ALTER TABLE commerce.orders DISABLE ROW LEVEL SECURITY', 'CREATE TABLE commerce.forbidden(id int)',
+    "INSERT INTO commerce.inventory_stock(product_slug,on_hand) VALUES ('unauthorized', 10)",
+  ]) await assert.rejects(db.query(statement), { code: '42501' });
+  console.log('PASS runtime/anonymous roles cannot migrate, alter snapshots, erase history or create stock records');
   async function reset(stock = 10) {
     await pool.query(`TRUNCATE commerce.cod_collections, commerce.stock_reservation_events,
       commerce.stock_reservations, commerce.inventory_stock, commerce.payment_attempt_events,
@@ -124,8 +156,24 @@ try {
   assert.equal((await db.query('SELECT * FROM commerce.orders')).rows.length, 0);
   await createCodCheckout(db)(input());
   console.log('PASS deferred commit failure rolls back and pool remains usable');
+
+  await pool.query(readFileSync(new URL('../db/migrations/0008_runtime_role.down.sql', import.meta.url), 'utf8'));
+  await assert.rejects(db.query('SELECT * FROM commerce.orders'), { code: '42501' });
+  await assert.rejects(migrateCommerce(pool), /ledgers disagree/);
+  assert.equal((await pool.query('SELECT * FROM commerce.orders')).rows.length, 1);
+  console.log('PASS role rollback revokes access without deleting data; runner rejects ledger drift');
+
+  // Separate empty database verifies that pre-existing schemas are never auto-adopted.
+  await pool.query('CREATE DATABASE furniro_untracked');
+  const untracked = new Pool({ ...runtimeConfig, user: 'postgres', database: 'furniro_untracked' });
+  try {
+    await untracked.query('CREATE SCHEMA commerce');
+    await assert.rejects(migrateCommerce(untracked), /Untracked commerce schema/);
+    assert.equal((await untracked.query("SELECT to_regclass('commerce_migrations.applied') AS ledger")).rows[0].ledger, null);
+  } finally { await untracked.end(); }
+  console.log('PASS existing untracked schemas require review instead of automatic adoption');
 } finally {
-  try { await pool?.end(); }
+  try { await Promise.all([runtimePool?.end(), anonymousPool?.end(), pool?.end()]); }
   finally {
     // A timed-out docker run can still have created the uniquely named container.
     if (attempted) {

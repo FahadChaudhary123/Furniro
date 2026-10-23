@@ -225,8 +225,8 @@ requirement counts, module status, runbooks and changelog before declaring compl
 | Durable commerce database and migrations | Orders and checkout | Open; owned by Furniro under ADR 0015 |
 | ERP/PIM source of truth | Long-term catalogue and inventory sync | Open |
 
-**Next implementation:** Define and verify least-privilege commerce database roles and migration
-management in disposable PostgreSQL, followed by explicit runtime connection lifecycle.
+**Next implementation:** Implement explicit runtime connection lifecycle and readiness/shutdown
+behavior with activation disabled by default; verify recovery before connecting live storage.
 Deployment is deferred at the user's request;
 Milestone 1 remains a release gate. Online payment follows COD implementation, and both
 methods must pass before public launch. Account-specific facts and approved trading data
@@ -264,3 +264,10 @@ PostgreSQL 16 scenarios passed, including checkout contention, cancellation/desp
 collection replay and deferred commit failure. Remote CI has not been run. Normal startup
 remains disconnected; production role grants, migration/checksum management, explicit
 connection lifecycle and recovery verification remain required before real orders.
+
+**Progress (2026-10-22, role and migrations):** Migration 0008 defines a restricted COD
+service role. The administrative runner serializes up migrations, verifies normalized
+checksums and rejects untracked/drifted history. Eleven full PostgreSQL scenarios pass,
+including the existing races through a non-owner runtime login and permission denials.
+Production logins, migration-owner privileges, deployment adoption/recovery and runtime
+connection lifecycle remain open; no live database is connected or migrated.

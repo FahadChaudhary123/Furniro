@@ -1,5 +1,48 @@
 # Commerce database foundation
 
+## Runtime role and migration checks (2026-10-22)
+
+Migration 0008 creates `furniro_commerce_runtime`, a NOLOGIN group role without superuser,
+role/database creation, replication or RLS bypass. Provision a separate backend login and
+grant membership deliberately; no password or production login is created here. The role
+can read/insert the current COD records, update order/reservation status, and update stock
+counters needed by existing invoker triggers. It cannot insert stock records, change price
+or delivery snapshots, delete/truncate data, alter tables, access online payment attempts,
+or read/write migration ledgers. RLS policies apply only to this backend group.
+
+This is a trusted service role, not an individual operator or customer role. It can access
+all COD rows and directly update permitted status/counter fields. The API and domain
+services still enforce operator roles, audit identity and valid transitions. Do not grant
+this role to public/anonymous clients. Existing foreign-key, immutable snapshot and audit
+constraints remain in force. Runtime rights are tested on a distinct non-owner login;
+production login provisioning, owner separation and access reviews still need deployment review.
+
+`db/migrate.js` exports `readMigrations()` and `migrateCommerce(administrativePool)`.
+It accepts an explicit administrative pool only; it never loads .env or runs at API startup.
+The account must have the reviewed DDL, CREATE ROLE and forced-RLS ledger privileges;
+the disposable test uses its container administrator. The runner locks concurrent runs
+(with a 30-second acquisition limit), applies pending up migrations in order and records
+SHA-256 checksums in private `commerce_migrations.applied`. CRLF is normalized to LF for
+cross-platform checksums. Each migration and its checksum commit in the same transaction.
+An error rolls back that migration; earlier successful migrations remain applied.
+
+Never edit applied migrations. Unknown versions, checksum changes, ledger disagreement
+and pre-existing untracked schemas stop the run. No automatic checksum repair, adoption,
+rollback or live connection command is supplied. SQL files are trusted repository code.
+Existing .down.sql scripts are manual recovery tools, not a routine deployment mechanism.
+The 0008 down script revokes runtime access without deleting records or the cluster-wide
+role; it deliberately makes the runner stop on ledger drift until reviewed recovery.
+Reapplying role creation requires explicit review of existing role dependencies.
+
+`npm run test:postgres` verifies migration serialization, replay, drift rejection, atomic
+failure, runtime permission denials, role rollback and untracked-schema rejection, plus
+the previous concurrency cases under the restricted runtime login. Everything runs inside
+a fresh local container and is removed afterward. No live database has been migrated.
+
+References: [PostgreSQL privileges](https://www.postgresql.org/docs/16/sql-grant.html)
+and [row security](https://www.postgresql.org/docs/16/ddl-rowsecurity.html).
+
+
 ## PostgreSQL adapter and concurrency checks (2026-10-21)
 
 `createCommerceDatabase(pool)` in platform accepts an explicitly configured `pg.Pool`.
@@ -27,8 +70,8 @@ The CI commerce-postgres job runs the same command; no remote CI result is claim
 Two checked-out PostgreSQL backend PIDs are synchronized before competing operations.
 Checks cover identical/conflicting checkout keys, last-unit contention, cancellation versus
 despatch, collection replay, and deferred COMMIT failure. PGlite remains useful for fast
-schema/domain tests; it alone cannot prove multi-client locking. These owner-role local
-checks do not establish production least-privilege permissions or restart recovery.
+schema/domain tests; it alone cannot prove multi-client locking. These local runtime-role
+checks do not establish deployed permissions or restart recovery.
 
 References: [node-postgres transactions](https://node-postgres.com/features/transactions)
 and [pool lifecycle](https://node-postgres.com/apis/pool).

@@ -14,6 +14,14 @@ Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Se
 
 ## [Unreleased]
 
+### Added: commerce role and migration safeguards (2026-10-22)
+
+- Restricted NOLOGIN runtime role with explicit COD table/column grants and role-specific RLS policies.
+- Administrative migration runner with ordered checksums, serialized runs, atomic ledger writes and drift rejection.
+- Eleven disposable PostgreSQL scenarios now verify permissions, migration failures/rollback and concurrent COD operations using a non-owner login.
+- No live credentials, login provisioning, migrations or startup activation are performed.
+
+
 ### Added: PostgreSQL commerce adapter (2026-10-21)
 
 - Explicit pooled transaction adapter with one client per transaction, local timeouts, rollback and connection cleanup.
